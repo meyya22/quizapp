@@ -1,0 +1,34 @@
+
+> quiz-app-frontend@1.0.0 dev
+> vite
+
+
+  [32m[1mVITE[22m v5.4.21[39m  [2mready in [0m[1m355[22m[2m[0m ms[22m
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[2m3:43:09 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:46:53 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:46:58 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:47:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:47:10 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:47:23 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:47:44 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:48:02 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:48:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m3:55:40 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/UpgradeModal.tsx, /src/index.css[22m
+[2m3:55:44 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/UpgradeModal.tsx, /src/index.css[22m
+[2m4:30:52 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/types/index.ts[22m
+[2m4:31:12 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
+[2m4:32:12 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/AdminLayout.tsx, /src/index.css[22m
+[2m4:32:39 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/UpgradeModal.tsx, /src/index.css[22m
+[2m4:32:47 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m4:32:50 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m4:32:54 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m5:10:34 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/types/index.ts[22m
+[2m5:11:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/SuperAdminLayout.tsx, /src/index.css[22m
+[2m5:11:13 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/SuperAdminLayout.tsx, /src/index.css[22m
+[2m5:11:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m5:11:22 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m6:56:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Account.tsx, /src/index.css[22m

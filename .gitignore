@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Environment files — never commit these (contain secrets)
+.env
+.env.local
+.env.production
+
+# Database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Prisma generated (regenerated on install)
+backend/node_modules/.prisma/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Upload temp files
+backend/uploads/
