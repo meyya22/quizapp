@@ -210,8 +210,8 @@ export default function QuizPlayer() {
   const location = useLocation();
   const { user } = useAuthStore();
   const isStandalone = location.pathname.startsWith('/quiz/');
-  const needsParticipantForm = isStandalone && !user;
   const isPreviewParam = new URLSearchParams(location.search).get('preview') === 'true';
+  const needsParticipantForm = isStandalone && !isPreviewParam;
 
   const [participantInfo, setParticipantInfo] = useState<ParticipantInfo | null>(null);
   const infoForm = useForm<ParticipantInfo>();
