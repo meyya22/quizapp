@@ -25,8 +25,22 @@ model User {
 
   attempts     QuizAttempt[]
   categories   Category[]
+  contacts     Contact[]
 
   @@map("users")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  adminId   String
+  name      String
+  email     String
+  createdAt DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@unique([adminId, email])
+  @@map("contacts")
 }
 
 model Category {

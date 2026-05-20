@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FolderOpen, FileQuestion, BarChart3, LogOut, BookOpen, Crown, UserCircle } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, FileQuestion, BarChart3, LogOut, BookOpen, Crown, UserCircle, Users } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/admin', end: true, icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/categories', icon: FolderOpen, label: 'Categories' },
   { to: '/admin/quizzes', icon: FileQuestion, label: 'Quizzes' },
+  { to: '/admin/audience', icon: Users, label: 'Audience' },
   { to: '/admin/reports', icon: BarChart3, label: 'Reports' },
   { to: '/admin/account', icon: UserCircle, label: 'Account' },
 ];

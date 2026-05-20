@@ -127,6 +127,14 @@ export interface PaymentMetrics {
   }[];
 }
 
+export interface Contact {
+  id: string;
+  adminId: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
 export interface Invoice {
   id: string;
   amountPaid: number;

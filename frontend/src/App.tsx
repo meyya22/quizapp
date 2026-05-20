@@ -13,6 +13,7 @@ import QuizzesList from './pages/admin/QuizzesList';
 import QuizBuilder from './pages/admin/QuizBuilder';
 import Reports from './pages/admin/Reports';
 import Account from './pages/admin/Account';
+import Audience from './pages/admin/Audience';
 import ParticipantDashboard from './pages/participant/ParticipantDashboard';
 import QuizPlayer from './pages/participant/QuizPlayer';
 import Results from './pages/participant/Results';
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="categories" element={<Categories />} />
         <Route path="quizzes" element={<QuizzesList />} />
         <Route path="quizzes/:id" element={<QuizBuilder />} />
+        <Route path="audience" element={<Audience />} />
         <Route path="reports" element={<Reports />} />
         <Route path="account" element={<Account />} />
       </Route>
