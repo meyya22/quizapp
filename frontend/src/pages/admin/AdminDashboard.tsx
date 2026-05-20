@@ -76,7 +76,7 @@ export default function AdminDashboard() {
             <p className="text-sm font-semibold text-amber-800">Free tier limits</p>
             <p className="text-sm text-amber-700 mt-0.5">
               You can create up to <strong>5 categories</strong>, <strong>1 quiz per category</strong>, and <strong>10 questions per quiz</strong>.
-              Upgrade to Paid for unlimited access.
+              <Link to="/payment" className="font-semibold text-amber-800 underline hover:text-amber-900">Upgrade</Link> to Paid for unlimited access.
             </p>
           </div>
         </div>
