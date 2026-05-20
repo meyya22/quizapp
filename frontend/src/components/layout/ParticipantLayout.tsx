@@ -7,6 +7,11 @@ export default function ParticipantLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
+  function handleQuizzesClick(e: React.MouseEvent) {
+    e.preventDefault();
+    window.location.href = '/participant';
+  }
+
   function handleLogout() {
     logout();
     toast.success('Logged out');
@@ -25,18 +30,14 @@ export default function ParticipantLayout() {
           </Link>
 
           <nav className="flex items-center gap-1">
-            <NavLink
-              to="/participant"
-              end
-              className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100'
-                }`
-              }
+            <a
+              href="/participant"
+              onClick={handleQuizzesClick}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-700"
             >
               <LayoutDashboard className="w-4 h-4" />
               Quizzes
-            </NavLink>
+            </a>
           </nav>
 
           <div className="flex items-center gap-3">
