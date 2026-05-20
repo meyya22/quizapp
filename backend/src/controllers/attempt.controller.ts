@@ -93,6 +93,7 @@ export async function getAttempt(req: AuthRequest, res: Response): Promise<void>
 
   const result = {
     id: attempt.id,
+    quizId: attempt.quizId,
     score: attempt.score,
     passed: attempt.passed,
     timeTaken: attempt.timeTaken,

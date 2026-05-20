@@ -62,6 +62,7 @@ export interface QuizAttempt {
 
 export interface AttemptResult {
   id: string;
+  quizId: string;
   score: number;
   passed: boolean;
   timeTaken: number;

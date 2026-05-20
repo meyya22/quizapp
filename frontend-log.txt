@@ -32,3 +32,7 @@
 [2m5:11:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
 [2m5:11:22 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
 [2m6:56:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Account.tsx, /src/index.css[22m
+[2m8:14:26 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/types/index.ts[22m
+[2m8:14:40 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/Results.tsx, /src/index.css[22m
+[2m8:20:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/ParticipantDashboard.tsx, /src/index.css[22m
+[2m8:20:57 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/ParticipantDashboard.tsx, /src/index.css[22m

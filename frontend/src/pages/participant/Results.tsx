@@ -155,17 +155,16 @@ export default function Results() {
         </div>
       </div>
 
-      {!isStandalone && (
-        <div className="flex justify-end mb-4">
-          <Link
-            to="/participant"
-            className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
-          >
-            <RotateCcw className="w-4 h-4" />
-            Retake Quiz
-          </Link>
-        </div>
-      )}
+      <div className="flex justify-end mb-4">
+        <Link
+          to={isStandalone ? `/quiz/${result.quizId}` : `/participant/quiz/${result.quizId}`}
+          state={{ lang: selectedLang }}
+          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Retake Quiz
+        </Link>
+      </div>
 
       <h2 className="text-lg font-semibold text-slate-900 mb-4">Question Review</h2>
 

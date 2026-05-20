@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { BookOpen, ChevronRight, Trophy, Clock } from 'lucide-react';
+import { BookOpen, ChevronRight, Trophy } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge';
 import api from '../../services/api';
-import { Category, Quiz, QuizAttempt } from '../../types';
+import { Quiz, QuizAttempt } from '../../types';
 import { useAuthStore } from '../../store/authStore';
 
 function formatDate(iso: string): string {
@@ -18,11 +18,6 @@ export default function ParticipantDashboard() {
     queryFn: () => api.get('/quizzes').then((r) => r.data),
   });
 
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ['categories'],
-    queryFn: () => api.get('/categories').then((r) => r.data),
-  });
-
   const { data: myAttempts = [] } = useQuery<QuizAttempt[]>({
     queryKey: ['my-attempts'],
     queryFn: () => api.get('/attempts/my').then((r) => r.data),
@@ -32,12 +27,17 @@ export default function ParticipantDashboard() {
     myAttempts.map((a) => [a.quizId, a])
   );
 
+  // Derive categories from quizzes so all admins' quizzes appear
   const quizzesByCategory = quizzes.reduce<Record<string, Quiz[]>>((acc, quiz) => {
-    const catId = quiz.categoryId;
+    const catId = quiz.category.id;
     if (!acc[catId]) acc[catId] = [];
     acc[catId].push(quiz);
     return acc;
   }, {});
+
+  const categories = Array.from(
+    new Map(quizzes.map((q) => [q.category.id, q.category])).values()
+  );
 
   return (
     <div>
@@ -85,9 +85,7 @@ export default function ParticipantDashboard() {
         </div>
       ) : (
         <div className="space-y-8">
-          {categories
-            .filter((cat) => quizzesByCategory[cat.id]?.length > 0)
-            .map((cat) => (
+          {categories.map((cat) => (
               <div key={cat.id}>
                 <div className="flex items-center gap-2 mb-4">
                   <h2 className="text-lg font-semibold text-slate-900">{cat.name}</h2>
