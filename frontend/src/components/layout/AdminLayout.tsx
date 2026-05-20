@@ -48,7 +48,7 @@ export default function AdminLayout() {
           <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
             <BookOpen className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-white text-lg">QuizApp</span>
+          <span className="font-bold text-white text-lg">Xam Bridge</span>
           <button
             onClick={closeSidebar}
             className="ml-auto md:hidden text-slate-400 hover:text-white"
@@ -123,7 +123,7 @@ export default function AdminLayout() {
             <div className="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center">
               <BookOpen className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="font-bold text-white">QuizApp</span>
+            <span className="font-bold text-white">Xam Bridge</span>
           </div>
         </header>
 

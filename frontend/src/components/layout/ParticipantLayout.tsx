@@ -26,7 +26,7 @@ export default function ParticipantLayout() {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-slate-900 text-lg">QuizApp</span>
+            <span className="font-bold text-slate-900 text-lg">Xam Bridge</span>
           </Link>
 
           <nav className="flex items-center gap-1">

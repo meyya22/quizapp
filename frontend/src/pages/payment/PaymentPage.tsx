@@ -58,7 +58,7 @@ export default function PaymentPage() {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-2xl font-bold text-slate-900">QuizApp</span>
+            <span className="text-2xl font-bold text-slate-900">Xam Bridge</span>
           </div>
         </div>
 
