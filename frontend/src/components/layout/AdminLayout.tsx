@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import Footer from '../Footer';
 import { LayoutDashboard, FolderOpen, FileQuestion, BarChart3, LogOut, BookOpen, Crown, UserCircle, Users, Menu, X, HelpCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
@@ -133,6 +134,7 @@ export default function AdminLayout() {
             <Outlet />
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, AlertCircle } from 'lucide-react';
+import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import api from '../../services/api';
@@ -87,7 +88,7 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-3">
@@ -209,6 +210,7 @@ export default function Register() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

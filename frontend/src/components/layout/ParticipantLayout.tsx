@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, LogOut, BookOpen, HelpCircle } from 'lucide-react';
+import Footer from '../Footer';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -76,6 +77,7 @@ export default function ParticipantLayout() {
           <Outlet />
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

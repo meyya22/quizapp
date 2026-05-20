@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, AlertCircle, Mail, Lock } from 'lucide-react';
+import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/Button';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
@@ -81,7 +82,7 @@ export default function Login() {
   const passwordHasError = authError?.type === 'password';
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-3">
@@ -178,6 +179,7 @@ export default function Login() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

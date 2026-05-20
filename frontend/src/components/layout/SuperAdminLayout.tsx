@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import Footer from '../Footer';
 import { Users, LogOut, ShieldCheck, CreditCard, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
@@ -103,6 +104,7 @@ export default function SuperAdminLayout() {
             <Outlet />
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );
