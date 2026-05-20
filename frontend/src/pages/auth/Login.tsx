@@ -6,10 +6,8 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, AlertCircle, Mail, Lock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
-import toast from 'react-hot-toast';
 
 const schema = z.object({
   email: z.string().email('Please enter a valid email address'),

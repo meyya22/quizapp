@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, BarChart3 } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge';
-import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import api from '../../services/api';
 import { Quiz, QuizAttempt } from '../../types';
