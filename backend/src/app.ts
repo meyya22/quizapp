@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import 'dotenv/config';
 
 import authRoutes from './routes/auth.routes';
@@ -15,12 +17,42 @@ import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
 
+// Security headers
+app.use(helmet());
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
     credentials: true,
   })
 );
+
+// Global rate limit: 200 requests per 15 min per IP
+app.use(rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
+}));
+
+// Strict rate limit for auth endpoints: 20 attempts per 15 min
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many login attempts, please try again later.' },
+});
+
+// Support enquiry: 5 per hour per IP
+export const supportLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many enquiries submitted, please try again later.' },
+});
 
 // Stripe webhook requires raw body — register before json parser
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));

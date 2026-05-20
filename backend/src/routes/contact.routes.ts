@@ -4,7 +4,17 @@ import { authenticate } from '../middleware/auth';
 import { getContacts, addContact, deleteContact, importContacts, broadcastQuiz } from '../controllers/contact.controller';
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === 'text/csv' || file.originalname.toLowerCase().endsWith('.csv')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'));
+    }
+  },
+});
 
 router.get('/', authenticate, getContacts);
 router.post('/', authenticate, addContact);

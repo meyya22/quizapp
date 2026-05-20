@@ -3,6 +3,19 @@ import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
 import nodemailer from 'nodemailer';
 
+function escapeHtml(str: string): string {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+function stripNewlines(str: string): string {
+  return str.replace(/[\r\n]/g, '');
+}
+
 const FREE_LIMIT = 10;
 const PAID_LIMIT = 500;
 
@@ -171,22 +184,22 @@ export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<vo
   for (const contact of contacts) {
     try {
       await transporter.sendMail({
-        from: `"${admin?.name || 'QuizApp'}" <${fromAddress}>`,
-        to: `"${contact.name}" <${contact.email}>`,
-        subject: `You're invited: ${quiz.title}`,
+        from: `"${stripNewlines(admin?.name || 'Xam Bridge')}" <${fromAddress}>`,
+        to: `"${stripNewlines(contact.name)}" <${contact.email}>`,
+        subject: `You're invited: ${stripNewlines(quiz.title)}`,
         html: `
           <div style="font-family:sans-serif;max-width:500px;margin:auto;padding:24px">
-            <h2 style="color:#1e293b">Hi ${contact.name},</h2>
+            <h2 style="color:#1e293b">Hi ${escapeHtml(contact.name)},</h2>
             <p style="color:#475569">You've been invited to take a quiz:</p>
             <div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:20px 0">
-              <h3 style="margin:0 0 8px;color:#1e293b">${quiz.title}</h3>
-              ${quiz.description ? `<p style="margin:0;color:#64748b">${quiz.description}</p>` : ''}
+              <h3 style="margin:0 0 8px;color:#1e293b">${escapeHtml(quiz.title)}</h3>
+              ${quiz.description ? `<p style="margin:0;color:#64748b">${escapeHtml(quiz.description)}</p>` : ''}
               <p style="margin:8px 0 0;color:#64748b;font-size:14px">Passing score: ${quiz.passingScore}%</p>
             </div>
             <a href="${quizUrl}" style="display:inline-block;background:#2563eb;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600">
               Start Quiz
             </a>
-            <p style="color:#94a3b8;font-size:12px;margin-top:24px">Sent by ${admin?.name} via QuizApp</p>
+            <p style="color:#94a3b8;font-size:12px;margin-top:24px">Sent by ${escapeHtml(admin?.name || 'Xam Bridge')} via Xam Bridge</p>
           </div>
         `,
       });
