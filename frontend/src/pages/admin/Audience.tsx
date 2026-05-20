@@ -131,7 +131,7 @@ export default function Audience() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Users className="w-6 h-6" /> Audience
@@ -208,17 +208,19 @@ export default function Audience() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
         {/* Contact list */}
         <div className="lg:col-span-2">
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             {contacts.length === 0 ? (
+
               <div className="py-16 text-center">
                 <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
                 <p className="text-slate-500 text-sm">No contacts yet. Add some above or import a CSV.</p>
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full min-w-[480px] text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50">
                     <th className="px-4 py-3 w-10">
@@ -270,6 +272,7 @@ export default function Audience() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
           {selected.size > 0 && (

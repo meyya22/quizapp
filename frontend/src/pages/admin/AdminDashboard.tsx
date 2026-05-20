@@ -51,7 +51,7 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">
             Welcome back, {user?.name}

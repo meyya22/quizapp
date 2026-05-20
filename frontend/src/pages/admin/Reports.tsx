@@ -46,7 +46,7 @@ export default function Reports() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Reports</h1>
           <p className="text-slate-500 text-sm mt-1">View all participant quiz attempts</p>
@@ -83,7 +83,8 @@ export default function Reports() {
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Participant</th>
@@ -126,6 +127,7 @@ export default function Reports() {
               ))}
             </tbody>
           </table>
+          </div>
           <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 text-xs text-slate-500">
             {attempts.length} attempt{attempts.length !== 1 ? 's' : ''} found
           </div>
