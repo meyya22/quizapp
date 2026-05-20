@@ -211,6 +211,7 @@ export default function QuizPlayer() {
   const { user } = useAuthStore();
   const isStandalone = location.pathname.startsWith('/quiz/');
   const needsParticipantForm = isStandalone && !user;
+  const isPreviewParam = new URLSearchParams(location.search).get('preview') === 'true';
 
   const [participantInfo, setParticipantInfo] = useState<ParticipantInfo | null>(null);
   const infoForm = useForm<ParticipantInfo>();
@@ -391,7 +392,7 @@ export default function QuizPlayer() {
 
   const answeredCount = questions.length - unanswered.length;
   const displayQuestions = displayContent.questions.length > 0 ? displayContent.questions : questions;
-  const isAdminPreview = isStandalone && user?.role === 'ADMIN';
+  const isAdminPreview = isStandalone && user?.role === 'ADMIN' && isPreviewParam;
 
   return (
     <div className="max-w-3xl mx-auto">

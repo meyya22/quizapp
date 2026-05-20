@@ -229,7 +229,7 @@ export default function QuizBuilder() {
           </div>
           <div className="flex gap-2">
             <Link
-              to={`/quiz/${id}`}
+              to={`/quiz/${id}?preview=true`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors"

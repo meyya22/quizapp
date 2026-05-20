@@ -279,7 +279,7 @@ export default function QuizzesList() {
                         {quiz.published ? <EyeOff className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
                       </button>
                       <Link
-                        to={`/quiz/${quiz.id}`}
+                        to={`/quiz/${quiz.id}?preview=true`}
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Preview as participant"

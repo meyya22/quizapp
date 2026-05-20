@@ -132,12 +132,12 @@ export async function getAllAttempts(req: AuthRequest, res: Response): Promise<v
       quiz: { category: { adminId } },
       ...(quizId && { quizId }),
       ...(search && {
-        user: {
-          OR: [
-            { name: { contains: search } },
-            { email: { contains: search } },
-          ],
-        },
+        OR: [
+          { user: { name: { contains: search, mode: 'insensitive' } } },
+          { user: { email: { contains: search, mode: 'insensitive' } } },
+          { participantName: { contains: search, mode: 'insensitive' } },
+          { participantEmail: { contains: search, mode: 'insensitive' } },
+        ],
       }),
     },
     orderBy: { completedAt: 'desc' },

@@ -58,6 +58,8 @@ export interface QuizAttempt {
   completedAt: string;
   quiz?: { title: string; category?: { name: string } };
   user?: { id: string; name: string; email: string };
+  participantName?: string;
+  participantEmail?: string;
 }
 
 export interface AttemptResult {

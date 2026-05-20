@@ -98,8 +98,12 @@ export default function Reports() {
               {attempts.map((attempt) => (
                 <tr key={attempt.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-5 py-4">
-                    <p className="font-medium text-slate-900 text-sm">{attempt.user?.name}</p>
-                    <p className="text-xs text-slate-500">{attempt.user?.email}</p>
+                    <p className="font-medium text-slate-900 text-sm">
+                      {attempt.user?.name ?? attempt.participantName ?? '—'}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {attempt.user?.email ?? attempt.participantEmail ?? ''}
+                    </p>
                   </td>
                   <td className="px-5 py-4 text-sm text-slate-700">{attempt.quiz?.title}</td>
                   <td className="px-5 py-4">
