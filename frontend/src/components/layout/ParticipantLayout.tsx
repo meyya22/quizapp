@@ -1,5 +1,5 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LogOut, BookOpen } from 'lucide-react';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, LogOut, BookOpen, HelpCircle } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -36,8 +36,19 @@ export default function ParticipantLayout() {
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-700"
             >
               <LayoutDashboard className="w-4 h-4" />
-              Quizzes
+              <span className="hidden sm:inline">Quizzes</span>
             </a>
+            <NavLink
+              to="/participant/help"
+              className={({ isActive }) =>
+                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100'
+                }`
+              }
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Help & Support</span>
+            </NavLink>
           </nav>
 
           <div className="flex items-center gap-3">

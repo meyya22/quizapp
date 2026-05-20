@@ -10,6 +10,7 @@ import attemptRoutes from './routes/attempt.routes';
 import userRoutes from './routes/user.routes';
 import paymentRoutes from './routes/payment.routes';
 import contactRoutes from './routes/contact.routes';
+import supportRoutes from './routes/support.routes';
 import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/attempts', attemptRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/contacts', contactRoutes);
+app.use('/api/support', supportRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

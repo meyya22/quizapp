@@ -20,6 +20,7 @@ import Results from './pages/participant/Results';
 import SuperAdminLayout from './components/layout/SuperAdminLayout';
 import UserReport from './pages/superadmin/UserReport';
 import PaymentMetricsPage from './pages/superadmin/PaymentMetrics';
+import HelpSupport from './pages/HelpSupport';
 
 function RootRedirect() {
   const { isAuthenticated, user } = useAuthStore();
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="audience" element={<Audience />} />
         <Route path="reports" element={<Reports />} />
         <Route path="account" element={<Account />} />
+        <Route path="help" element={<HelpSupport />} />
       </Route>
 
       <Route
@@ -74,6 +76,7 @@ export default function App() {
         <Route index element={<ParticipantDashboard />} />
         <Route path="quiz/:id" element={<QuizPlayer />} />
         <Route path="results/:attemptId" element={<Results />} />
+        <Route path="help" element={<HelpSupport />} />
       </Route>
 
       <Route
