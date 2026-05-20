@@ -123,7 +123,7 @@ export default function Register() {
                     <input type="radio" value={r} className="text-blue-600" {...register('role')} />
                     <div>
                       <p className="text-sm font-medium text-slate-900">
-                        {r === 'PARTICIPANT' ? 'Participant' : 'Admin'}
+                        {r === 'PARTICIPANT' ? 'Participant / Student' : 'Quiz Admin'}
                       </p>
                       <p className="text-xs text-slate-500">
                         {r === 'PARTICIPANT' ? 'Take quizzes' : 'Create & manage quizzes'}
