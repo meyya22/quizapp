@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { register, login, googleAuth, getMe, upgradeTier } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
-import { authLimiter } from '../app';
+import { authLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
