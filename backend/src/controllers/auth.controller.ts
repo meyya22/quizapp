@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '../config/prisma';
+import { AuthRequest } from '../types';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -10,7 +11,7 @@ function signToken(user: { id: string; email: string; role: string; tier: string
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role, tier: user.tier, name: user.name },
     process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any }
   );
 }
 
