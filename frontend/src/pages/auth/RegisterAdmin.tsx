@@ -160,7 +160,7 @@ export default function RegisterAdmin() {
 
           {/* ── Right: Registration form ──────────────────────────── */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-            <h1 className="text-2xl font-bold text-slate-900 mb-1">Create your admin account</h1>
+            <h1 className="text-2xl font-bold text-slate-900 mb-1">Create Educator or Trainer Account</h1>
             <p className="text-slate-500 text-sm mb-6">Free forever — upgrade anytime.</p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
