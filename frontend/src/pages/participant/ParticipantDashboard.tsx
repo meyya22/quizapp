@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { BookOpen, ChevronRight, Trophy, CheckCircle, XCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, Trophy, CheckCircle, XCircle, UserCircle } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge';
 import api from '../../services/api';
 import { Quiz, QuizAttempt } from '../../types';
@@ -85,6 +85,12 @@ export default function ParticipantDashboard() {
                         Pass: {quiz.passingScore}%
                       </span>
                     </div>
+                    {quiz.category.admin?.name && (
+                      <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                        <UserCircle className="w-3.5 h-3.5" />
+                        <span>By {quiz.category.admin.name}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">

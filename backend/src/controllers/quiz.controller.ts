@@ -14,7 +14,7 @@ export async function getQuizzes(req: AuthRequest, res: Response): Promise<void>
       : { published: true, visibility: 'PUBLIC' },
     orderBy: { createdAt: 'desc' },
     include: {
-      category: { select: { id: true, name: true } },
+      category: { select: { id: true, name: true, admin: { select: { name: true } } } },
       _count: { select: { questions: true, attempts: true } },
     },
   });

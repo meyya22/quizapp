@@ -32,7 +32,7 @@ export interface Quiz {
   visibility: Visibility;
   layout: Layout;
   createdAt: string;
-  category: { id: string; name: string };
+  category: { id: string; name: string; admin?: { name: string } };
   _count?: { questions: number; attempts?: number };
 }
 
