@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
 
-const FREE_QUIZ_PER_CATEGORY = 1;
+const FREE_QUIZ_TOTAL = 5;
 const PAID_QUIZ_TOTAL = 50;
 
 export async function getQuizzes(req: AuthRequest, res: Response): Promise<void> {
@@ -93,10 +93,10 @@ export async function createQuiz(req: AuthRequest, res: Response): Promise<void>
 
   const user = await prisma.user.findUnique({ where: { id: adminId } });
   if (user?.tier === 'FREE') {
-    const count = await prisma.quiz.count({ where: { categoryId } });
-    if (count >= FREE_QUIZ_PER_CATEGORY) {
+    const totalCount = await prisma.quiz.count({ where: { category: { adminId } } });
+    if (totalCount >= FREE_QUIZ_TOTAL) {
       res.status(403).json({
-        error: `Free tier allows only ${FREE_QUIZ_PER_CATEGORY} quiz per category. Upgrade to Paid to create more.`,
+        error: `Free tier allows ${FREE_QUIZ_TOTAL} quizzes total. Upgrade to Paid to create more.`,
       });
       return;
     }

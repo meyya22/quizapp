@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 
 const FREE_FEATURES = [
-  { label: '3 quizzes', ok: true },
+  { label: '5 quizzes', ok: true },
   { label: '10 questions per quiz', ok: true },
   { label: '3 AI generations / month', ok: true },
   { label: '10 contacts', ok: true },

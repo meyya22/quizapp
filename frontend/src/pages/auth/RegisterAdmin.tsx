@@ -14,7 +14,7 @@ import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 
 const FREE_PERKS = [
-  { icon: BookOpen,       text: '3 quizzes with 10 questions each' },
+  { icon: BookOpen,       text: '5 quizzes with 10 questions each' },
   { icon: Brain,          text: '3 AI question generations / month' },
   { icon: Users,          text: '10 contacts in your audience' },
   { icon: Mail,           text: '50 broadcast emails / month' },

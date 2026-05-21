@@ -9,7 +9,7 @@ import { AdminStats } from '../../types';
 import { useAuthStore } from '../../store/authStore';
 
 const COMPARE_ROWS = [
-  { label: 'Quizzes',              free: '3',              paid: '50' },
+  { label: 'Quizzes',              free: '5',              paid: '50' },
   { label: 'Questions per quiz',   free: '10',             paid: '100' },
   { label: 'AI generations / mo',  free: '3',              paid: '25' },
   { label: 'Contacts',             free: '10',             paid: '500' },

@@ -14,7 +14,7 @@ type Plan = 'MONTHLY' | 'YEARLY';
 
 const features: { label: string; free: string | boolean; paid: string | boolean }[] = [
   { label: 'Categories', free: '5 max', paid: 'Unlimited' },
-  { label: 'Quizzes per category', free: '1 max', paid: '50 total max' },
+  { label: 'Quizzes', free: '5 max', paid: '50 total max' },
   { label: 'Questions per quiz', free: '10 max', paid: '100 max' },
   { label: 'Publish & share quizzes', free: true, paid: true },
   { label: 'Quiz translation (6 languages)', free: true, paid: true },

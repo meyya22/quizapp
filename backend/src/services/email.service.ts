@@ -90,7 +90,7 @@ export async function sendWelcomeEmail(to: string, name: string, role: string): 
               As a <strong>Quiz Admin</strong> on the Free plan you can:
             </p>
             <ul style="margin:0 0 24px;padding-left:20px;color:#475569;font-size:14px;line-height:2;">
-              <li>Create up to <strong>3 quizzes</strong> with 10 questions each</li>
+              <li>Create up to <strong>5 quizzes</strong> with 10 questions each</li>
               <li>Generate questions with <strong>AI</strong> (3 times/month)</li>
               <li>Manage up to <strong>10 contacts</strong> &amp; send 50 emails/month</li>
               <li>Collect up to <strong>50 quiz responses</strong> (lifetime)</li>
