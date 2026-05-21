@@ -137,7 +137,7 @@ model AttemptAnswer {
   isCorrect  Boolean
 
   attempt    QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question   Question    @relation(fields: [questionId], references: [id])
+  question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("attempt_answers")
 }
