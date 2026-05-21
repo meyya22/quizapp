@@ -18,6 +18,9 @@ import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
 
+// Trust Cloud Run's load balancer so express-rate-limit sees the real client IP
+app.set('trust proxy', 1);
+
 // Security headers
 app.use(helmet());
 
