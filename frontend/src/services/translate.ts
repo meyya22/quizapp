@@ -101,16 +101,20 @@ export async function translateQuizContent(
 
   // Flatten all texts that need translation into one batch
   const originalTexts: string[] = [];
-  const questionMeta: { textIdx: number; optionIdxMap: Record<string, number> }[] = [];
+  const questionMeta: { textIdx: number; optionIdxMap: Record<string, number>; explanationIdx: number | null }[] = [];
 
   for (const q of questions) {
-    const meta = { textIdx: originalTexts.length, optionIdxMap: {} as Record<string, number> };
+    const meta = { textIdx: originalTexts.length, optionIdxMap: {} as Record<string, number>, explanationIdx: null as number | null };
     originalTexts.push(q.text);
     if (q.options) {
       for (const [key, value] of Object.entries(q.options)) {
         meta.optionIdxMap[key] = originalTexts.length;
         originalTexts.push(value);
       }
+    }
+    if (q.explanation) {
+      meta.explanationIdx = originalTexts.length;
+      originalTexts.push(q.explanation);
     }
     questionMeta.push(meta);
   }
@@ -138,7 +142,12 @@ export async function translateQuizContent(
         translatedOptions[key] = translated[meta.optionIdxMap[key]];
       }
     }
-    return { ...q, text: translated[meta.textIdx], options: translatedOptions };
+    return {
+      ...q,
+      text: translated[meta.textIdx],
+      options: translatedOptions,
+      explanation: meta.explanationIdx !== null ? translated[meta.explanationIdx] : q.explanation,
+    };
   });
 
   return {
