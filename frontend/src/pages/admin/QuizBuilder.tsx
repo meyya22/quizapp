@@ -405,7 +405,7 @@ export default function QuizBuilder() {
           <div className="flex items-center gap-2 p-3 rounded-lg bg-violet-50 border border-violet-100">
             <Sparkles className="w-4 h-4 text-violet-600 shrink-0" />
             <p className="text-xs text-violet-700">
-              Gemini AI will generate up to 10 questions from your prompt and add them directly to this quiz.
+              Claude AI will generate up to 10 questions from your prompt and add them directly to this quiz.
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
 
@@ -74,12 +74,12 @@ export async function generateQuestions(req: AuthRequest, res: Response): Promis
     return;
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     res.status(500).json({ error: 'AI service not configured on this server.' }); return;
   }
 
-  const systemInstruction = `You are a quiz question generator. Your ONLY task is to generate quiz questions. Do not explain or discuss anything — output ONLY a raw JSON array.
+  const systemPrompt = `You are a quiz question generator. Your ONLY task is to generate quiz questions. Do not explain or discuss anything — output ONLY a raw JSON array.
 
 Each element must be an object with exactly these fields:
 - "text": question string
@@ -94,28 +94,24 @@ Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
 
   let rawQuestions: unknown[];
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction,
-      generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+    const client = new Anthropic({ apiKey });
+    const message = await client.messages.create({
+      model: process.env.CLAUDE_MODEL ?? 'claude-haiku-4-5-20251001',
+      max_tokens: 4096,
+      temperature: 0.7,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
-    const result = await model.generateContent(userPrompt);
 
-    let text: string;
-    try {
-      text = result.response.text();
-    } catch (safetyErr) {
-      console.error('Gemini blocked response:', safetyErr);
-      res.status(502).json({ error: 'AI declined this prompt. Please try a different topic or wording.' });
+    const block = message.content[0];
+    if (!block || block.type !== 'text') {
+      res.status(502).json({ error: 'AI returned an unexpected response. Please try again.' });
       return;
     }
 
-    // Strip markdown code fences if Gemini wraps anyway
-    let jsonText = text.trim();
+    let jsonText = block.text.trim();
     const fence = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fence) jsonText = fence[1].trim();
-    // If response starts with [ or { it's likely raw JSON already
     const start = jsonText.indexOf('[');
     if (start > 0) jsonText = jsonText.slice(start);
     const end = jsonText.lastIndexOf(']');
@@ -125,11 +121,12 @@ Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
     if (!Array.isArray(rawQuestions)) throw new Error('Not an array');
   } catch (err) {
     console.error('AI generation failed:', err);
-    const msg = (err as { message?: string }).message ?? '';
-    if (msg.includes('429') || msg.toLowerCase().includes('quota')) {
-      res.status(429).json({ error: 'AI quota limit reached. Please try again in a few minutes.' });
-    } else if (msg.includes('404')) {
-      res.status(502).json({ error: 'AI model not available. Please contact support.' });
+    const msg = (err as { message?: string; status?: number }).message ?? '';
+    const status = (err as { status?: number }).status;
+    if (status === 429 || msg.includes('429') || msg.toLowerCase().includes('rate limit')) {
+      res.status(429).json({ error: 'AI rate limit reached. Please try again in a few minutes.' });
+    } else if (status === 401) {
+      res.status(500).json({ error: 'AI service authentication failed. Please contact support.' });
     } else {
       res.status(502).json({ error: 'AI returned an invalid response. Please try again with a clearer prompt.' });
     }

@@ -12,6 +12,7 @@
     "db:reset": "prisma migrate reset --force"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.97.1",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^5.10.0",
     "@types/nodemailer": "^8.0.0",
