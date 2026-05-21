@@ -4,6 +4,7 @@ import { Crown, Zap, ArrowLeft, BookOpen, Check, ShieldCheck, RefreshCw } from '
 import { Button } from '../../components/ui/Button';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '../../store/authStore';
 
 type Plan = 'MONTHLY' | 'YEARLY';
 
@@ -39,10 +40,15 @@ const features = [
 
 export default function PaymentPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const [plan, setPlan] = useState<Plan>('MONTHLY');
   const [loading, setLoading] = useState(false);
 
   async function handleSubscribe() {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: '/payment' } });
+      return;
+    }
     setLoading(true);
     try {
       const { data } = await api.post('/payment/create-checkout-session', { plan });
