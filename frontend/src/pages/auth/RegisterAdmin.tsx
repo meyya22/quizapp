@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  BookOpen, Check, Crown, Brain, Mail, Users,
+  BookOpen, Crown, Brain, Mail, Users,
   BarChart3, FileSpreadsheet, Globe, AlertCircle, ArrowRight,
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';

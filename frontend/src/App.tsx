@@ -2,7 +2,6 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
 import RegisterAdmin from './pages/auth/RegisterAdmin';
 import RegisterLearner from './pages/auth/RegisterLearner';
 import PaymentPage from './pages/payment/PaymentPage';
