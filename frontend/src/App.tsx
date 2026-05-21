@@ -4,6 +4,7 @@ import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PaymentPage from './pages/payment/PaymentPage';
+import SubscribePage from './pages/payment/SubscribePage';
 import PaymentSuccess from './pages/payment/PaymentSuccess';
 import PaymentCancel from './pages/payment/PaymentCancel';
 import AdminLayout from './components/layout/AdminLayout';
@@ -45,6 +46,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/payment" element={<PaymentPage />} />
+      <Route path="/subscribe" element={<SubscribePage />} />
       <Route path="/payment/success" element={<PaymentSuccess />} />
       <Route path="/payment/cancel" element={<PaymentCancel />} />
 
