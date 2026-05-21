@@ -214,6 +214,7 @@ export default function QuizPlayer() {
   const needsParticipantForm = isStandalone && !isPreviewParam;
 
   const [participantInfo, setParticipantInfo] = useState<ParticipantInfo | null>(null);
+  const [capReached, setCapReached] = useState<{ tier: string } | null>(null);
   const infoForm = useForm<ParticipantInfo>();
 
   const startedAt = useRef(new Date().toISOString());
@@ -281,7 +282,14 @@ export default function QuizPlayer() {
       isStandalone ? `/results/${res.data.id}` : `/participant/results/${res.data.id}`,
       { state: { lang: selectedLang } }
     ),
-    onError: () => toast.error('Failed to submit quiz'),
+    onError: (err: unknown) => {
+      const data = (err as { response?: { data?: { code?: string; tier?: string } } }).response?.data;
+      if (data?.code === 'RESPONSE_CAP_REACHED') {
+        setCapReached({ tier: data.tier ?? 'FREE' });
+      } else {
+        toast.error('Failed to submit quiz');
+      }
+    },
   });
 
   function setAnswer(questionId: string, value: string | string[]) {
@@ -313,6 +321,24 @@ export default function QuizPlayer() {
         participantInfo: participantInfo.otherInfo || undefined,
       }),
     });
+  }
+
+  if (capReached) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-amber-100 rounded-2xl mb-5">
+            <AlertCircle className="w-7 h-7 text-amber-500" />
+          </div>
+          <h1 className="text-xl font-bold text-slate-900 mb-2">Quiz temporarily unavailable</h1>
+          <p className="text-slate-500 text-sm">
+            {capReached.tier === 'FREE'
+              ? 'The quiz creator has reached their lifetime response limit on the free plan. They need to upgrade to accept more responses.'
+              : 'The quiz creator has reached their monthly response limit. Please try again next month.'}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (isPrivateError) {

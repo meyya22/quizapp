@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
+import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import PaymentPage from './pages/payment/PaymentPage';
@@ -24,7 +25,7 @@ import HelpSupport from './pages/HelpSupport';
 
 function RootRedirect() {
   const { isAuthenticated, user } = useAuthStore();
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Landing />;
   if (user?.role === 'SUPER_ADMIN') return <Navigate to="/superadmin/users" replace />;
   return <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/participant'} replace />;
 }

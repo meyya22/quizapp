@@ -24,7 +24,7 @@ export default function AdminLayout() {
   function handleLogout() {
     logout();
     toast.success('Logged out');
-    navigate('/login');
+    navigate('/');
   }
 
   function closeSidebar() {

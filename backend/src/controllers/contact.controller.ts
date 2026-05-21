@@ -122,6 +122,22 @@ export async function deleteContact(req: AuthRequest, res: Response): Promise<vo
   res.json({ success: true });
 }
 
+export async function bulkDeleteContacts(req: AuthRequest, res: Response): Promise<void> {
+  const adminId = req.user!.id;
+  const { ids } = req.body as { ids: string[] };
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    res.status(400).json({ error: 'ids array is required' });
+    return;
+  }
+
+  const result = await prisma.contact.deleteMany({
+    where: { id: { in: ids }, adminId },
+  });
+
+  res.json({ deleted: result.count });
+}
+
 export async function importContacts(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
 
@@ -160,8 +176,18 @@ export async function importContacts(req: AuthRequest, res: Response): Promise<v
 
 export async function getEmailHistory(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
+
+  if (req.query.download === 'true') {
+    const history = await prisma.emailHistory.findMany({
+      where: { adminId },
+      orderBy: { sentAt: 'desc' },
+    });
+    res.json(history);
+    return;
+  }
+
   const page = Math.max(1, parseInt(req.query.page as string) || 1);
-  const take = 20;
+  const take = 10;
 
   const [total, history] = await Promise.all([
     prisma.emailHistory.count({ where: { adminId } }),
@@ -178,7 +204,12 @@ export async function getEmailHistory(req: AuthRequest, res: Response): Promise<
 
 export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
-  const { quizId, contactIds } = req.body as { quizId: string; contactIds: string[] };
+  const { quizId, contactIds, customSubject, customBody } = req.body as {
+    quizId: string;
+    contactIds: string[];
+    customSubject?: string;
+    customBody?: string;
+  };
 
   if (!quizId || !contactIds?.length) {
     res.status(400).json({ error: 'quizId and contactIds are required' });
@@ -240,6 +271,7 @@ export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<vo
   });
 
   const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const useCustom = tier === 'PAID' && typeof customSubject === 'string' && customSubject.trim() && typeof customBody === 'string' && customBody.trim();
   let sent = 0;
   let failed = 0;
   const failures: string[] = [];
@@ -247,25 +279,44 @@ export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<vo
 
   for (const contact of contacts) {
     try {
+      let subject: string;
+      let html: string;
+
+      if (useCustom) {
+        subject = stripNewlines(customSubject!)
+          .replace(/\{\{name\}\}/g, stripNewlines(contact.name))
+          .replace(/\{\{quiz_title\}\}/g, stripNewlines(quiz.title));
+        const bodyHtml = escapeHtml(customBody!)
+          .replace(/\{\{name\}\}/g, escapeHtml(contact.name))
+          .replace(/\{\{quiz_title\}\}/g, escapeHtml(quiz.title))
+          .replace(/\{\{quiz_url\}\}/g, `<a href="${quizUrl}" style="color:#2563eb">${quizUrl}</a>`)
+          .replace(/\n/g, '<br>');
+        html = `<div style="font-family:sans-serif;max-width:500px;margin:auto;padding:24px;color:#334155">
+          ${bodyHtml}
+          <p style="color:#94a3b8;font-size:12px;margin-top:32px">Sent by ${escapeHtml(admin?.name || 'Xam Bridge')} via Xam Bridge</p>
+        </div>`;
+      } else {
+        subject = `You're invited: ${stripNewlines(quiz.title)}`;
+        html = `<div style="font-family:sans-serif;max-width:500px;margin:auto;padding:24px">
+          <h2 style="color:#1e293b">Hi ${escapeHtml(contact.name)},</h2>
+          <p style="color:#475569">You've been invited to take a quiz:</p>
+          <div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:20px 0">
+            <h3 style="margin:0 0 8px;color:#1e293b">${escapeHtml(quiz.title)}</h3>
+            ${quiz.description ? `<p style="margin:0;color:#64748b">${escapeHtml(quiz.description)}</p>` : ''}
+            <p style="margin:8px 0 0;color:#64748b;font-size:14px">Passing score: ${quiz.passingScore}%</p>
+          </div>
+          <a href="${quizUrl}" style="display:inline-block;background:#2563eb;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600">
+            Start Quiz
+          </a>
+          <p style="color:#94a3b8;font-size:12px;margin-top:24px">Sent by ${escapeHtml(admin?.name || 'Xam Bridge')} via Xam Bridge</p>
+        </div>`;
+      }
+
       await transporter.sendMail({
         from: `"${stripNewlines(admin?.name || 'Xam Bridge')}" <${fromAddress}>`,
         to: `"${stripNewlines(contact.name)}" <${contact.email}>`,
-        subject: `You're invited: ${stripNewlines(quiz.title)}`,
-        html: `
-          <div style="font-family:sans-serif;max-width:500px;margin:auto;padding:24px">
-            <h2 style="color:#1e293b">Hi ${escapeHtml(contact.name)},</h2>
-            <p style="color:#475569">You've been invited to take a quiz:</p>
-            <div style="background:#f1f5f9;border-radius:12px;padding:20px;margin:20px 0">
-              <h3 style="margin:0 0 8px;color:#1e293b">${escapeHtml(quiz.title)}</h3>
-              ${quiz.description ? `<p style="margin:0;color:#64748b">${escapeHtml(quiz.description)}</p>` : ''}
-              <p style="margin:8px 0 0;color:#64748b;font-size:14px">Passing score: ${quiz.passingScore}%</p>
-            </div>
-            <a href="${quizUrl}" style="display:inline-block;background:#2563eb;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600">
-              Start Quiz
-            </a>
-            <p style="color:#94a3b8;font-size:12px;margin-top:24px">Sent by ${escapeHtml(admin?.name || 'Xam Bridge')} via Xam Bridge</p>
-          </div>
-        `,
+        subject,
+        html,
       });
       sent++;
       historyEntries.push({

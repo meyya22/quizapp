@@ -26,11 +26,14 @@ const features = [
   '50 quizzes total',
   '100 questions per quiz',
   'Unlimited categories',
+  '2,000 quiz responses per month (resets monthly)',
+  '500 contacts & 500 emails per month',
+  'Custom email composer with preview',
   'CSV / Excel import',
   'Generate Q&A with AI — 25 times/month (max 10 questions each)',
   'Quiz translation (6 languages)',
   'Study mode for participants',
-  'Advanced analytics & reports',
+  'Advanced analytics & reports — export Excel & PDF',
   'Cancel anytime',
 ];
 

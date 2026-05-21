@@ -16,7 +16,7 @@ export default function ParticipantLayout() {
   function handleLogout() {
     logout();
     toast.success('Logged out');
-    navigate('/login');
+    navigate('/');
   }
 
   return (

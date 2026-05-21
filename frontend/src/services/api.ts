@@ -21,7 +21,7 @@ api.interceptors.response.use(
       window.location.pathname.startsWith('/results/');
     if (error.response?.status === 401 && !isStandalonePath) {
       useAuthStore.getState().logout();
-      window.location.href = '/login';
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

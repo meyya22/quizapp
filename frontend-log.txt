@@ -107,3 +107,25 @@
 [2m8:17:58 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizBuilder.tsx, /src/index.css[22m
 [2m8:18:12 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
 [2m10:07:26 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m
+[2m10:27:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m10:27:16 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m10:55:37 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Reports.tsx, /src/index.css[22m
+[2m10:55:39 PM[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33mxlsx, jspdf, jspdf-autotable[32m[39m
+[2m10:55:39 PM[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m10:55:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m10:55:49 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m10:55:57 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m10:58:00 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m
+[2m10:58:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Landing.tsx, /src/index.css[22m
+[2m10:58:21 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
+[2m10:59:22 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Reports.tsx, /src/index.css[22m
+[2m11:02:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/AdminLayout.tsx, /src/index.css[22m
+[2m11:02:16 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/ParticipantLayout.tsx, /src/index.css[22m
+[2m11:02:17 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/SuperAdminLayout.tsx, /src/index.css[22m
+[2m11:02:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/auth/Register.tsx, /src/pages/admin/AdminDashboard.tsx, /src/pages/admin/Reports.tsx, /src/pages/admin/Categories.tsx, /src/pages/participant/ParticipantDashboard.tsx, /src/pages/auth/Login.tsx, /src/pages/payment/PaymentPage.tsx, /src/pages/admin/QuizBuilder.tsx, /src/pages/admin/QuizzesList.tsx, /src/pages/superadmin/UserReport.tsx, /src/pages/participant/QuizPlayer.tsx, /src/pages/participant/Results.tsx, /src/components/UpgradeModal.tsx, /src/pages/payment/PaymentSuccess.tsx, /src/pages/admin/Account.tsx, /src/pages/superadmin/PaymentMetrics.tsx, /src/pages/admin/Audience.tsx, /src/pages/HelpSupport.tsx[22m
+[2m11:09:31 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/AdminDashboard.tsx, /src/index.css[22m
+[2m11:14:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m
+[2m11:14:49 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m
+[2m11:15:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m
+[2m11:17:31 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m
+[2m11:17:40 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m

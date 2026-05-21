@@ -13,7 +13,7 @@ export default function SuperAdminLayout() {
   function handleLogout() {
     logout();
     toast.success('Logged out');
-    navigate('/login');
+    navigate('/');
   }
 
   function closeSidebar() {

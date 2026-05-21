@@ -3,6 +3,14 @@ import { prisma } from '../config/prisma';
 import { calculateScore } from '../services/grading.service';
 import { AuthRequest, SubmittedAnswer } from '../types';
 
+const FREE_RESPONSE_LIMIT = 50;
+const PAID_RESPONSE_LIMIT = 2000;
+
+function getMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
 export async function submitAttempt(req: AuthRequest, res: Response): Promise<void> {
   const { quizId, answers, startedAt, participantName, participantEmail, participantInfo } = req.body as {
     quizId: string;
@@ -20,12 +28,46 @@ export async function submitAttempt(req: AuthRequest, res: Response): Promise<vo
 
   const quiz = await prisma.quiz.findUnique({
     where: { id: quizId },
-    include: { questions: { orderBy: { orderIndex: 'asc' } } },
+    include: {
+      questions: { orderBy: { orderIndex: 'asc' } },
+      category: { select: { adminId: true } },
+    },
   });
 
   if (!quiz) {
     res.status(404).json({ error: 'Quiz not found' });
     return;
+  }
+
+  // Response quota check
+  const adminId = quiz.category.adminId;
+  const admin = await prisma.user.findUnique({ where: { id: adminId }, select: { tier: true } });
+  const tier = admin?.tier ?? 'FREE';
+
+  if (tier === 'FREE') {
+    const count = await prisma.quizAttempt.count({
+      where: { quiz: { category: { adminId } } },
+    });
+    if (count >= FREE_RESPONSE_LIMIT) {
+      res.status(403).json({
+        error: 'This quiz platform has reached its lifetime response limit. The creator needs to upgrade their plan.',
+        code: 'RESPONSE_CAP_REACHED',
+        tier: 'FREE',
+      });
+      return;
+    }
+  } else {
+    const count = await prisma.quizAttempt.count({
+      where: { quiz: { category: { adminId } }, completedAt: { gte: getMonthStart() } },
+    });
+    if (count >= PAID_RESPONSE_LIMIT) {
+      res.status(403).json({
+        error: 'This quiz platform has reached its monthly response limit. Please try again next month.',
+        code: 'RESPONSE_CAP_REACHED',
+        tier: 'PAID',
+      });
+      return;
+    }
   }
 
   const { score, gradedAnswers } = calculateScore(quiz.questions, answers);
@@ -86,7 +128,6 @@ export async function getAttempt(req: AuthRequest, res: Response): Promise<void>
       return;
     }
   } else if (attempt.userId !== null) {
-    // anonymous request trying to access a logged-in user's attempt
     res.status(403).json({ error: 'Access denied' });
     return;
   }
@@ -125,27 +166,52 @@ export async function getMyAttempts(req: AuthRequest, res: Response): Promise<vo
 
 export async function getAllAttempts(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
-  const { quizId, search } = req.query as { quizId?: string; search?: string };
+  const { quizId, search, page: pageStr, pageSize: pageSizeStr, download } = req.query as {
+    quizId?: string; search?: string; page?: string; pageSize?: string; download?: string;
+  };
 
-  const attempts = await prisma.quizAttempt.findMany({
-    where: {
-      quiz: { category: { adminId } },
-      ...(quizId && { quizId }),
-      ...(search && {
-        OR: [
-          { user: { name: { contains: search, mode: 'insensitive' } } },
-          { user: { email: { contains: search, mode: 'insensitive' } } },
-          { participantName: { contains: search, mode: 'insensitive' } },
-          { participantEmail: { contains: search, mode: 'insensitive' } },
-        ],
-      }),
-    },
-    orderBy: { completedAt: 'desc' },
-    include: {
-      user: { select: { id: true, name: true, email: true } },
-      quiz: { select: { id: true, title: true } },
-    },
-  });
+  const where = {
+    quiz: { category: { adminId } },
+    ...(quizId && { quizId }),
+    ...(search && {
+      OR: [
+        { user: { name: { contains: search, mode: 'insensitive' as const } } },
+        { user: { email: { contains: search, mode: 'insensitive' as const } } },
+        { participantName: { contains: search, mode: 'insensitive' as const } },
+        { participantEmail: { contains: search, mode: 'insensitive' as const } },
+      ],
+    }),
+  };
 
-  res.json(attempts);
+  const include = {
+    user: { select: { id: true, name: true, email: true } },
+    quiz: { select: { id: true, title: true } },
+  };
+
+  if (download === 'true') {
+    const attempts = await prisma.quizAttempt.findMany({
+      where,
+      orderBy: { completedAt: 'desc' },
+      include,
+    });
+    res.json(attempts);
+    return;
+  }
+
+  const validSizes = [10, 20, 30];
+  const pageSize = validSizes.includes(parseInt(pageSizeStr || '')) ? parseInt(pageSizeStr!) : 20;
+  const page = Math.max(1, parseInt(pageStr || '1'));
+
+  const [total, attempts] = await Promise.all([
+    prisma.quizAttempt.count({ where }),
+    prisma.quizAttempt.findMany({
+      where,
+      orderBy: { completedAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include,
+    }),
+  ]);
+
+  res.json({ attempts, total, page, pages: Math.ceil(total / pageSize), pageSize });
 }
