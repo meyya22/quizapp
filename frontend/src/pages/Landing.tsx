@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+﻿import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
   BookOpen, Check, X, Zap, Crown, Users, BarChart3, Mail,
@@ -37,7 +37,7 @@ const HOW_IT_WORKS = [
   {
     icon: BookOpen,
     title: 'Create your quiz',
-    desc: 'Build quizzes with multiple question types — MCQ, True/False, Free Text, or let AI generate them for you.',
+    desc: 'Build quizzes with multiple question types â€” MCQ, True/False, Free Text, or let AI generate them for you.',
   },
   {
     icon: Mail,
@@ -66,16 +66,16 @@ export default function Landing() {
   return (
     <>
     <Helmet>
-      <title>Xam Bridge — Free Online Quiz Maker for Teachers &amp; Trainers</title>
+      <title>Xam Bridge â€” Free Online Quiz Maker for Teachers &amp; Trainers</title>
       <meta name="description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support (Hindi, Tamil, Bengali &amp; more), analytics, and free to start. No credit card required." />
-      <link rel="canonical" href="https://xambridge.com/" />
-      <meta property="og:title" content="Xam Bridge — Free Online Quiz Maker for Teachers &amp; Trainers" />
+      <link rel="canonical" href="https://www.xambridge.com/" />
+      <meta property="og:title" content="Xam Bridge â€” Free Online Quiz Maker for Teachers &amp; Trainers" />
       <meta property="og:description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support, and free to start." />
-      <meta property="og:url" content="https://xambridge.com/" />
+      <meta property="og:url" content="https://www.xambridge.com/" />
     </Helmet>
     <div className="min-h-screen bg-white text-slate-900 font-sans">
 
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Nav â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -101,7 +101,7 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="pt-32 pb-20 px-6 text-center bg-gradient-to-b from-blue-50 to-white">
         <div className="max-w-3xl mx-auto">
           {/* Free learner badge */}
@@ -118,7 +118,7 @@ export default function Landing() {
           <p className="text-lg text-slate-500 leading-relaxed mb-8 max-w-xl mx-auto">
             Xam Bridge is a modern quiz platform for educators, trainers, and teams.
             Create engaging assessments in minutes, invite learners with a single link,
-            and gain instant insights — no experience needed.
+            and gain instant insights â€” no experience needed.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -138,7 +138,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Learner Callout ─────────────────────────────────────────────── */}
+      {/* â”€â”€ Learner Callout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-10 bg-emerald-600 text-white text-center px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-3 mb-2">
@@ -167,7 +167,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── How it works ────────────────────────────────────────────────── */}
+      {/* â”€â”€ How it works â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">How it works</h2>
@@ -186,12 +186,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Feature highlights ──────────────────────────────────────────── */}
+      {/* â”€â”€ Feature highlights â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-20 px-6 bg-slate-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">Everything you need to teach &amp; assess</h2>
-            <p className="text-slate-500">Powerful tools for educators, trainers, and teams — built to be simple.</p>
+            <p className="text-slate-500">Powerful tools for educators, trainers, and teams â€” built to be simple.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {HIGHLIGHTS.map((h) => (
@@ -207,7 +207,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Pricing / Plan comparison ───────────────────────────────────── */}
+      {/* â”€â”€ Pricing / Plan comparison â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-20 px-6 bg-white" id="pricing">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
@@ -259,7 +259,7 @@ export default function Landing() {
                   <span className="text-5xl font-extrabold text-slate-900">$5</span>
                   <span className="text-slate-400 mb-1.5">/ month</span>
                 </div>
-                <p className="text-xs text-emerald-600 font-medium mt-0.5">or $50/year — save 16%</p>
+                <p className="text-xs text-emerald-600 font-medium mt-0.5">or $50/year â€” save 16%</p>
                 <p className="text-sm text-slate-500 mt-2">For educators and teams who want full power.</p>
               </div>
               <ul className="space-y-2.5 mb-7">
@@ -274,19 +274,19 @@ export default function Landing() {
                 onClick={() => navigate('/payment')}
                 className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-100"
               >
-                <Zap className="w-4 h-4" /> Subscribe — $5/month
+                <Zap className="w-4 h-4" /> Subscribe â€” $5/month
               </button>
             </div>
           </div>
 
           <p className="text-center text-xs text-slate-400 mt-6">
             <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1" />
-            Secure checkout via Stripe &nbsp;·&nbsp; Cancel anytime &nbsp;·&nbsp; No hidden fees
+            Secure checkout via Stripe &nbsp;Â·&nbsp; Cancel anytime &nbsp;Â·&nbsp; No hidden fees
           </p>
         </div>
       </section>
 
-      {/* ── AI callout strip ────────────────────────────────────────────── */}
+      {/* â”€â”€ AI callout strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-16 px-6 bg-gradient-to-r from-violet-600 to-blue-600 text-white text-center">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-3">
@@ -294,7 +294,7 @@ export default function Landing() {
             <span className="text-2xl font-bold">AI-powered question generation</span>
           </div>
           <p className="text-blue-100 mb-6">
-            Type a topic — "Grade 5 Science", "JavaScript Basics", "Food Safety" — and Gemini AI
+            Type a topic â€” "Grade 5 Science", "JavaScript Basics", "Food Safety" â€” and Gemini AI
             drafts up to 10 ready-to-use questions with options and explanations in seconds.
           </p>
           <Link
@@ -306,12 +306,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Final CTA ───────────────────────────────────────────────────── */}
+      {/* â”€â”€ Final CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <section className="py-20 px-6 bg-slate-50 text-center">
         <div className="max-w-xl mx-auto">
           <h2 className="text-3xl font-bold mb-3">Ready to bridge the knowledge gap?</h2>
           <p className="text-slate-500 mb-8">
-            Join quiz creators who use Xam Bridge to educate, assess, and inspire — for free.
+            Join quiz creators who use Xam Bridge to educate, assess, and inspire â€” for free.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -330,7 +330,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <footer className="bg-white border-t border-slate-100 py-8 px-6 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
@@ -339,7 +339,7 @@ export default function Landing() {
           <span className="font-bold text-slate-800">Xam Bridge</span>
         </div>
         <p className="text-xs text-slate-400">
-          © {new Date().getFullYear()} Xam Bridge · Empowering learners everywhere, free of charge.
+          Â© {new Date().getFullYear()} Xam Bridge Â· Empowering learners everywhere, free of charge.
         </p>
         <div className="flex items-center justify-center gap-4 mt-3 text-xs text-slate-400">
           <Link to="/login" className="hover:text-slate-700 transition-colors">Sign In</Link>
@@ -352,3 +352,4 @@ export default function Landing() {
     </>
   );
 }
+

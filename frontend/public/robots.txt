@@ -5,4 +5,4 @@ Disallow: /participant/
 Disallow: /superadmin/
 Disallow: /payment/
 
-Sitemap: https://xambridge.com/sitemap.xml
+Sitemap: https://www.xambridge.com/sitemap.xml
