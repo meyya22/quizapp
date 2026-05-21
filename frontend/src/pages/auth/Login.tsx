@@ -85,7 +85,7 @@ export default function Login() {
   return (
     <>
     <Helmet>
-      <title>Sign In â€” Xam Bridge</title>
+      <title>Sign In — Xam Bridge</title>
       <meta name="description" content="Sign in to your Xam Bridge account to manage quizzes, view reports, and take tests." />
       <link rel="canonical" href="https://www.xambridge.com/login" />
     </Helmet>
@@ -135,7 +135,7 @@ export default function Login() {
                 <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${passwordHasError ? 'text-red-400' : 'text-slate-400'}`} />
                 <input
                   type="password"
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="••••••••"
                   className={`block w-full rounded-lg border pl-9 pr-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.password || passwordHasError
                       ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-400'

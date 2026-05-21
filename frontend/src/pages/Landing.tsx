@@ -37,7 +37,7 @@ const HOW_IT_WORKS = [
   {
     icon: BookOpen,
     title: 'Create your quiz',
-    desc: 'Build quizzes with multiple question types â€” MCQ, True/False, Free Text, or let AI generate them for you.',
+    desc: 'Build quizzes with multiple question types — MCQ, True/False, Free Text, or let AI generate them for you.',
   },
   {
     icon: Mail,
@@ -66,10 +66,10 @@ export default function Landing() {
   return (
     <>
     <Helmet>
-      <title>Xam Bridge â€” Free Online Quiz Maker for Teachers &amp; Trainers</title>
+      <title>Xam Bridge — Free Online Quiz Maker for Teachers &amp; Trainers</title>
       <meta name="description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support (Hindi, Tamil, Bengali &amp; more), analytics, and free to start. No credit card required." />
       <link rel="canonical" href="https://www.xambridge.com/" />
-      <meta property="og:title" content="Xam Bridge â€” Free Online Quiz Maker for Teachers &amp; Trainers" />
+      <meta property=”og:title” content=”Xam Bridge — Free Online Quiz Maker for Teachers &amp; Trainers” />
       <meta property="og:description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support, and free to start." />
       <meta property="og:url" content="https://www.xambridge.com/" />
       <meta property="og:image" content="https://www.xambridge.com/og-image.svg" />
@@ -123,7 +123,7 @@ export default function Landing() {
           <p className="text-lg text-slate-500 leading-relaxed mb-8 max-w-xl mx-auto">
             Xam Bridge is a modern quiz platform for educators, trainers, and teams.
             Create engaging assessments in minutes, invite learners with a single link,
-            and gain instant insights â€” no experience needed.
+            and gain instant insights — no experience needed.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -196,7 +196,7 @@ export default function Landing() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-3">Everything you need to teach &amp; assess</h2>
-            <p className="text-slate-500">Powerful tools for educators, trainers, and teams â€” built to be simple.</p>
+            <p className=”text-slate-500”>Powerful tools for educators, trainers, and teams — built to be simple.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {HIGHLIGHTS.map((h) => (
@@ -264,7 +264,7 @@ export default function Landing() {
                   <span className="text-5xl font-extrabold text-slate-900">$5</span>
                   <span className="text-slate-400 mb-1.5">/ month</span>
                 </div>
-                <p className="text-xs text-emerald-600 font-medium mt-0.5">or $50/year â€” save 16%</p>
+                <p className=”text-xs text-emerald-600 font-medium mt-0.5”>or $50/year — save 16%</p>
                 <p className="text-sm text-slate-500 mt-2">For educators and teams who want full power.</p>
               </div>
               <ul className="space-y-2.5 mb-7">
@@ -279,7 +279,7 @@ export default function Landing() {
                 onClick={() => navigate('/payment')}
                 className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-100"
               >
-                <Zap className="w-4 h-4" /> Subscribe â€” $5/month
+                <Zap className=”w-4 h-4” /> Subscribe — $5/month
               </button>
             </div>
           </div>
@@ -316,7 +316,7 @@ export default function Landing() {
         <div className="max-w-xl mx-auto">
           <h2 className="text-3xl font-bold mb-3">Ready to bridge the knowledge gap?</h2>
           <p className="text-slate-500 mb-8">
-            Join quiz creators who use Xam Bridge to educate, assess, and inspire â€” for free.
+            Join quiz creators who use Xam Bridge to educate, assess, and inspire — for free.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
