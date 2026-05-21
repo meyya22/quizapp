@@ -148,3 +148,99 @@ export async function sendWelcomeEmail(to: string, name: string, role: string): 
     // Non-fatal — don't block registration if email fails
   }
 }
+
+const SUPER_ADMIN_EMAIL = 'contact.topstudent@gmail.com';
+
+export async function sendNewUserNotification(name: string, email: string, role: string): Promise<void> {
+  const transporter = createTransporter();
+  if (!transporter) return;
+
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const isAdmin = role === 'ADMIN';
+  const now = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:28px 36px;text-align:center;">
+            <span style="color:#ffffff;font-size:18px;font-weight:bold;letter-spacing:1px;">&#128218; Xam Bridge — Admin Alert</span>
+            <p style="margin:8px 0 0;color:#94a3b8;font-size:13px;">New user registration</p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:32px 36px;">
+            <p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.6;">
+              A new user has just registered on <strong>Xam Bridge</strong>.
+            </p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:24px;">
+              <tr>
+                <td style="padding:20px 24px;">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding:7px 0;color:#64748b;font-size:13px;width:130px;">Full Name</td>
+                      <td style="padding:7px 0;color:#0f172a;font-size:13px;font-weight:600;">${name}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:7px 0;color:#64748b;font-size:13px;">Email</td>
+                      <td style="padding:7px 0;color:#0f172a;font-size:13px;font-weight:600;">${email}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:7px 0;color:#64748b;font-size:13px;">Account Type</td>
+                      <td style="padding:7px 0;">
+                        <span style="background:${isAdmin ? '#dbeafe' : '#d1fae5'};color:${isAdmin ? '#1d4ed8' : '#065f46'};font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;">
+                          ${isAdmin ? 'Quiz Admin' : 'Participant'}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:7px 0;color:#64748b;font-size:13px;">Registered At</td>
+                      <td style="padding:7px 0;color:#0f172a;font-size:13px;">${now}</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0;color:#94a3b8;font-size:12px;">
+              This is an automated notification from the Xam Bridge platform.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:18px 36px;text-align:center;">
+            <p style="margin:0;color:#94a3b8;font-size:12px;">
+              &copy; ${new Date().getFullYear()} Xam Bridge &nbsp;&middot;&nbsp; Super Admin Notification
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: SUPER_ADMIN_EMAIL,
+      subject: `New User Registered: ${name} (${isAdmin ? 'Quiz Admin' : 'Participant'})`,
+      html,
+    });
+  } catch {
+    // Non-fatal
+  }
+}
