@@ -20,7 +20,10 @@ function formatTime(seconds: number): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(iso).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  });
 }
 
 interface PagedAttempts {
@@ -41,10 +44,10 @@ interface QuizSummary {
   lastAt: string;
 }
 
-type SortScore = 'asc' | 'desc' | null;
+type SortDir = 'asc' | 'desc' | null;
 type ViewMode = 'flat' | 'grouped';
 
-function SortIcon({ active, dir }: { active: boolean; dir: SortScore }) {
+function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
   if (!active || !dir) return <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />;
   return dir === 'asc'
     ? <ArrowUp className="w-3.5 h-3.5 text-blue-600" />
@@ -86,10 +89,11 @@ export default function Reports() {
   const [quizFilter, setQuizFilter] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
-  const [sortScore, setSortScore] = useState<SortScore>(null);
+  const [sortScore, setSortScore] = useState<SortDir>(null);
+  const [sortDate, setSortDate] = useState<SortDir>(null);
   const [exporting, setExporting] = useState(false);
 
-  useEffect(() => { setPage(1); }, [quizFilter, search, sortScore]);
+  useEffect(() => { setPage(1); }, [quizFilter, search, sortScore, sortDate]);
 
   const { data: quizzes = [] } = useQuery<Quiz[]>({
     queryKey: ['quizzes'],
@@ -97,7 +101,7 @@ export default function Reports() {
   });
 
   const { data: pagedData, isLoading } = useQuery<PagedAttempts>({
-    queryKey: ['all-attempts', quizFilter, search, page, pageSize, sortScore],
+    queryKey: ['all-attempts', quizFilter, search, page, pageSize, sortScore, sortDate],
     queryFn: () => {
       const params = new URLSearchParams();
       if (quizFilter) params.append('quizId', quizFilter);
@@ -105,6 +109,7 @@ export default function Reports() {
       params.append('page', page.toString());
       params.append('pageSize', pageSize.toString());
       if (sortScore) { params.append('sortBy', 'score'); params.append('sortOrder', sortScore); }
+      else if (sortDate) { params.append('sortBy', 'date'); params.append('sortOrder', sortDate); }
       return api.get(`/attempts/all?${params}`).then((r) => r.data);
     },
     enabled: viewMode === 'flat',
@@ -126,7 +131,13 @@ export default function Reports() {
   ];
 
   function toggleSortScore() {
+    setSortDate(null);
     setSortScore((s) => s === null ? 'desc' : s === 'desc' ? 'asc' : null);
+  }
+
+  function toggleSortDate() {
+    setSortScore(null);
+    setSortDate((s) => s === null ? 'desc' : s === 'desc' ? 'asc' : null);
   }
 
   function drillIntoQuiz(quizId: string) {
@@ -140,6 +151,7 @@ export default function Reports() {
     if (quizFilter) params.append('quizId', quizFilter);
     if (search) params.append('search', search);
     if (sortScore) { params.append('sortBy', 'score'); params.append('sortOrder', sortScore); }
+    else if (sortDate) { params.append('sortBy', 'date'); params.append('sortOrder', sortDate); }
     params.append('download', 'true');
     const { data } = await api.get(`/attempts/all?${params}`);
     return data as QuizAttempt[];
@@ -298,7 +310,12 @@ export default function Reports() {
                       </th>
                       <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Status</th>
                       <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Time</th>
-                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Date</th>
+                      <th className="px-5 py-3">
+                        <button onClick={toggleSortDate}
+                          className="flex items-center gap-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider hover:text-slate-800 transition-colors">
+                          Date <SortIcon active={sortDate !== null} dir={sortDate} />
+                        </button>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">

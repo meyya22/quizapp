@@ -235,6 +235,8 @@ export async function getAllAttempts(req: AuthRequest, res: Response): Promise<v
 
   const orderBy = sortBy === 'score'
     ? { score: (sortOrder ?? 'desc') as 'asc' | 'desc' }
+    : sortBy === 'date'
+    ? { completedAt: (sortOrder ?? 'desc') as 'asc' | 'desc' }
     : { completedAt: 'desc' as const };
 
   const include = {
