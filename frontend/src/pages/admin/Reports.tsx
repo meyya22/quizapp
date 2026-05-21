@@ -4,6 +4,7 @@ import {
   Search, BarChart3, FileSpreadsheet, FileText,
   ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown,
   Trophy, Users, CheckCircle, ChevronRight as ViewIcon,
+  X, CheckCircle2, XCircle, ClipboardList,
 } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge';
 import { Select } from '../../components/ui/Select';
@@ -12,6 +13,142 @@ import { Quiz, QuizAttempt } from '../../types';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+
+interface AttemptDetail {
+  id: string;
+  score: number;
+  passed: boolean;
+  timeTaken: number;
+  completedAt: string;
+  quiz: { title: string; passingScore: number };
+  answers: {
+    questionId: string;
+    questionText: string;
+    questionType: string;
+    options: string[] | null;
+    explanation: string | null;
+    userAnswer: unknown;
+    correctAnswer: unknown;
+    isCorrect: boolean;
+  }[];
+}
+
+function formatAnswer(value: unknown, type: string, options: string[] | null): string {
+  if (value === null || value === undefined) return '— (no answer)';
+  if (type === 'TRUE_FALSE') return String(value) === 'true' ? 'True' : 'False';
+  if (type === 'MCQ' && options && typeof value === 'number') return options[value] ?? String(value);
+  if (Array.isArray(value)) return value.map((v) => (options ? options[v as number] ?? v : v)).join(', ');
+  return String(value);
+}
+
+function ReviewModal({ attemptId, participantName, onClose }: {
+  attemptId: string;
+  participantName: string;
+  onClose: () => void;
+}) {
+  const { data, isLoading, isError } = useQuery<AttemptDetail>({
+    queryKey: ['attempt-detail', attemptId],
+    queryFn: () => api.get(`/attempts/${attemptId}`).then((r) => r.data),
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+
+        {/* Modal header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <ClipboardList className="w-5 h-5 text-blue-600" />
+            <div>
+              <h2 className="text-base font-bold text-slate-900">Question Review</h2>
+              <p className="text-xs text-slate-500">{participantName}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+            <X className="w-5 h-5 text-slate-500" />
+          </button>
+        </div>
+
+        {/* Modal body */}
+        <div className="overflow-y-auto flex-1 px-6 py-5">
+          {isLoading && (
+            <div className="flex justify-center py-12">
+              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+          {isError && (
+            <p className="text-center text-red-500 py-8">Could not load attempt details.</p>
+          )}
+          {data && (
+            <>
+              {/* Summary strip */}
+              <div className="flex items-center gap-4 mb-5 p-3 bg-slate-50 rounded-xl border border-slate-100 text-sm">
+                <span className="text-slate-500">Quiz: <strong className="text-slate-800">{data.quiz.title}</strong></span>
+                <span className="text-slate-400">·</span>
+                <span className="text-slate-500">Score: <strong className={data.passed ? 'text-emerald-600' : 'text-red-500'}>{data.score.toFixed(1)}%</strong></span>
+                <span className="text-slate-400">·</span>
+                <span className={`font-semibold text-xs px-2 py-0.5 rounded-full ${data.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+                  {data.passed ? 'Passed' : 'Failed'}
+                </span>
+              </div>
+
+              {/* Questions */}
+              <div className="space-y-4">
+                {data.answers.map((a, i) => (
+                  <div key={a.questionId} className={`rounded-xl border p-4 ${a.isCorrect ? 'border-emerald-200 bg-emerald-50/40' : 'border-red-200 bg-red-50/40'}`}>
+                    <div className="flex items-start gap-3">
+                      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mt-0.5 ${a.isCorrect ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                        {a.isCorrect
+                          ? <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          : <XCircle className="w-4 h-4 text-red-500" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">Q{i + 1}</p>
+                        <p className="text-sm font-medium text-slate-800 mb-3">{a.questionText}</p>
+
+                        <div className="space-y-1.5 text-sm">
+                          <div className={`flex items-start gap-2 px-3 py-2 rounded-lg ${a.isCorrect ? 'bg-emerald-100/60' : 'bg-red-100/60'}`}>
+                            <span className="text-xs font-semibold text-slate-500 mt-0.5 w-24 flex-shrink-0">Their answer:</span>
+                            <span className={`font-medium ${a.isCorrect ? 'text-emerald-800' : 'text-red-700'}`}>
+                              {formatAnswer(a.userAnswer, a.questionType, a.options)}
+                            </span>
+                          </div>
+                          {!a.isCorrect && (
+                            <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-slate-100/80">
+                              <span className="text-xs font-semibold text-slate-500 mt-0.5 w-24 flex-shrink-0">Correct answer:</span>
+                              <span className="font-medium text-slate-700">
+                                {formatAnswer(a.correctAnswer, a.questionType, a.options)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {a.explanation && (
+                          <div className="mt-2.5 px-3 py-2 rounded-lg bg-amber-50 border border-amber-100">
+                            <p className="text-xs font-semibold text-amber-700 mb-0.5">Explanation</p>
+                            <p className="text-xs text-amber-800 leading-relaxed">{a.explanation}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-3 border-t border-slate-200 flex-shrink-0 flex justify-end">
+          <button onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -92,6 +229,7 @@ export default function Reports() {
   const [sortScore, setSortScore] = useState<SortDir>(null);
   const [sortDate, setSortDate] = useState<SortDir>(null);
   const [exporting, setExporting] = useState(false);
+  const [reviewAttempt, setReviewAttempt] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => { setPage(1); }, [quizFilter, search, sortScore, sortDate]);
 
@@ -316,6 +454,7 @@ export default function Reports() {
                           Date <SortIcon active={sortDate !== null} dir={sortDate} />
                         </button>
                       </th>
+                      <th className="px-5 py-3" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -338,6 +477,16 @@ export default function Reports() {
                         </td>
                         <td className="px-5 py-4 text-sm text-slate-600">{formatTime(attempt.timeTaken)}</td>
                         <td className="px-5 py-4 text-sm text-slate-600">{formatDate(attempt.completedAt)}</td>
+                        <td className="px-5 py-4">
+                          <button
+                            onClick={() => setReviewAttempt({
+                              id: attempt.id,
+                              name: attempt.user?.name ?? attempt.participantName ?? 'Participant',
+                            })}
+                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors whitespace-nowrap">
+                            Review →
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -434,6 +583,14 @@ export default function Reports() {
             </div>
           )}
         </>
+      )}
+
+      {reviewAttempt && (
+        <ReviewModal
+          attemptId={reviewAttempt.id}
+          participantName={reviewAttempt.name}
+          onClose={() => setReviewAttempt(null)}
+        />
       )}
     </div>
   );
