@@ -136,10 +136,16 @@ export default function Landing() {
             <span className="text-xl font-bold">Learners always take quizzes for free</span>
             <Star className="w-5 h-5 text-emerald-200" />
           </div>
-          <p className="text-emerald-100 text-sm">
-            No account needed to take a quiz. Students, employees, and curious minds of any age
+          <p className="text-emerald-100 text-sm mb-5">
+            Just sign up to take a quiz. Students, employees, and curious minds of any age
             can jump in instantly with a shared link. Knowledge has no price.
           </p>
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors shadow text-sm"
+          >
+            Sign Up Today <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
