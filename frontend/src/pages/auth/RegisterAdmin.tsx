@@ -115,7 +115,7 @@ export default function RegisterAdmin() {
           {/* ── Left: Features panel ─────────────────────────────── */}
           <div className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-2xl p-8 text-white">
             <div className="mb-6">
-              <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full mb-3">
+              <span className="inline-block bg-white/20 text-white text-base font-bold px-4 py-1.5 rounded-full mb-3">
                 Quiz Admin — Free Plan
               </span>
               <h2 className="text-2xl font-extrabold leading-tight mb-2">
