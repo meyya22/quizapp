@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
+import { sendWelcomeEmail } from '../services/email.service';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -35,6 +36,8 @@ export async function register(req: Request, res: Response): Promise<void> {
   const user = await prisma.user.create({
     data: { name, email, passwordHash, role: assignedRole },
   });
+
+  sendWelcomeEmail(user.email, user.name, user.role);
 
   const token = signToken(user);
   res.status(201).json({
@@ -106,6 +109,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
           role: 'PARTICIPANT',
         },
       });
+      sendWelcomeEmail(user.email, user.name, user.role);
     } else if (!user.googleId) {
       user = await prisma.user.update({
         where: { id: user.id },

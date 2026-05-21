@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -28,10 +28,15 @@ type FormData = z.infer<typeof schema>;
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string })?.from;
   const setAuth = useAuthStore((s) => s.setAuth);
   const [loading, setLoading] = useState(false);
   const [emailTakenError, setEmailTakenError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
+
+  // Pre-select ADMIN when coming from the payment/subscribe flow
+  const defaultRole = from === '/payment' ? 'ADMIN' : 'PARTICIPANT';
 
   const {
     register,
@@ -39,7 +44,7 @@ export default function Register() {
     formState: { errors },
     setError,
     watch,
-  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { role: 'PARTICIPANT' } });
+  } = useForm<FormData>({ resolver: zodResolver(schema), defaultValues: { role: defaultRole } });
 
   const selectedRole = watch('role');
 
@@ -55,7 +60,7 @@ export default function Register() {
         role: data.role,
       });
       setAuth(res.data.user, res.data.token);
-      navigate(res.data.user.role === 'ADMIN' ? '/admin' : '/participant');
+      navigate(from || (res.data.user.role === 'ADMIN' ? '/admin' : '/participant'));
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ??

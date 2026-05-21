@@ -133,3 +133,7 @@
 [2m6:51:32 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Landing.tsx, /src/index.css[22m
 [2m7:04:11 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
 [2m7:04:19 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
+[2m7:17:27 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Register.tsx, /src/index.css[22m
+[2m7:17:35 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Register.tsx, /src/index.css[22m
+[2m7:17:40 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Register.tsx, /src/index.css[22m
+[2m7:17:46 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m

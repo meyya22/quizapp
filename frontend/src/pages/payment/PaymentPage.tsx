@@ -46,7 +46,7 @@ export default function PaymentPage() {
 
   async function handleSubscribe() {
     if (!isAuthenticated) {
-      navigate('/login', { state: { from: '/payment' } });
+      navigate('/register', { state: { from: '/payment' } });
       return;
     }
     setLoading(true);
