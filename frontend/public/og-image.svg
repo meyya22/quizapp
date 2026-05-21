@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e40af"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle grid dots -->
+  <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <circle cx="2" cy="2" r="1.5" fill="#ffffff" opacity="0.08"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+
+  <!-- Decorative circle top-right -->
+  <circle cx="1100" cy="80" r="220" fill="#3b82f6" opacity="0.18"/>
+  <circle cx="1100" cy="80" r="140" fill="#60a5fa" opacity="0.12"/>
+
+  <!-- Decorative circle bottom-left -->
+  <circle cx="100" cy="560" r="180" fill="#1d4ed8" opacity="0.2"/>
+
+  <!-- Logo box -->
+  <rect x="100" y="160" width="72" height="72" rx="18" fill="#ffffff" opacity="0.15"/>
+  <!-- Book icon (simplified) -->
+  <rect x="118" y="178" width="36" height="36" rx="3" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="136" y1="178" x2="136" y2="214" stroke="#ffffff" stroke-width="2.5"/>
+  <line x1="122" y1="190" x2="132" y2="190" stroke="#ffffff" stroke-width="2"/>
+  <line x1="122" y1="197" x2="132" y2="197" stroke="#ffffff" stroke-width="2"/>
+  <line x1="140" y1="190" x2="150" y2="190" stroke="#ffffff" stroke-width="2"/>
+  <line x1="140" y1="197" x2="150" y2="197" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Brand name -->
+  <text x="190" y="210" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="700" fill="#ffffff" letter-spacing="-1">Xam Bridge</text>
+
+  <!-- Divider -->
+  <rect x="100" y="258" width="80" height="4" rx="2" fill="#93c5fd"/>
+
+  <!-- Tagline -->
+  <text x="100" y="318" font-family="system-ui, -apple-system, sans-serif" font-size="34" font-weight="400" fill="#bfdbfe" letter-spacing="-0.5">Free Online Quiz Maker for</text>
+  <text x="100" y="364" font-family="system-ui, -apple-system, sans-serif" font-size="34" font-weight="400" fill="#bfdbfe" letter-spacing="-0.5">Teachers &amp; Trainers</text>
+
+  <!-- Feature pills -->
+  <rect x="100" y="420" width="220" height="44" rx="22" fill="#ffffff" opacity="0.12"/>
+  <text x="210" y="448" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#ffffff" text-anchor="middle">AI Question Gen</text>
+
+  <rect x="338" y="420" width="210" height="44" rx="22" fill="#ffffff" opacity="0.12"/>
+  <text x="443" y="448" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#ffffff" text-anchor="middle">6 Languages</text>
+
+  <rect x="566" y="420" width="200" height="44" rx="22" fill="#ffffff" opacity="0.12"/>
+  <text x="666" y="448" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="500" fill="#ffffff" text-anchor="middle">Free to Start</text>
+
+  <!-- URL -->
+  <text x="100" y="540" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="400" fill="#93c5fd" opacity="0.9">www.xambridge.com</text>
+</svg>

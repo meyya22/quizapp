@@ -52,7 +52,7 @@ const HOW_IT_WORKS = [
 ];
 
 const HIGHLIGHTS = [
-  { icon: Brain, label: 'AI Question Generator', desc: 'Describe a topic and let Gemini AI draft questions for you.' },
+  { icon: Brain, label: 'AI Question Generator', desc: 'Describe a topic and let Claude AI draft questions for you.' },
   { icon: Globe, label: 'Multi-language Quizzes', desc: 'Translate quizzes into 6 languages with one click.' },
   { icon: Upload, label: 'CSV / Excel Import', desc: 'Bulk-import questions from spreadsheets in seconds.' },
   { icon: Users, label: 'Audience Management', desc: 'Maintain contact lists and broadcast quizzes by email.' },
@@ -72,6 +72,11 @@ export default function Landing() {
       <meta property="og:title" content="Xam Bridge â€” Free Online Quiz Maker for Teachers &amp; Trainers" />
       <meta property="og:description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support, and free to start." />
       <meta property="og:url" content="https://www.xambridge.com/" />
+      <meta property="og:image" content="https://www.xambridge.com/og-image.svg" />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:image" content="https://www.xambridge.com/og-image.svg" />
     </Helmet>
     <div className="min-h-screen bg-white text-slate-900 font-sans">
 
@@ -294,7 +299,7 @@ export default function Landing() {
             <span className="text-2xl font-bold">AI-powered question generation</span>
           </div>
           <p className="text-blue-100 mb-6">
-            Type a topic â€” "Grade 5 Science", "JavaScript Basics", "Food Safety" â€” and Gemini AI
+            Type a topic — “Grade 5 Science”, “JavaScript Basics”, “Food Safety” — and Claude AI
             drafts up to 10 ready-to-use questions with options and explanations in seconds.
           </p>
           <Link

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -97,6 +98,12 @@ export default function SubscribePage() {
   }
 
   return (
+    <>
+    <Helmet>
+      <title>Pricing — Xam Bridge</title>
+      <meta name="description" content="Upgrade to Xam Bridge Pro for $5/month. Get 50 quizzes, AI question generation, quiz translation in 6 languages, advanced analytics, and 2,000 responses per month." />
+      <link rel="canonical" href="https://www.xambridge.com/subscribe" />
+    </Helmet>
     <div className="min-h-screen bg-slate-50">
 
       {/* Nav */}
@@ -269,5 +276,6 @@ export default function SubscribePage() {
         </button>
       </div>
     </div>
+    </>
   );
 }
