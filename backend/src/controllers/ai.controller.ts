@@ -79,25 +79,18 @@ export async function generateQuestions(req: AuthRequest, res: Response): Promis
     res.status(500).json({ error: 'AI service not configured on this server.' }); return;
   }
 
-  const systemInstruction = `You are a quiz question generator. Your ONLY task is to generate quiz questions based on the user's prompt. Do not answer or discuss anything else.
+  const systemInstruction = `You are a quiz question generator. Your ONLY task is to generate quiz questions. Do not explain or discuss anything — output ONLY a raw JSON array.
 
-Output a JSON array of question objects. Each object must follow this exact structure:
-{
-  "text": "The question text",
-  "type": "MULTIPLE_CHOICE" | "MULTIPLE_RESPONSE" | "TRUE_FALSE" | "FREE_TEXT",
-  "options": { "A": "...", "B": "...", "C": "...", "D": "..." },
-  "correctAnswer": "A",
-  "explanation": "Why this is the correct answer"
-}
+Each element must be an object with exactly these fields:
+- "text": question string
+- "type": one of MULTIPLE_CHOICE, MULTIPLE_RESPONSE, TRUE_FALSE, FREE_TEXT
+- "options": object {"A":"...","B":"...","C":"...","D":"..."} for MULTIPLE_CHOICE/MULTIPLE_RESPONSE, or null for TRUE_FALSE/FREE_TEXT
+- "correctAnswer": single letter "A"/"B"/"C"/"D" for MULTIPLE_CHOICE; array like ["A","C"] for MULTIPLE_RESPONSE; "true" or "false" for TRUE_FALSE; answer string for FREE_TEXT
+- "explanation": string explaining why the answer is correct
 
-Rules:
-- Maximum 10 questions per response
-- MULTIPLE_CHOICE: 4 options (A/B/C/D), correctAnswer is one letter string e.g. "B"
-- MULTIPLE_RESPONSE: 4 options (A/B/C/D), correctAnswer is an array of letter strings e.g. ["A","C"]
-- TRUE_FALSE: options must be null, correctAnswer is "true" or "false"
-- FREE_TEXT: options must be null, correctAnswer is the expected answer text
-- Always include a clear explanation for each question
-- Output ONLY the JSON array with no surrounding text or markdown`;
+Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
+
+  const userPrompt = `${prompt.trim().slice(0, 2000)}\n\nGenerate up to 10 questions. Return ONLY the JSON array.`;
 
   let rawQuestions: unknown[];
   try {
@@ -105,17 +98,33 @@ Rules:
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
       systemInstruction,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      },
-    } as Parameters<typeof genAI.getGenerativeModel>[0]);
-    const result = await model.generateContent(prompt.trim().slice(0, 2000));
-    const text = result.response.text();
-    rawQuestions = JSON.parse(text);
+      generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+    });
+    const result = await model.generateContent(userPrompt);
+
+    let text: string;
+    try {
+      text = result.response.text();
+    } catch (safetyErr) {
+      console.error('Gemini blocked response:', safetyErr);
+      res.status(502).json({ error: 'AI declined this prompt. Please try a different topic or wording.' });
+      return;
+    }
+
+    // Strip markdown code fences if Gemini wraps anyway
+    let jsonText = text.trim();
+    const fence = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fence) jsonText = fence[1].trim();
+    // If response starts with [ or { it's likely raw JSON already
+    const start = jsonText.indexOf('[');
+    if (start > 0) jsonText = jsonText.slice(start);
+    const end = jsonText.lastIndexOf(']');
+    if (end !== -1 && end < jsonText.length - 1) jsonText = jsonText.slice(0, end + 1);
+
+    rawQuestions = JSON.parse(jsonText);
     if (!Array.isArray(rawQuestions)) throw new Error('Not an array');
-  } catch {
+  } catch (err) {
+    console.error('AI generation failed:', err);
     res.status(502).json({ error: 'AI returned an invalid response. Please try again with a clearer prompt.' });
     return;
   }
