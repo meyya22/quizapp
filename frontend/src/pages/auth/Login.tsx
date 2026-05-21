@@ -85,7 +85,7 @@ export default function Login() {
   return (
     <>
     <Helmet>
-      <title>Sign In — Xam Bridge</title>
+      <title>Sign In  - Xam Bridge</title>
       <meta name="description" content="Sign in to your Xam Bridge account to manage quizzes, view reports, and take tests." />
       <link rel="canonical" href="https://www.xambridge.com/login" />
     </Helmet>

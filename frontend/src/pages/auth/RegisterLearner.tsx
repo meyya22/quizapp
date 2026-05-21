@@ -15,13 +15,13 @@ import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 
 const LEARNER_PERKS = [
-  { icon: BookOpen,    text: 'Take any quiz shared with you — instantly' },
-  { icon: Check,       text: '100% free, forever — no credit card ever' },
+  { icon: BookOpen,    text: 'Take any quiz shared with you  - instantly' },
+  { icon: Check,       text: '100% free, forever  - no credit card ever' },
   { icon: Zap,         text: 'Instant results with scores & explanations' },
   { icon: Trophy,      text: 'See if you passed and review your answers' },
   { icon: Star,        text: 'Study mode to learn at your own pace' },
   { icon: Clock,       text: 'Track time taken on each attempt' },
-  { icon: ShieldCheck, text: 'Secure, private — your data stays yours' },
+  { icon: ShieldCheck, text: 'Secure, private  - your data stays yours' },
 ];
 
 const schema = z
@@ -94,7 +94,7 @@ export default function RegisterLearner() {
   return (
     <>
     <Helmet>
-      <title>Join as a Learner — Xam Bridge</title>
+      <title>Join as a Learner  - Xam Bridge</title>
       <meta name="description" content="Sign up to take quizzes assigned by your teacher or trainer. Track your scores, review answers, and learn at your own pace." />
       <link rel="canonical" href="https://www.xambridge.com/register/learner" />
     </Helmet>
@@ -119,20 +119,20 @@ export default function RegisterLearner() {
       <div className="flex-1 flex items-start justify-center px-6 py-10">
         <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-8 items-start">
 
-          {/* â”€â”€ Left: Benefits panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â"€â"€ Left: Benefits panel â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
           <div className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-8 text-white">
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <GraduationCap className="w-5 h-5 text-emerald-200" />
                 <span className="inline-block bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full">
-                  Learner Account — Always Free
+                  Learner Account  - Always Free
                 </span>
               </div>
               <h2 className="text-2xl font-extrabold leading-tight mb-2">
                 Learn, practice &amp; grow at your own pace
               </h2>
               <p className="text-emerald-200 text-sm leading-relaxed">
-                Take quizzes created by your teachers, trainers, or employers — for free, forever.
+                Take quizzes created by your teachers, trainers, or employers  - for free, forever.
               </p>
             </div>
 
@@ -149,7 +149,7 @@ export default function RegisterLearner() {
 
             <div className="bg-white/10 border border-white/20 rounded-xl p-4">
               <p className="text-sm text-white leading-relaxed">
-                <span className="font-bold">No quiz link yet?</span> Ask your teacher or trainer to share a quiz link with you — sign up first so your results are saved to your profile.
+                <span className="font-bold">No quiz link yet?</span> Ask your teacher or trainer to share a quiz link with you  - sign up first so your results are saved to your profile.
               </p>
             </div>
 
@@ -161,10 +161,10 @@ export default function RegisterLearner() {
             </p>
           </div>
 
-          {/* â”€â”€ Right: Registration form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â"€â"€ Right: Registration form â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Create your learner account</h1>
-            <p className="text-slate-500 text-sm mb-6">Free forever — no credit card needed.</p>
+            <p className="text-slate-500 text-sm mb-6">Free forever  - no credit card needed.</p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input label="Full Name" placeholder="John Doe" error={errors.name?.message} {...register('name')} />

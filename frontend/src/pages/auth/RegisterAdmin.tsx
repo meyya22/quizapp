@@ -94,7 +94,7 @@ export default function RegisterAdmin() {
   return (
     <>
     <Helmet>
-      <title>Create Free Quiz Admin Account — Xam Bridge</title>
+      <title>Create Free Quiz Admin Account  - Xam Bridge</title>
       <meta name="description" content="Sign up free as an educator or trainer. Create up to 5 quizzes, use AI to generate questions, and share with your audience. No credit card required." />
       <link rel="canonical" href="https://www.xambridge.com/register/admin" />
     </Helmet>
@@ -119,11 +119,11 @@ export default function RegisterAdmin() {
       <div className="flex-1 flex items-start justify-center px-6 py-10">
         <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-8 items-start">
 
-          {/* â”€â”€ Left: Features panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â"€â"€ Left: Features panel â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
           <div className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-2xl p-8 text-white">
             <div className="mb-6">
               <span className="inline-block bg-white/20 text-white text-base font-bold px-4 py-1.5 rounded-full mb-3">
-                Quiz Admin — Free Plan
+                Quiz Admin  - Free Plan
               </span>
               <h2 className="text-2xl font-extrabold leading-tight mb-2">
                 Create quizzes for your students or team
@@ -165,10 +165,10 @@ export default function RegisterAdmin() {
             </p>
           </div>
 
-          {/* â”€â”€ Right: Registration form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* â"€â"€ Right: Registration form â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Create Educator or Trainer Account</h1>
-            <p className=”text-slate-500 text-sm mb-6”>Free forever — upgrade anytime.</p>
+            <p className="text-slate-500 text-sm mb-6">Free forever  - upgrade anytime.</p>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input label="Full Name" placeholder="John Doe" error={errors.name?.message} {...register('name')} />
