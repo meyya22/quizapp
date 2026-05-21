@@ -1,7 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, ArrowLeft, Upload, Download, GripVertical, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, Upload, Download, GripVertical, Eye, Sparkles, Loader2 } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
@@ -37,6 +37,10 @@ interface QuestionFormData {
   explanation: string;
 }
 
+interface AiUsage { used: number; limit: number; tier: string }
+
+const SAMPLE_PROMPT = 'Generate 5 MCQ style Grade 5 Science questions with answer options and explanations';
+
 export default function QuizBuilder() {
   const { id } = useParams<{ id: string }>();
   const qc = useQueryClient();
@@ -45,6 +49,45 @@ export default function QuizBuilder() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiUsage, setAiUsage] = useState<AiUsage | null>(null);
+
+  useEffect(() => {
+    api.get('/ai/usage').then((r) => setAiUsage(r.data)).catch(() => {});
+  }, []);
+
+  async function handleAiGenerate() {
+    if (!aiPrompt.trim()) { toast.error('Please enter a prompt'); return; }
+    setAiLoading(true);
+    try {
+      const res = await api.post('/ai/generate-questions', { quizId: id, prompt: aiPrompt });
+      qc.invalidateQueries({ queryKey: ['questions', id] });
+      qc.invalidateQueries({ queryKey: ['quizzes'] });
+      setAiUsage(res.data.usage);
+      toast.success(`${res.data.generated} question${res.data.generated !== 1 ? 's' : ''} generated`);
+      setAiModalOpen(false);
+      setAiPrompt('');
+    } catch (err: unknown) {
+      const e = err as { response?: { status?: number; data?: { error?: string } } };
+      if (e.response?.status === 403) {
+        const msg = e.response.data?.error ?? '';
+        if (msg.toLowerCase().includes('upgrade')) {
+          setAiModalOpen(false);
+          setUpgradeReason(msg);
+          setUpgradeOpen(true);
+        } else {
+          toast.error(msg || 'Limit reached');
+        }
+      } else {
+        toast.error(e.response?.data?.error || 'AI generation failed. Please try again.');
+      }
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   function openUpgrade(err: unknown) {
     const e = err as { response?: { status?: number; data?: { error?: string } } };
@@ -237,6 +280,22 @@ export default function QuizBuilder() {
               <Eye className="w-4 h-4" />
               Preview
             </Link>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setAiModalOpen(true)}
+              disabled={aiUsage !== null && aiUsage.used >= aiUsage.limit}
+              title={aiUsage && aiUsage.used >= aiUsage.limit ? 'Monthly AI limit reached' : 'Generate questions using AI'}
+              className="border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 disabled:opacity-50"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden sm:inline">Generate with AI</span>
+              {aiUsage && (
+                <span className="text-[10px] font-normal text-violet-500 ml-0.5">
+                  {aiUsage.used}/{aiUsage.limit}
+                </span>
+              )}
+            </Button>
             <Button variant="secondary" size="sm" onClick={handleDownloadSample}>
               <Download className="w-4 h-4" />
               Sample CSV
@@ -335,6 +394,81 @@ export default function QuizBuilder() {
         onClose={() => setUpgradeOpen(false)}
         reason={upgradeReason}
       />
+
+      <Modal
+        open={aiModalOpen}
+        onClose={() => { if (!aiLoading) { setAiModalOpen(false); setAiPrompt(''); } }}
+        title="Generate Questions with AI"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-violet-50 border border-violet-100">
+            <Sparkles className="w-4 h-4 text-violet-600 shrink-0" />
+            <p className="text-xs text-violet-700">
+              Gemini AI will generate up to 10 questions from your prompt and add them directly to this quiz.
+            </p>
+          </div>
+
+          {aiUsage && (
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>Monthly usage</span>
+              <span className={`font-medium ${aiUsage.used >= aiUsage.limit ? 'text-red-600' : 'text-slate-700'}`}>
+                {aiUsage.used} / {aiUsage.limit} generations used
+                {aiUsage.tier === 'FREE' && ' (Free plan)'}
+              </span>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-slate-700">Your Prompt</label>
+            <p className="text-xs text-slate-400">
+              Example: <span className="italic">"{SAMPLE_PROMPT}"</span>
+            </p>
+            <textarea
+              className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none"
+              rows={5}
+              placeholder={SAMPLE_PROMPT}
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              disabled={aiLoading}
+              maxLength={2000}
+            />
+            <p className="text-right text-xs text-slate-400">{aiPrompt.length}/2000</p>
+          </div>
+
+          {aiUsage && aiUsage.used >= aiUsage.limit && (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+              {aiUsage.tier === 'FREE'
+                ? 'Free plan allows 3 AI generations per month. Upgrade to Paid for 25/month.'
+                : 'Monthly limit of 25 reached. Resets on the 1st of next month.'}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3 pt-1">
+            <Button variant="secondary" type="button" onClick={() => { setAiModalOpen(false); setAiPrompt(''); }} disabled={aiLoading}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleAiGenerate}
+              disabled={aiLoading || !aiPrompt.trim() || (aiUsage !== null && aiUsage.used >= aiUsage.limit)}
+              className="bg-violet-600 hover:bg-violet-700"
+            >
+              {aiLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate Questions
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         open={modalOpen}

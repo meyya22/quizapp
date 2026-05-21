@@ -23,3 +23,11 @@ export const supportLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many enquiries submitted, please try again later.' },
 });
+
+export const aiLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many AI generation requests, please try again later.' },
+});

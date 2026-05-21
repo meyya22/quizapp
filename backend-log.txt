@@ -47,3 +47,262 @@ Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
 [ERROR] 17:10:29 Error: listen EADDRINUSE: address already in use :::3001
 [INFO] 20:14:14 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\attempt.controller.ts has been modified
 Server running on http://localhost:3001
+[INFO] 21:14:08 Reinitializing TS compilation
+[INFO] 21:14:08 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\tsconfig.json has been modified
+[ERROR] 21:14:10 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 21:19:04 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
+[ERROR] 21:19:05 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 21:19:08 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
+Server running on http://localhost:3001
+[INFO] 21:19:38 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
+[ERROR] 21:19:39 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 22:12:18 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+[ERROR] 22:12:19 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 22:12:22 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Error: Cannot find module '../middleware/auth.middleware'
+Require stack:
+- C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\contact.routes.ts
+- C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts
+- C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1476:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1049:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1073:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1094:12)
+    at Module._load (node:internal/modules/cjs/loader:1262:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.require (node:internal/modules/cjs/loader:1576:12)
+    at require (node:internal/modules/helpers:153:16)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\contact.routes.ts:3:1)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+[ERROR] 22:12:22 Error: Cannot find module '../middleware/auth.middleware'
+Require stack:
+- C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\contact.routes.ts
+- C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts
+- C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts
+[INFO] 22:14:58 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\contact.routes.ts has been modified
+Server running on http://localhost:3001
+[INFO] 22:38:09 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\attempt.controller.ts has been modified
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[ERROR] 22:38:10 Error: listen EADDRINUSE: address already in use :::3001
+[INFO] 22:38:20 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\attempt.controller.ts has been modified
+[ERROR] 22:38:20 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 22:38:25 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\attempt.controller.ts has been modified
+Server running on http://localhost:3001
+[INFO] 16:32:52 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+[ERROR] 16:32:55 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 16:32:56 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Server running on http://localhost:3001
+[INFO] 18:01:54 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Server running on http://localhost:3001
+[INFO] 18:02:01 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\auth.routes.ts has been modified
+Error: Route.post() requires a callback function but got a [object Undefined]
+    at Route.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\route.js:216:15)
+    at router.proto.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\index.js:521:19)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\auth.routes.ts:8:8)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20)
+    at require.extensions.<computed> (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:71:20)
+    at Object.nodeDevHook [as .ts] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\ts-node-dev\lib\hook.js:63:13)
+[ERROR] 18:02:01 Error: Route.post() requires a callback function but got a [object Undefined]
+[INFO] 18:06:59 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Error: Route.post() requires a callback function but got a [object Undefined]
+    at Route.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\route.js:216:15)
+    at router.proto.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\index.js:521:19)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\auth.routes.ts:8:8)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20)
+    at require.extensions.<computed> (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:71:20)
+    at Object.nodeDevHook [as .ts] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\ts-node-dev\lib\hook.js:63:13)
+[ERROR] 18:06:59 Error: Route.post() requires a callback function but got a [object Undefined]
+[INFO] 18:07:05 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Error: Route.post() requires a callback function but got a [object Undefined]
+    at Route.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\route.js:216:15)
+    at router.proto.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\index.js:521:19)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\auth.routes.ts:8:8)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20)
+    at require.extensions.<computed> (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:71:20)
+    at Object.nodeDevHook [as .ts] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\ts-node-dev\lib\hook.js:63:13)
+[ERROR] 18:07:06 Error: Route.post() requires a callback function but got a [object Undefined]
+[INFO] 18:07:10 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\auth.routes.ts has been modified
+Error: Route.post() requires a callback function but got a [object Undefined]
+    at Route.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\route.js:216:15)
+    at router.proto.<computed> [as post] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\router\index.js:521:19)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\support.routes.ts:7:8)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20)
+    at require.extensions.<computed> (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:71:20)
+    at Object.nodeDevHook [as .ts] (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\ts-node-dev\lib\hook.js:63:13)
+[ERROR] 18:07:11 Error: Route.post() requires a callback function but got a [object Undefined]
+[INFO] 18:07:15 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\routes\support.routes.ts has been modified
+[ERROR] 18:07:16 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 20:16:06 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\middleware\rateLimiter.ts has been modified
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[ERROR] 20:16:08 Error: listen EADDRINUSE: address already in use :::3001
+[INFO] 20:16:56 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Server running on http://localhost:3001
+[INFO] 20:17:01 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Server running on http://localhost:3001

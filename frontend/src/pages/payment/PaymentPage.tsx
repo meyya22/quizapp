@@ -27,6 +27,7 @@ const features = [
   '100 questions per quiz',
   'Unlimited categories',
   'CSV / Excel import',
+  'Generate Q&A with AI — 25 times/month (max 10 questions each)',
   'Quiz translation (6 languages)',
   'Study mode for participants',
   'Advanced analytics & reports',
