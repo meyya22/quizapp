@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { HelpCircle, Mail, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { HelpCircle, Mail, Send, CheckCircle, AlertCircle, BookOpen } from 'lucide-react';
 import api from '../services/api';
 
 interface EnquiryForm {
@@ -44,6 +45,25 @@ export default function HelpSupport() {
           <HelpCircle className="w-6 h-6 text-blue-600" /> Help & Support
         </h1>
         <p className="text-slate-500 mt-1 text-sm">Get help with your account, billing, or any other questions.</p>
+      </div>
+
+      {/* FAQ callout */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+            <BookOpen className="w-4 h-4 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Looking for quick answers?</p>
+            <p className="text-xs text-slate-500 mt-0.5">Check our FAQ — it covers plans, AI generation, languages, and more.</p>
+          </div>
+        </div>
+        <Link
+          to="/faq"
+          className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          View FAQ
+        </Link>
       </div>
 
       {/* Contact info */}
