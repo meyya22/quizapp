@@ -2,16 +2,20 @@ import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Users, Plus, Trash2, Upload, Send, CheckCircle,
-  AlertCircle, Copy, ChevronDown, ChevronUp, X,
+  AlertCircle, Copy, ChevronDown, ChevronUp, X, Mail, History,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import { Contact, Quiz } from '../../types';
+
+interface EmailQuota { used: number; limit: number; resetDate: string }
+interface EmailHistoryEntry { id: string; contactEmail: string; contactName: string; quizTitle: string; sentAt: string }
 
 function ContactLimitBar({ count, limit, tier }: { count: number; limit: number; tier: string }) {
   const pct = Math.min((count / limit) * 100, 100);
   const near = pct >= 80;
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 mb-6">
+    <div className="bg-white border border-slate-200 rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-slate-700">
           Contacts: <span className="font-bold">{count}</span> / {limit}
@@ -23,17 +27,43 @@ function ContactLimitBar({ count, limit, tier }: { count: number; limit: number;
         </span>
       </div>
       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all ${near ? 'bg-amber-400' : 'bg-blue-500'}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full rounded-full transition-all ${near ? 'bg-amber-400' : 'bg-blue-500'}`} style={{ width: `${pct}%` }} />
       </div>
-      {near && count < limit && (
-        <p className="text-xs text-amber-600 mt-1">Approaching limit — {limit - count} remaining</p>
-      )}
+      {near && count < limit && <p className="text-xs text-amber-600 mt-1">Approaching limit — {limit - count} remaining</p>}
       {count >= limit && (
-        <p className="text-xs text-red-600 mt-1">Limit reached. {tier === 'FREE' ? 'Upgrade to add up to 500 contacts.' : 'Maximum reached.'}</p>
+        <p className="text-xs text-red-600 mt-1">
+          Limit reached. {tier === 'FREE' ? 'Upgrade to add up to 500 contacts.' : 'Maximum reached.'}
+        </p>
       )}
+    </div>
+  );
+}
+
+function EmailQuotaBar({ quota, tier }: { quota: EmailQuota; tier: string }) {
+  const pct = Math.min((quota.used / quota.limit) * 100, 100);
+  const near = pct >= 80;
+  const resetDate = new Date(quota.resetDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
+          <Mail className="w-3.5 h-3.5 text-slate-400" />
+          Emails sent this month: <span className="font-bold">{quota.used}</span> / {quota.limit}
+        </span>
+        <span className="text-xs text-slate-400">Resets {resetDate}</span>
+      </div>
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full transition-all ${pct >= 100 ? 'bg-red-400' : near ? 'bg-amber-400' : 'bg-emerald-500'}`} style={{ width: `${pct}%` }} />
+      </div>
+      {pct >= 100 && (
+        <p className="text-xs text-red-600 mt-1">
+          Monthly limit reached.{' '}
+          {tier === 'FREE'
+            ? <Link to="/payment" className="font-semibold underline">Upgrade to Paid</Link>
+            : `Resets on ${resetDate}.`}
+        </p>
+      )}
+      {near && pct < 100 && <p className="text-xs text-amber-600 mt-1">{quota.limit - quota.used} emails remaining this month</p>}
     </div>
   );
 }
@@ -49,11 +79,15 @@ export default function Audience() {
   const [selectedQuiz, setSelectedQuiz] = useState('');
   const [broadcastResult, setBroadcastResult] = useState<{
     sent: number; failed: number; quizUrl?: string; error?: string;
+    skippedByQuota?: number; emailQuota?: EmailQuota;
   } | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [importResult, setImportResult] = useState<string>('');
+  const [importResult, setImportResult] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
 
-  const { data: contactData } = useQuery<{ contacts: Contact[]; limit: number; tier: string }>({
+  const { data: contactData } = useQuery<{
+    contacts: Contact[]; limit: number; tier: string; emailQuota: EmailQuota;
+  }>({
     queryKey: ['contacts'],
     queryFn: () => api.get('/contacts').then((r) => r.data),
   });
@@ -63,19 +97,25 @@ export default function Audience() {
     queryFn: () => api.get('/quizzes').then((r) => r.data),
   });
 
+  const { data: historyData } = useQuery<{ history: EmailHistoryEntry[]; total: number }>(
+    {
+      queryKey: ['email-history'],
+      queryFn: () => api.get('/contacts/email-history').then((r) => r.data),
+      enabled: showHistory,
+    }
+  );
+
   const contacts = contactData?.contacts ?? [];
   const limit = contactData?.limit ?? 10;
   const tier = contactData?.tier ?? 'FREE';
+  const emailQuota: EmailQuota = contactData?.emailQuota ?? { used: 0, limit: tier === 'PAID' ? 500 : 50, resetDate: '' };
   const publicQuizzes = quizzes.filter((q) => q.visibility === 'PUBLIC' && q.published);
 
   const addMutation = useMutation({
     mutationFn: (data: { name: string; email: string }) => api.post('/contacts', data).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['contacts'] });
-      setNewName('');
-      setNewEmail('');
-      setAddError('');
-      setShowAddForm(false);
+      setNewName(''); setNewEmail(''); setAddError(''); setShowAddForm(false);
     },
     onError: (e: any) => setAddError(e.response?.data?.error || 'Failed to add contact'),
   });
@@ -88,15 +128,19 @@ export default function Audience() {
   const broadcastMutation = useMutation({
     mutationFn: (payload: { quizId: string; contactIds: string[] }) =>
       api.post('/contacts/broadcast', payload).then((r) => r.data),
-    onSuccess: (data) => setBroadcastResult(data),
+    onSuccess: (data) => {
+      setBroadcastResult(data);
+      qc.invalidateQueries({ queryKey: ['contacts'] });
+      qc.invalidateQueries({ queryKey: ['email-history'] });
+    },
+    onError: (e: any) => {
+      const data = e.response?.data;
+      setBroadcastResult({ sent: 0, failed: selected.size, error: data?.error || 'Broadcast failed', emailQuota: data?.emailQuota });
+    },
   });
 
   function toggleSelect(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
   }
 
   function toggleAll() {
@@ -109,9 +153,7 @@ export default function Audience() {
     const form = new FormData();
     form.append('file', file);
     try {
-      const res = await api.post('/contacts/import', form, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const res = await api.post('/contacts/import', form, { headers: { 'Content-Type': 'multipart/form-data' } });
       const d = res.data;
       setImportResult(`Imported ${d.added} contacts. ${d.duplicates} duplicates skipped.${d.skipped ? ` ${d.skipped} over limit.` : ''}`);
       qc.invalidateQueries({ queryKey: ['contacts'] });
@@ -128,6 +170,7 @@ export default function Audience() {
   }
 
   const canAdd = contacts.length < limit;
+  const quotaExhausted = emailQuota.used >= emailQuota.limit;
 
   return (
     <div>
@@ -139,13 +182,7 @@ export default function Audience() {
           <p className="text-slate-500 mt-1 text-sm">Manage your contacts and broadcast quizzes via email.</p>
         </div>
         <div className="flex gap-2">
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={handleImport}
-          />
+          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleImport} />
           <button
             onClick={() => fileRef.current?.click()}
             className="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -163,9 +200,12 @@ export default function Audience() {
         </div>
       </div>
 
-      <ContactLimitBar count={contacts.length} limit={limit} tier={tier} />
+      {/* Quota bars */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <ContactLimitBar count={contacts.length} limit={limit} tier={tier} />
+        <EmailQuotaBar quota={emailQuota} tier={tier} />
+      </div>
 
-      {/* Import result */}
       {importResult && (
         <div className="mb-4 flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
           <CheckCircle className="w-4 h-4 shrink-0" />
@@ -174,30 +214,17 @@ export default function Audience() {
         </div>
       )}
 
-      {/* Add contact form */}
       {showAddForm && (
         <div className="mb-4 bg-white border border-slate-200 rounded-xl p-5">
           <h3 className="font-semibold text-slate-800 mb-4">Add New Contact</h3>
           <div className="flex gap-3 flex-wrap">
-            <input
-              type="text"
-              placeholder="Full name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="flex-1 min-w-[160px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="email"
-              placeholder="Email address"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              className="flex-1 min-w-[200px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              onClick={() => addMutation.mutate({ name: newName, email: newEmail })}
+            <input type="text" placeholder="Full name" value={newName} onChange={(e) => setNewName(e.target.value)}
+              className="flex-1 min-w-[160px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <input type="email" placeholder="Email address" value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
+              className="flex-1 min-w-[200px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <button onClick={() => addMutation.mutate({ name: newName, email: newEmail })}
               disabled={!newName || !newEmail || addMutation.isPending}
-              className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
+              className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
               {addMutation.isPending ? 'Adding...' : 'Add'}
             </button>
           </div>
@@ -213,65 +240,45 @@ export default function Audience() {
         <div className="lg:col-span-2">
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             {contacts.length === 0 ? (
-
               <div className="py-16 text-center">
                 <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
                 <p className="text-slate-500 text-sm">No contacts yet. Add some above or import a CSV.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
-              <table className="w-full min-w-[480px] text-sm">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50">
-                    <th className="px-4 py-3 w-10">
-                      <input
-                        type="checkbox"
-                        checked={selected.size === contacts.length && contacts.length > 0}
-                        onChange={toggleAll}
-                        className="rounded"
-                      />
-                    </th>
-                    <th className="px-4 py-3 text-left font-medium text-slate-600">Name</th>
-                    <th className="px-4 py-3 text-left font-medium text-slate-600">Email</th>
-                    <th className="px-4 py-3 text-left font-medium text-slate-600">Added</th>
-                    <th className="px-4 py-3 w-10" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {contacts.map((c, idx) => (
-                    <tr
-                      key={c.id}
-                      className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 ${
-                        selected.has(c.id) ? 'bg-blue-50/50' : idx % 2 === 1 ? 'bg-slate-50/30' : ''
-                      }`}
-                    >
-                      <td className="px-4 py-3">
-                        <input
-                          type="checkbox"
-                          checked={selected.has(c.id)}
-                          onChange={() => toggleSelect(c.id)}
-                          className="rounded"
-                        />
-                      </td>
-                      <td className="px-4 py-3 font-medium text-slate-900">{c.name}</td>
-                      <td className="px-4 py-3 text-slate-600">{c.email}</td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">
-                        {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => {
-                            if (confirm(`Remove ${c.name}?`)) deleteMutation.mutate(c.id);
-                          }}
-                          className="text-slate-400 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
+                <table className="w-full min-w-[480px] text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50">
+                      <th className="px-4 py-3 w-10">
+                        <input type="checkbox" checked={selected.size === contacts.length && contacts.length > 0} onChange={toggleAll} className="rounded" />
+                      </th>
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Name</th>
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Email</th>
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Added</th>
+                      <th className="px-4 py-3 w-10" />
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {contacts.map((c, idx) => (
+                      <tr key={c.id} className={`border-b border-slate-100 last:border-0 hover:bg-slate-50 ${selected.has(c.id) ? 'bg-blue-50/50' : idx % 2 === 1 ? 'bg-slate-50/30' : ''}`}>
+                        <td className="px-4 py-3">
+                          <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggleSelect(c.id)} className="rounded" />
+                        </td>
+                        <td className="px-4 py-3 font-medium text-slate-900">{c.name}</td>
+                        <td className="px-4 py-3 text-slate-600">{c.email}</td>
+                        <td className="px-4 py-3 text-slate-400 text-xs">
+                          {new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button onClick={() => { if (confirm(`Remove ${c.name}?`)) deleteMutation.mutate(c.id); }}
+                            className="text-slate-400 hover:text-red-500 transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
@@ -289,32 +296,28 @@ export default function Audience() {
             <p className="text-xs text-slate-500 mb-4">Send a quiz invitation email to selected contacts.</p>
 
             <label className="text-xs font-medium text-slate-600 block mb-1">Quiz (PUBLIC only)</label>
-            <select
-              value={selectedQuiz}
-              onChange={(e) => setSelectedQuiz(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
+            <select value={selectedQuiz} onChange={(e) => setSelectedQuiz(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">— Select a quiz —</option>
-              {publicQuizzes.map((q) => (
-                <option key={q.id} value={q.id}>{q.title}</option>
-              ))}
+              {publicQuizzes.map((q) => <option key={q.id} value={q.id}>{q.title}</option>)}
             </select>
 
             {publicQuizzes.length === 0 && (
               <p className="text-xs text-amber-600 mb-4">No published PUBLIC quizzes. Set a quiz to Public and publish it first.</p>
             )}
 
-            <button
-              onClick={handleBroadcast}
-              disabled={!selectedQuiz || selected.size === 0 || broadcastMutation.isPending}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
+            {quotaExhausted && (
+              <div className="mb-3 p-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+                Monthly email quota reached ({emailQuota.limit}/month).{' '}
+                {tier === 'FREE' ? <Link to="/payment" className="font-semibold underline">Upgrade to Paid</Link> : 'Resets 1st of next month.'}
+              </div>
+            )}
+
+            <button onClick={handleBroadcast}
+              disabled={!selectedQuiz || selected.size === 0 || broadcastMutation.isPending || quotaExhausted}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed">
               <Send className="w-4 h-4" />
-              {broadcastMutation.isPending
-                ? 'Sending...'
-                : selected.size > 0
-                ? `Send to ${selected.size} contact${selected.size !== 1 ? 's' : ''}`
-                : 'Select contacts first'}
+              {broadcastMutation.isPending ? 'Sending...' : selected.size > 0 ? `Send to ${selected.size} contact${selected.size !== 1 ? 's' : ''}` : 'Select contacts first'}
             </button>
 
             {broadcastResult && (
@@ -322,17 +325,25 @@ export default function Audience() {
                 {broadcastResult.error ? (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <p className="text-xs font-semibold text-amber-700 flex items-center gap-1 mb-1">
-                      <AlertCircle className="w-3.5 h-3.5" /> Email not configured
+                      <AlertCircle className="w-3.5 h-3.5" /> {broadcastResult.error.includes('quota') ? 'Quota reached' : 'Email not configured'}
                     </p>
-                    <p className="text-xs text-amber-600">Copy the quiz link below to share manually:</p>
+                    {!broadcastResult.error.includes('quota') && (
+                      <p className="text-xs text-amber-600">Copy the quiz link below to share manually:</p>
+                    )}
                   </div>
                 ) : (
-                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs">
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs space-y-0.5">
                     <p className="font-semibold text-emerald-700 flex items-center gap-1">
                       <CheckCircle className="w-3.5 h-3.5" /> Sent {broadcastResult.sent} email{broadcastResult.sent !== 1 ? 's' : ''}
                     </p>
-                    {broadcastResult.failed > 0 && (
-                      <p className="text-red-600 mt-0.5">{broadcastResult.failed} failed</p>
+                    {broadcastResult.failed > 0 && <p className="text-red-600">{broadcastResult.failed} failed</p>}
+                    {(broadcastResult.skippedByQuota ?? 0) > 0 && (
+                      <p className="text-amber-600">{broadcastResult.skippedByQuota} skipped (monthly quota reached)</p>
+                    )}
+                    {broadcastResult.emailQuota && (
+                      <p className="text-slate-500 pt-0.5">
+                        {broadcastResult.emailQuota.used} / {broadcastResult.emailQuota.limit} emails used this month
+                      </p>
                     )}
                   </div>
                 )}
@@ -342,11 +353,8 @@ export default function Audience() {
                     <p className="text-xs font-medium text-slate-600 mb-1">Quiz link:</p>
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-blue-600 truncate flex-1">{broadcastResult.quizUrl}</span>
-                      <button
-                        onClick={() => navigator.clipboard.writeText(broadcastResult.quizUrl!)}
-                        className="shrink-0 text-slate-400 hover:text-slate-700"
-                        title="Copy link"
-                      >
+                      <button onClick={() => navigator.clipboard.writeText(broadcastResult.quizUrl!)}
+                        className="shrink-0 text-slate-400 hover:text-slate-700" title="Copy link">
                         <Copy className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -356,6 +364,52 @@ export default function Audience() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Email History */}
+      <div className="mt-8">
+        <button
+          onClick={() => setShowHistory((v) => !v)}
+          className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-slate-900 mb-3"
+        >
+          <History className="w-4 h-4" />
+          Email Send History
+          {showHistory ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {historyData && <span className="text-xs font-normal text-slate-400">({historyData.total} total)</span>}
+        </button>
+
+        {showHistory && (
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+            {!historyData || historyData.history.length === 0 ? (
+              <div className="py-10 text-center text-slate-400 text-sm">No emails sent yet.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[560px] text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100 bg-slate-50">
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Date</th>
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Recipient</th>
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Email</th>
+                      <th className="px-4 py-3 text-left font-medium text-slate-600">Quiz</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historyData.history.map((h, idx) => (
+                      <tr key={h.id} className={`border-b border-slate-100 last:border-0 ${idx % 2 === 1 ? 'bg-slate-50/30' : ''}`}>
+                        <td className="px-4 py-3 text-slate-500 text-xs whitespace-nowrap">
+                          {new Date(h.sentAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="px-4 py-3 font-medium text-slate-900">{h.contactName}</td>
+                        <td className="px-4 py-3 text-slate-500">{h.contactEmail}</td>
+                        <td className="px-4 py-3 text-slate-700">{h.quizTitle}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

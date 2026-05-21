@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { authenticate } from '../middleware/auth';
-import { getContacts, addContact, deleteContact, importContacts, broadcastQuiz } from '../controllers/contact.controller';
+import { getContacts, addContact, deleteContact, importContacts, broadcastQuiz, getEmailHistory } from '../controllers/contact.controller';
 
 const router = Router();
 const upload = multer({
@@ -21,5 +21,6 @@ router.post('/', authenticate, addContact);
 router.delete('/:id', authenticate, deleteContact);
 router.post('/import', authenticate, upload.single('file'), importContacts);
 router.post('/broadcast', authenticate, broadcastQuiz);
+router.get('/email-history', authenticate, getEmailHistory);
 
 export default router;

@@ -106,3 +106,4 @@
 [2m8:17:41 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizBuilder.tsx, /src/index.css[22m
 [2m8:17:58 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizBuilder.tsx, /src/index.css[22m
 [2m8:18:12 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
+[2m10:07:26 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/Audience.tsx, /src/index.css[22m

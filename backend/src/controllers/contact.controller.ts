@@ -16,11 +16,33 @@ function stripNewlines(str: string): string {
   return str.replace(/[\r\n]/g, '');
 }
 
-const FREE_LIMIT = 10;
-const PAID_LIMIT = 500;
+const FREE_CONTACT_LIMIT = 10;
+const PAID_CONTACT_LIMIT = 500;
+const FREE_EMAIL_LIMIT = 50;
+const PAID_EMAIL_LIMIT = 500;
 
-function getLimit(tier: string) {
-  return tier === 'PAID' ? PAID_LIMIT : FREE_LIMIT;
+function getContactLimit(tier: string) {
+  return tier === 'PAID' ? PAID_CONTACT_LIMIT : FREE_CONTACT_LIMIT;
+}
+
+function getEmailLimit(tier: string) {
+  return tier === 'PAID' ? PAID_EMAIL_LIMIT : FREE_EMAIL_LIMIT;
+}
+
+function getMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+function getNextMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 1);
+}
+
+async function getMonthlyEmailCount(adminId: string): Promise<number> {
+  return prisma.emailHistory.count({
+    where: { adminId, sentAt: { gte: getMonthStart() } },
+  });
 }
 
 function parseCSV(raw: string): { name: string; email: string }[] {
@@ -41,11 +63,23 @@ function parseCSV(raw: string): { name: string; email: string }[] {
 export async function getContacts(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
   const admin = await prisma.user.findUnique({ where: { id: adminId }, select: { tier: true } });
-  const contacts = await prisma.contact.findMany({
-    where: { adminId },
-    orderBy: { createdAt: 'desc' },
+  const tier = admin?.tier ?? 'FREE';
+
+  const [contacts, emailUsed] = await Promise.all([
+    prisma.contact.findMany({ where: { adminId }, orderBy: { createdAt: 'desc' } }),
+    getMonthlyEmailCount(adminId),
+  ]);
+
+  res.json({
+    contacts,
+    limit: getContactLimit(tier),
+    tier,
+    emailQuota: {
+      used: emailUsed,
+      limit: getEmailLimit(tier),
+      resetDate: getNextMonthStart().toISOString(),
+    },
   });
-  res.json({ contacts, limit: getLimit(admin?.tier ?? 'FREE'), tier: admin?.tier });
 }
 
 export async function addContact(req: AuthRequest, res: Response): Promise<void> {
@@ -58,7 +92,7 @@ export async function addContact(req: AuthRequest, res: Response): Promise<void>
   }
 
   const admin = await prisma.user.findUnique({ where: { id: adminId }, select: { tier: true } });
-  const limit = getLimit(admin?.tier ?? 'FREE');
+  const limit = getContactLimit(admin?.tier ?? 'FREE');
   const count = await prisma.contact.count({ where: { adminId } });
 
   if (count >= limit) {
@@ -97,7 +131,7 @@ export async function importContacts(req: AuthRequest, res: Response): Promise<v
   }
 
   const admin = await prisma.user.findUnique({ where: { id: adminId }, select: { tier: true } });
-  const limit = getLimit(admin?.tier ?? 'FREE');
+  const limit = getContactLimit(admin?.tier ?? 'FREE');
   const existing = await prisma.contact.count({ where: { adminId } });
   const remaining = limit - existing;
 
@@ -124,6 +158,24 @@ export async function importContacts(req: AuthRequest, res: Response): Promise<v
   res.json({ added, duplicates, skipped, total: parsed.length });
 }
 
+export async function getEmailHistory(req: AuthRequest, res: Response): Promise<void> {
+  const adminId = req.user!.id;
+  const page = Math.max(1, parseInt(req.query.page as string) || 1);
+  const take = 20;
+
+  const [total, history] = await Promise.all([
+    prisma.emailHistory.count({ where: { adminId } }),
+    prisma.emailHistory.findMany({
+      where: { adminId },
+      orderBy: { sentAt: 'desc' },
+      skip: (page - 1) * take,
+      take,
+    }),
+  ]);
+
+  res.json({ history, total, page, pages: Math.ceil(total / take) });
+}
+
 export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
   const { quizId, contactIds } = req.body as { quizId: string; contactIds: string[] };
@@ -136,32 +188,46 @@ export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<vo
   const quiz = await prisma.quiz.findFirst({
     where: { id: quizId, category: { adminId } },
   });
-
   if (!quiz) {
     res.status(404).json({ error: 'Quiz not found' });
     return;
   }
-
   if (quiz.visibility !== 'PUBLIC') {
     res.status(400).json({ error: 'Only PUBLIC quizzes can be broadcast' });
     return;
   }
 
+  // Check monthly email quota
+  const admin = await prisma.user.findUnique({ where: { id: adminId }, select: { tier: true, name: true, email: true } });
+  const tier = admin?.tier ?? 'FREE';
+  const emailLimit = getEmailLimit(tier);
+  const emailUsed = await getMonthlyEmailCount(adminId);
+  const remaining = emailLimit - emailUsed;
+
+  if (remaining <= 0) {
+    res.status(403).json({
+      error: `Monthly email quota reached (${emailLimit} emails/month on ${tier} plan). Resets on the 1st of next month.`,
+      emailQuota: { used: emailUsed, limit: emailLimit, resetDate: getNextMonthStart().toISOString() },
+    });
+    return;
+  }
+
+  // Only send up to remaining quota
   const contacts = await prisma.contact.findMany({
-    where: { id: { in: contactIds }, adminId },
+    where: { id: { in: contactIds.slice(0, remaining) }, adminId },
   });
+  const skippedByQuota = Math.max(0, contactIds.length - remaining);
 
   const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
   const quizUrl = `${frontendUrl}/quiz/${quizId}`;
-  const admin = await prisma.user.findUnique({ where: { id: adminId }, select: { name: true, email: true } });
 
-  // Check if SMTP is configured
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
     res.status(200).json({
       sent: 0,
       failed: contacts.length,
       quizUrl,
       error: 'Email not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS environment variables to enable sending.',
+      emailQuota: { used: emailUsed, limit: emailLimit, resetDate: getNextMonthStart().toISOString() },
     });
     return;
   }
@@ -170,16 +236,14 @@ export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<vo
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_PORT === '465',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
   });
 
   const fromAddress = process.env.SMTP_FROM || process.env.SMTP_USER;
   let sent = 0;
   let failed = 0;
   const failures: string[] = [];
+  const historyEntries: { adminId: string; contactEmail: string; contactName: string; quizTitle: string }[] = [];
 
   for (const contact of contacts) {
     try {
@@ -204,11 +268,31 @@ export async function broadcastQuiz(req: AuthRequest, res: Response): Promise<vo
         `,
       });
       sent++;
+      historyEntries.push({
+        adminId,
+        contactEmail: contact.email,
+        contactName: contact.name,
+        quizTitle: quiz.title,
+      });
     } catch {
       failed++;
       failures.push(contact.email);
     }
   }
 
-  res.json({ sent, failed, failures, quizUrl });
+  // Record history — even if contact is later deleted, these records persist
+  if (historyEntries.length > 0) {
+    await prisma.emailHistory.createMany({ data: historyEntries });
+  }
+
+  const newUsed = emailUsed + sent;
+
+  res.json({
+    sent,
+    failed,
+    failures,
+    skippedByQuota,
+    quizUrl,
+    emailQuota: { used: newUsed, limit: emailLimit, resetDate: getNextMonthStart().toISOString() },
+  });
 }

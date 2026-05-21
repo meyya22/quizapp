@@ -28,6 +28,7 @@ model User {
   attempts     QuizAttempt[]
   categories   Category[]
   contacts     Contact[]
+  emailHistory EmailHistory[]
 
   @@map("users")
 }
@@ -113,6 +114,19 @@ model QuizAttempt {
   answers     AttemptAnswer[]
 
   @@map("quiz_attempts")
+}
+
+model EmailHistory {
+  id           String   @id @default(cuid())
+  adminId      String
+  contactEmail String
+  contactName  String
+  quizTitle    String
+  sentAt       DateTime @default(now())
+
+  admin        User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("email_history")
 }
 
 model AttemptAnswer {
