@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useForm } from 'react-hook-form';
@@ -82,6 +83,12 @@ export default function Login() {
   const passwordHasError = authError?.type === 'password';
 
   return (
+    <>
+    <Helmet>
+      <title>Sign In — Xam Bridge</title>
+      <meta name="description" content="Sign in to your Xam Bridge account to manage quizzes, view reports, and take tests." />
+      <link rel="canonical" href="https://xambridge.com/login" />
+    </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
@@ -181,5 +188,6 @@ export default function Login() {
       </div>
       <Footer />
     </div>
+    </>
   );
 }

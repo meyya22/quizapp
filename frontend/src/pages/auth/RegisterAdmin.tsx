@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useForm } from 'react-hook-form';
@@ -91,6 +92,12 @@ export default function RegisterAdmin() {
   }
 
   return (
+    <>
+    <Helmet>
+      <title>Create Free Quiz Admin Account — Xam Bridge</title>
+      <meta name="description" content="Sign up free as an educator or trainer. Create up to 5 quizzes, use AI to generate questions, and share with your audience. No credit card required." />
+      <link rel="canonical" href="https://xambridge.com/register/admin" />
+    </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col">
 
       {/* Nav */}
@@ -223,5 +230,6 @@ export default function RegisterAdmin() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
   BookOpen, Check, X, Zap, Crown, Users, BarChart3, Mail,
   Brain, Globe, Upload, ShieldCheck, Star, ArrowRight, Sparkles,
@@ -63,6 +64,15 @@ export default function Landing() {
   const navigate = useNavigate();
 
   return (
+    <>
+    <Helmet>
+      <title>Xam Bridge — Free Online Quiz Maker for Teachers &amp; Trainers</title>
+      <meta name="description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support (Hindi, Tamil, Bengali &amp; more), analytics, and free to start. No credit card required." />
+      <link rel="canonical" href="https://xambridge.com/" />
+      <meta property="og:title" content="Xam Bridge — Free Online Quiz Maker for Teachers &amp; Trainers" />
+      <meta property="og:description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support, and free to start." />
+      <meta property="og:url" content="https://xambridge.com/" />
+    </Helmet>
     <div className="min-h-screen bg-white text-slate-900 font-sans">
 
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
@@ -339,5 +349,6 @@ export default function Landing() {
       </footer>
 
     </div>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { useForm } from 'react-hook-form';
@@ -91,6 +92,12 @@ export default function RegisterLearner() {
   }
 
   return (
+    <>
+    <Helmet>
+      <title>Join as a Learner — Xam Bridge</title>
+      <meta name="description" content="Sign up to take quizzes assigned by your teacher or trainer. Track your scores, review answers, and learn at your own pace." />
+      <link rel="canonical" href="https://xambridge.com/register/learner" />
+    </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col">
 
       {/* Nav */}
@@ -222,5 +229,6 @@ export default function RegisterLearner() {
         </div>
       </div>
     </div>
+    </>
   );
 }

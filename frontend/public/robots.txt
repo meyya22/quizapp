@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /participant/
+Disallow: /superadmin/
+Disallow: /payment/
+
+Sitemap: https://xambridge.com/sitemap.xml
