@@ -164,10 +164,60 @@ export async function getMyAttempts(req: AuthRequest, res: Response): Promise<vo
   res.json(attempts);
 }
 
+export async function getAttemptsSummary(req: AuthRequest, res: Response): Promise<void> {
+  const adminId = req.user!.id;
+
+  const attempts = await prisma.quizAttempt.findMany({
+    where: { quiz: { category: { adminId } } },
+    select: {
+      quizId: true,
+      score: true,
+      passed: true,
+      completedAt: true,
+      quiz: { select: { title: true } },
+    },
+    orderBy: { completedAt: 'desc' },
+  });
+
+  const quizMap = new Map<string, { title: string; count: number; totalScore: number; passCount: number; lastAt: Date }>();
+
+  for (const a of attempts) {
+    const entry = quizMap.get(a.quizId);
+    if (entry) {
+      entry.count++;
+      entry.totalScore += a.score;
+      if (a.passed) entry.passCount++;
+    } else {
+      quizMap.set(a.quizId, {
+        title: a.quiz.title,
+        count: 1,
+        totalScore: a.score,
+        passCount: a.passed ? 1 : 0,
+        lastAt: a.completedAt,
+      });
+    }
+  }
+
+  const summary = Array.from(quizMap.entries())
+    .map(([quizId, d]) => ({
+      quizId,
+      title: d.title,
+      attempts: d.count,
+      avgScore: Math.round((d.totalScore / d.count) * 10) / 10,
+      passRate: Math.round((d.passCount / d.count) * 100),
+      passCount: d.passCount,
+      lastAt: d.lastAt.toISOString(),
+    }))
+    .sort((a, b) => b.attempts - a.attempts);
+
+  res.json(summary);
+}
+
 export async function getAllAttempts(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
-  const { quizId, search, page: pageStr, pageSize: pageSizeStr, download } = req.query as {
+  const { quizId, search, page: pageStr, pageSize: pageSizeStr, download, sortBy, sortOrder } = req.query as {
     quizId?: string; search?: string; page?: string; pageSize?: string; download?: string;
+    sortBy?: string; sortOrder?: 'asc' | 'desc';
   };
 
   const where = {
@@ -183,6 +233,10 @@ export async function getAllAttempts(req: AuthRequest, res: Response): Promise<v
     }),
   };
 
+  const orderBy = sortBy === 'score'
+    ? { score: (sortOrder ?? 'desc') as 'asc' | 'desc' }
+    : { completedAt: 'desc' as const };
+
   const include = {
     user: { select: { id: true, name: true, email: true } },
     quiz: { select: { id: true, title: true } },
@@ -191,7 +245,7 @@ export async function getAllAttempts(req: AuthRequest, res: Response): Promise<v
   if (download === 'true') {
     const attempts = await prisma.quizAttempt.findMany({
       where,
-      orderBy: { completedAt: 'desc' },
+      orderBy,
       include,
     });
     res.json(attempts);
@@ -206,7 +260,7 @@ export async function getAllAttempts(req: AuthRequest, res: Response): Promise<v
     prisma.quizAttempt.count({ where }),
     prisma.quizAttempt.findMany({
       where,
-      orderBy: { completedAt: 'desc' },
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
       include,
