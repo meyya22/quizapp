@@ -243,10 +243,18 @@ export default function QuizPlayer() {
     (quizError as { response?: { data?: { code?: string } } } | null)
       ?.response?.data?.code === 'QUIZ_PRIVATE';
 
-  const { data: questions = [], isLoading } = useQuery<Question[]>({
+  const { data: questions = [], isLoading, error: questionsError } = useQuery<Question[]>({
     queryKey: ['questions', id, studyMode],
     queryFn: () => api.get(`/quizzes/${id}/questions${studyMode ? '?study=true' : ''}`).then((r) => r.data),
+    retry: false,
   });
+
+  useEffect(() => {
+    const data = (questionsError as { response?: { data?: { code?: string; tier?: string } } } | null)?.response?.data;
+    if (data?.code === 'RESPONSE_CAP_REACHED') {
+      setCapReached({ tier: data.tier ?? 'FREE' });
+    }
+  }, [questionsError]);
 
   // Re-translate whenever language or source questions change
   useEffect(() => {

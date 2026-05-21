@@ -13,6 +13,13 @@ const VALID_TYPES: QuestionType[] = [
 
 const FREE_QUESTION_LIMIT = 10;
 const PAID_QUESTION_LIMIT = 100;
+const FREE_RESPONSE_LIMIT = 50;
+const PAID_RESPONSE_LIMIT = 2000;
+
+function getMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
 
 async function getQuizWithOwnership(quizId: string, adminId: string) {
   const quiz = await prisma.quiz.findUnique({
@@ -29,7 +36,11 @@ export async function getQuestions(req: AuthRequest, res: Response): Promise<voi
   if (!isAdmin) {
     const quiz = await prisma.quiz.findUnique({
       where: { id: req.params.quizId },
-      select: { published: true, visibility: true },
+      select: {
+        published: true,
+        visibility: true,
+        category: { select: { adminId: true, admin: { select: { tier: true } } } },
+      },
     });
     if (!quiz?.published) {
       res.status(404).json({ error: 'Quiz not found' });
@@ -38,6 +49,31 @@ export async function getQuestions(req: AuthRequest, res: Response): Promise<voi
     if (quiz.visibility === 'PRIVATE') {
       res.status(403).json({ error: 'This quiz is private', code: 'QUIZ_PRIVATE' });
       return;
+    }
+
+    const { adminId, admin } = quiz.category;
+    if (admin.tier === 'FREE') {
+      const count = await prisma.quizAttempt.count({ where: { quiz: { category: { adminId } } } });
+      if (count >= FREE_RESPONSE_LIMIT) {
+        res.status(403).json({
+          error: 'This quiz is not currently accepting responses.',
+          code: 'RESPONSE_CAP_REACHED',
+          tier: 'FREE',
+        });
+        return;
+      }
+    } else {
+      const count = await prisma.quizAttempt.count({
+        where: { quiz: { category: { adminId } }, completedAt: { gte: getMonthStart() } },
+      });
+      if (count >= PAID_RESPONSE_LIMIT) {
+        res.status(403).json({
+          error: 'This quiz is not currently accepting responses.',
+          code: 'RESPONSE_CAP_REACHED',
+          tier: 'PAID',
+        });
+        return;
+      }
     }
   }
 
