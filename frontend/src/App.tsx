@@ -3,6 +3,8 @@ import { useAuthStore } from './store/authStore';
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import RegisterAdmin from './pages/auth/RegisterAdmin';
+import RegisterLearner from './pages/auth/RegisterLearner';
 import PaymentPage from './pages/payment/PaymentPage';
 import SubscribePage from './pages/payment/SubscribePage';
 import PaymentSuccess from './pages/payment/PaymentSuccess';
@@ -44,7 +46,9 @@ export default function App() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/register" element={<Navigate to="/register/admin" replace />} />
+      <Route path="/register/admin" element={<RegisterAdmin />} />
+      <Route path="/register/learner" element={<RegisterLearner />} />
       <Route path="/payment" element={<PaymentPage />} />
       <Route path="/subscribe" element={<SubscribePage />} />
       <Route path="/payment/success" element={<PaymentSuccess />} />

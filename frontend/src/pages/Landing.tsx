@@ -82,7 +82,7 @@ export default function Landing() {
               Sign In
             </Link>
             <Link
-              to="/register"
+              to="/register/admin"
               className="text-sm font-semibold bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             >
               Get Started Free
@@ -113,7 +113,7 @@ export default function Landing() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to="/register"
+              to="/register/admin"
               className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors text-base shadow-md shadow-blue-100"
             >
               Start for Free <ArrowRight className="w-4 h-4" />
@@ -140,12 +140,20 @@ export default function Landing() {
             Just sign up to take a quiz. Students, employees, and curious minds of any age
             can jump in instantly with a shared link. Knowledge has no price.
           </p>
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors shadow text-sm"
-          >
-            Sign Up Today <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/register/learner"
+              className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-5 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors shadow text-sm"
+            >
+              Sign Up as Learner <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              to="/register/admin"
+              className="inline-flex items-center gap-2 bg-emerald-800 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-emerald-900 transition-colors shadow text-sm"
+            >
+              Sign Up as Teacher / Admin <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -220,7 +228,7 @@ export default function Landing() {
                 ))}
               </ul>
               <Link
-                to="/register"
+                to="/register/admin"
                 className="flex items-center justify-center gap-2 w-full border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50 transition-colors"
               >
                 Get Started Free <ChevronRight className="w-4 h-4" />
@@ -280,7 +288,7 @@ export default function Landing() {
             drafts up to 10 ready-to-use questions with options and explanations in seconds.
           </p>
           <Link
-            to="/register"
+            to="/register/admin"
             className="inline-flex items-center gap-2 bg-white text-violet-700 font-bold px-6 py-3 rounded-xl hover:bg-violet-50 transition-colors shadow"
           >
             Try it free <ArrowRight className="w-4 h-4" />
@@ -297,10 +305,10 @@ export default function Landing() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to="/register"
+              to="/register/admin"
               className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors text-base shadow-md shadow-blue-100"
             >
-              Create your free account <ArrowRight className="w-4 h-4" />
+              Create free admin account <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/login"
@@ -325,7 +333,7 @@ export default function Landing() {
         </p>
         <div className="flex items-center justify-center gap-4 mt-3 text-xs text-slate-400">
           <Link to="/login" className="hover:text-slate-700 transition-colors">Sign In</Link>
-          <Link to="/register" className="hover:text-slate-700 transition-colors">Register</Link>
+          <Link to="/register/admin" className="hover:text-slate-700 transition-colors">Register</Link>
           <Link to="/payment" className="hover:text-slate-700 transition-colors">Pricing</Link>
         </div>
       </footer>
