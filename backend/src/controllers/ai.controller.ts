@@ -96,7 +96,7 @@ Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-1.5-flash-latest',
       systemInstruction,
       generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
     });
@@ -125,7 +125,14 @@ Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
     if (!Array.isArray(rawQuestions)) throw new Error('Not an array');
   } catch (err) {
     console.error('AI generation failed:', err);
-    res.status(502).json({ error: 'AI returned an invalid response. Please try again with a clearer prompt.' });
+    const msg = (err as { message?: string }).message ?? '';
+    if (msg.includes('429') || msg.toLowerCase().includes('quota')) {
+      res.status(429).json({ error: 'AI quota limit reached. Please try again in a few minutes.' });
+    } else if (msg.includes('404')) {
+      res.status(502).json({ error: 'AI model not available. Please contact support.' });
+    } else {
+      res.status(502).json({ error: 'AI returned an invalid response. Please try again with a clearer prompt.' });
+    }
     return;
   }
 
