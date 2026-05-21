@@ -79,18 +79,21 @@ export async function generateQuestions(req: AuthRequest, res: Response): Promis
     res.status(500).json({ error: 'AI service not configured on this server.' }); return;
   }
 
-  const systemPrompt = `You are a quiz question generator. Your ONLY task is to generate quiz questions. Do not explain or discuss anything — output ONLY a raw JSON array.
+  const systemPrompt = `You are a quiz question generator. Your ONLY task is to generate quiz questions for educational or training purposes.
+
+FIRST, decide if the user's request is asking you to generate quiz or test questions on any topic. If it is NOT — for example if they are asking you to write code, tell a story, give advice, have a conversation, or do anything other than generate questions — output ONLY this exact JSON and nothing else:
+{"refused": true}
+
+If the request IS about generating questions, output ONLY a raw JSON array. No markdown, no code fences, no preamble.
 
 Each element must be an object with exactly these fields:
 - "text": question string
 - "type": one of MULTIPLE_CHOICE, MULTIPLE_RESPONSE, TRUE_FALSE, FREE_TEXT
 - "options": object {"A":"...","B":"...","C":"...","D":"..."} for MULTIPLE_CHOICE/MULTIPLE_RESPONSE, or null for TRUE_FALSE/FREE_TEXT
 - "correctAnswer": single letter "A"/"B"/"C"/"D" for MULTIPLE_CHOICE; array like ["A","C"] for MULTIPLE_RESPONSE; "true" or "false" for TRUE_FALSE; answer string for FREE_TEXT
-- "explanation": string explaining why the answer is correct
+- "explanation": string explaining why the answer is correct`;
 
-Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
-
-  const userPrompt = `${prompt.trim().slice(0, 2000)}\n\nGenerate up to 10 questions. Return ONLY the JSON array.`;
+  const userPrompt = `${prompt.trim().slice(0, 2000)}\n\nIf this is a question generation request, generate up to 10 questions and return ONLY the JSON array. Otherwise return {"refused": true}.`;
 
   let rawQuestions: unknown[];
   try {
@@ -112,6 +115,14 @@ Output nothing but the JSON array. No markdown, no code fences, no preamble.`;
     let jsonText = block.text.trim();
     const fence = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fence) jsonText = fence[1].trim();
+
+    // Check for refusal before attempting to parse as question array
+    const parsed = JSON.parse(jsonText);
+    if (!Array.isArray(parsed) && (parsed as Record<string, unknown>).refused === true) {
+      res.status(400).json({ error: "Sorry, I can only generate quiz questions. Please describe the topic and question type you'd like (e.g. '5 MCQ questions on World War II')." });
+      return;
+    }
+
     const start = jsonText.indexOf('[');
     if (start > 0) jsonText = jsonText.slice(start);
     const end = jsonText.lastIndexOf(']');
