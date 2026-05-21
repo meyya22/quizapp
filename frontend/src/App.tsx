@@ -24,6 +24,7 @@ import SuperAdminLayout from './components/layout/SuperAdminLayout';
 import UserReport from './pages/superadmin/UserReport';
 import PaymentMetricsPage from './pages/superadmin/PaymentMetrics';
 import HelpSupport from './pages/HelpSupport';
+import FAQ from './pages/FAQ';
 
 function RootRedirect() {
   const { isAuthenticated, user } = useAuthStore();
@@ -120,6 +121,7 @@ export default function App() {
         }
       />
 
+      <Route path="/faq" element={<FAQ />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -345,6 +345,7 @@ export default function Landing() {
           <Link to="/login" className="hover:text-slate-700 transition-colors">Sign In</Link>
           <Link to="/register/admin" className="hover:text-slate-700 transition-colors">Register</Link>
           <Link to="/payment" className="hover:text-slate-700 transition-colors">Pricing</Link>
+          <Link to="/faq" className="hover:text-slate-700 transition-colors">FAQ</Link>
         </div>
       </footer>
 
