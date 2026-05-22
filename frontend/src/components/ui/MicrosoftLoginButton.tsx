@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { PublicClientApplication } from '@azure/msal-browser';
 
-const clientId = import.meta.env.VITE_MICROSOFT_CLIENT_ID as string | undefined;
+const clientId: string =
+  (import.meta.env.VITE_MICROSOFT_CLIENT_ID as string | undefined) ||
+  '070f84a9-da4a-468f-ba93-7def125a7734';
 
 let _msal: PublicClientApplication | null = null;
 
@@ -29,10 +31,6 @@ export default function MicrosoftLoginButton({ onSuccess, onError }: Props) {
   const [loading, setLoading] = useState(false);
 
   async function handleClick() {
-    if (!clientId) {
-      onError('Microsoft SSO is not configured.');
-      return;
-    }
     setLoading(true);
     try {
       const instance = await getMsal();
