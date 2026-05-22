@@ -9,8 +9,8 @@ import App from './App';
 import { getMsal } from './components/ui/MicrosoftLoginButton';
 import './index.css';
 
-// Initialize MSAL on every page load so the popup redirect context is handled
-getMsal().catch(() => {});
+// Initialize MSAL on every page load and process any popup redirect response
+getMsal().then(instance => instance.handleRedirectPromise()).catch(() => {});
 
 const queryClient = new QueryClient({
   defaultOptions: {
