@@ -1,13 +1,22 @@
 import { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Mail, Users, CheckSquare, Square, Search, Send,
-  ChevronDown, ChevronUp, Pencil, CheckCircle, AlertCircle,
+  ChevronDown, ChevronUp, Pencil, CheckCircle, AlertCircle, History,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
 import api from '../../services/api';
 import { UserRecord } from '../../types';
+
+interface CampaignHistoryRecord {
+  id: string;
+  templateName: string;
+  subject: string;
+  sent: number;
+  failed: number;
+  sentAt: string;
+}
 
 interface Template {
   id: number;
@@ -101,6 +110,7 @@ Lock in your Pro plan today.`,
 ];
 
 export default function EmailCampaign() {
+  const qc = useQueryClient();
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [activeTemplate, setActiveTemplate] = useState(0);
@@ -110,10 +120,17 @@ export default function EmailCampaign() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ sent: number; failed: number; total: number } | null>(null);
   const [showTemplates, setShowTemplates] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const { data: allUsers = [], isLoading } = useQuery<UserRecord[]>({
     queryKey: ['all-users'],
     queryFn: () => api.get('/users').then((r) => r.data),
+  });
+
+  const { data: history = [], isLoading: historyLoading } = useQuery<CampaignHistoryRecord[]>({
+    queryKey: ['campaign-history'],
+    queryFn: () => api.get('/users/campaign-history').then((r) => r.data),
+    enabled: historyOpen,
   });
 
   const freeAdmins = useMemo(
@@ -165,8 +182,10 @@ export default function EmailCampaign() {
         recipientIds: Array.from(selected),
         subject,
         body,
+        templateName: TEMPLATES[activeTemplate]?.name ?? 'Custom',
       });
       setResult(res.data);
+      qc.invalidateQueries({ queryKey: ['campaign-history'] });
       toast.success(`Sent to ${res.data.sent} recipient${res.data.sent !== 1 ? 's' : ''}`);
     } catch {
       toast.error('Campaign failed. Check SMTP configuration.');
@@ -400,6 +419,78 @@ export default function EmailCampaign() {
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* Campaign History */}
+      <div className="mt-6 bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <button
+          className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
+          onClick={() => setHistoryOpen((v) => !v)}
+        >
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-slate-400" />
+            <span className="font-semibold text-slate-800 text-sm">Campaign History</span>
+            {history.length > 0 && (
+              <span className="text-xs bg-slate-100 text-slate-500 font-medium px-2 py-0.5 rounded-full">
+                {history.length}
+              </span>
+            )}
+          </div>
+          {historyOpen
+            ? <ChevronUp className="w-4 h-4 text-slate-400" />
+            : <ChevronDown className="w-4 h-4 text-slate-400" />
+          }
+        </button>
+
+        {historyOpen && (
+          <div className="border-t border-slate-100">
+            {historyLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="w-5 h-5 border-2 border-rose-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : history.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+                <History className="w-7 h-7 mb-2 opacity-40" />
+                <p className="text-sm">No campaigns sent yet</p>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Template</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Subject</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Sent</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Failed</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {history.map((h) => (
+                    <tr key={h.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3">
+                        <span className="text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                          {h.templateName}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-sm text-slate-600 max-w-xs truncate">{h.subject}</td>
+                      <td className="px-5 py-3">
+                        <span className="text-sm font-semibold text-emerald-700">{h.sent}</span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className={`text-sm font-semibold ${h.failed > 0 ? 'text-red-600' : 'text-slate-400'}`}>
+                          {h.failed}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-sm text-slate-500">
+                        {new Date(h.sentAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

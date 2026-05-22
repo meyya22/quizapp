@@ -129,6 +129,17 @@ model EmailHistory {
   @@map("email_history")
 }
 
+model CampaignHistory {
+  id           String   @id @default(cuid())
+  templateName String
+  subject      String
+  sent         Int
+  failed       Int
+  sentAt       DateTime @default(now())
+
+  @@map("campaign_history")
+}
+
 model AttemptAnswer {
   id         String      @id @default(cuid())
   attemptId  String

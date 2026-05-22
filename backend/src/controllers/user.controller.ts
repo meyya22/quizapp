@@ -120,10 +120,11 @@ export async function deleteUser(req: AuthRequest, res: Response): Promise<void>
 }
 
 export async function sendEmailCampaign(req: AuthRequest, res: Response): Promise<void> {
-  const { recipientIds, subject, body } = req.body as {
+  const { recipientIds, subject, body, templateName } = req.body as {
     recipientIds: string[];
     subject: string;
     body: string;
+    templateName: string;
   };
 
   if (!Array.isArray(recipientIds) || !recipientIds.length || !subject?.trim() || !body?.trim()) {
@@ -169,5 +170,22 @@ export async function sendEmailCampaign(req: AuthRequest, res: Response): Promis
     }
   }
 
+  await prisma.campaignHistory.create({
+    data: {
+      templateName: templateName || 'Custom',
+      subject,
+      sent,
+      failed,
+    },
+  });
+
   res.json({ sent, failed, total: recipients.length });
+}
+
+export async function getCampaignHistory(_req: AuthRequest, res: Response): Promise<void> {
+  const history = await prisma.campaignHistory.findMany({
+    orderBy: { sentAt: 'desc' },
+    take: 50,
+  });
+  res.json(history);
 }
