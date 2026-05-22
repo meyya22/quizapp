@@ -84,11 +84,8 @@ export default function Landing() {
       {/* â"€â"€ Nav â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
       <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-xl font-bold tracking-tight">Xam Bridge</span>
+          <div className="flex items-center">
+            <img src="/logo.png" alt="Xam Bridge" className="h-10 w-auto" />
           </div>
           <div className="flex items-center gap-3">
             <Link
@@ -338,11 +335,8 @@ export default function Landing() {
 
       {/* â"€â"€ Footer â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
       <footer className="bg-white border-t border-slate-100 py-8 px-6 text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
-            <BookOpen className="w-3 h-3 text-white" />
-          </div>
-          <span className="font-bold text-slate-800">Xam Bridge</span>
+        <div className="flex items-center justify-center mb-2">
+          <img src="/logo.png" alt="Xam Bridge" className="h-8 w-auto" />
         </div>
         <p className="text-xs text-slate-400">
           Â© {new Date().getFullYear()} Xam Bridge Â· Empowering learners everywhere, free of charge.
