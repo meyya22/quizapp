@@ -73,11 +73,11 @@ export default function HelpSupport() {
           For any technical issues, billing, payment, cancellation, or other enquiries, please reach out to our support team:
         </p>
         <a
-          href="mailto:contact.topstudent@gmail.com"
+          href="mailto:cs.admin@xambridge.com"
           className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 transition-colors"
         >
           <Mail className="w-4 h-4" />
-          contact.topstudent@gmail.com
+          cs.admin@xambridge.com
         </a>
         <div className="pt-2 border-t border-blue-200">
           <p className="text-xs text-blue-700 font-medium mb-1">We can help with:</p>
