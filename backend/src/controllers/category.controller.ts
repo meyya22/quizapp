@@ -73,6 +73,16 @@ export async function deleteCategory(req: AuthRequest, res: Response): Promise<v
     return;
   }
 
-  await prisma.category.delete({ where: { id } });
+  const quizIds = (
+    await prisma.quiz.findMany({ where: { categoryId: id }, select: { id: true } })
+  ).map((q) => q.id);
+
+  await prisma.$transaction([
+    prisma.attemptAnswer.deleteMany({ where: { attempt: { quizId: { in: quizIds } } } }),
+    prisma.quizAttempt.deleteMany({ where: { quizId: { in: quizIds } } }),
+    prisma.question.deleteMany({ where: { quizId: { in: quizIds } } }),
+    prisma.quiz.deleteMany({ where: { categoryId: id } }),
+    prisma.category.delete({ where: { id } }),
+  ]);
   res.status(204).send();
 }

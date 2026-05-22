@@ -181,7 +181,12 @@ export async function deleteQuiz(req: AuthRequest, res: Response): Promise<void>
     return;
   }
 
-  await prisma.quiz.delete({ where: { id } });
+  await prisma.$transaction([
+    prisma.attemptAnswer.deleteMany({ where: { attempt: { quizId: id } } }),
+    prisma.quizAttempt.deleteMany({ where: { quizId: id } }),
+    prisma.question.deleteMany({ where: { quizId: id } }),
+    prisma.quiz.delete({ where: { id } }),
+  ]);
   res.status(204).send();
 }
 
