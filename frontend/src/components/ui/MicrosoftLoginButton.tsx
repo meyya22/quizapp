@@ -7,7 +7,7 @@ const clientId: string =
 
 let _msal: PublicClientApplication | null = null;
 
-async function getMsal(): Promise<PublicClientApplication> {
+export async function getMsal(): Promise<PublicClientApplication> {
   if (!_msal) {
     _msal = new PublicClientApplication({
       auth: {

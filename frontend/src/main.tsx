@@ -6,7 +6,11 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
+import { getMsal } from './components/ui/MicrosoftLoginButton';
 import './index.css';
+
+// Initialize MSAL on every page load so the popup redirect context is handled
+getMsal().catch(() => {});
 
 const queryClient = new QueryClient({
   defaultOptions: {
