@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 
-const SUPPORT_EMAIL = 'contact.topstudent@gmail.com';
+const SUPPORT_EMAIL = 'cs.admin@xambridge.com';
 
 function escapeHtml(str: string): string {
   return String(str)

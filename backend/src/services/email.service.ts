@@ -149,7 +149,7 @@ export async function sendWelcomeEmail(to: string, name: string, role: string): 
   }
 }
 
-const SUPER_ADMIN_EMAIL = 'contact.topstudent@gmail.com';
+const SUPER_ADMIN_EMAIL = 'cs.admin@xambridge.com';
 
 export async function sendNewUserNotification(name: string, email: string, role: string): Promise<void> {
   const transporter = createTransporter();
