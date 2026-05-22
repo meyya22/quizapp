@@ -105,12 +105,14 @@ export async function login(req: Request, res: Response): Promise<void> {
 }
 
 export async function googleAuth(req: Request, res: Response): Promise<void> {
-  const { idToken } = req.body;
+  const { idToken, role } = req.body;
 
   if (!idToken) {
     res.status(400).json({ error: 'idToken is required' });
     return;
   }
+
+  const assignedRole = role === 'ADMIN' ? 'ADMIN' : 'PARTICIPANT';
 
   try {
     const ticket = await googleClient.verifyIdToken({
@@ -133,7 +135,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
           name: payload.name || payload.email.split('@')[0],
           email: payload.email,
           googleId: payload.sub,
-          role: 'PARTICIPANT',
+          role: assignedRole,
         },
       });
       sendWelcomeEmail(user.email, user.name, user.role);
