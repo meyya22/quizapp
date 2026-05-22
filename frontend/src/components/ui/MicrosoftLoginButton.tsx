@@ -15,7 +15,7 @@ async function getMsal(): Promise<PublicClientApplication> {
         authority: 'https://login.microsoftonline.com/common',
         redirectUri: window.location.origin,
       },
-      cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false },
+      cache: { cacheLocation: 'sessionStorage' },
     });
     await _msal.initialize();
   }
