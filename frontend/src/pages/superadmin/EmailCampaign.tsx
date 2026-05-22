@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Mail, Users, CheckSquare, Square, Search, Send,
-  ChevronDown, ChevronUp, Pencil, CheckCircle, AlertCircle, History,
+  ChevronDown, ChevronUp, Pencil, CheckCircle, AlertCircle, History, X,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
@@ -16,6 +16,12 @@ interface CampaignHistoryRecord {
   sent: number;
   failed: number;
   sentAt: string;
+}
+
+interface CampaignRecipient {
+  id: string;
+  name: string;
+  email: string;
 }
 
 interface Template {
@@ -121,6 +127,7 @@ export default function EmailCampaign() {
   const [result, setResult] = useState<{ sent: number; failed: number; total: number } | null>(null);
   const [showTemplates, setShowTemplates] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState<CampaignHistoryRecord | null>(null);
 
   const { data: allUsers = [], isLoading } = useQuery<UserRecord[]>({
     queryKey: ['all-users'],
@@ -131,6 +138,12 @@ export default function EmailCampaign() {
     queryKey: ['campaign-history'],
     queryFn: () => api.get('/users/campaign-history').then((r) => r.data),
     enabled: historyOpen,
+  });
+
+  const { data: recipients = [], isLoading: recipientsLoading } = useQuery<CampaignRecipient[]>({
+    queryKey: ['campaign-recipients', selectedCampaign?.id],
+    queryFn: () => api.get(`/users/campaign-history/${selectedCampaign!.id}/recipients`).then((r) => r.data),
+    enabled: !!selectedCampaign,
   });
 
   const freeAdmins = useMemo(
@@ -474,7 +487,13 @@ export default function EmailCampaign() {
                       </td>
                       <td className="px-5 py-3 text-sm text-slate-600 max-w-xs truncate">{h.subject}</td>
                       <td className="px-5 py-3">
-                        <span className="text-sm font-semibold text-emerald-700">{h.sent}</span>
+                        <button
+                          onClick={() => setSelectedCampaign(h)}
+                          className="text-sm font-semibold text-emerald-700 underline decoration-dotted hover:text-emerald-900 transition-colors"
+                          title="View recipients"
+                        >
+                          {h.sent}
+                        </button>
                       </td>
                       <td className="px-5 py-3">
                         <span className={`text-sm font-semibold ${h.failed > 0 ? 'text-red-600' : 'text-slate-400'}`}>
@@ -492,6 +511,79 @@ export default function EmailCampaign() {
           </div>
         )}
       </div>
+      {/* Recipients modal */}
+      {selectedCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col max-h-[80vh]">
+            {/* Modal header */}
+            <div className="flex items-start justify-between px-6 py-4 border-b border-slate-200">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Campaign Recipients</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  <span className="font-medium text-blue-700">{selectedCampaign.templateName}</span>
+                  {' '}&middot;{' '}
+                  {new Date(selectedCampaign.sentAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                  {' '}&middot;{' '}
+                  <span className="text-emerald-700 font-medium">{selectedCampaign.sent} sent</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedCampaign(null)}
+                className="text-slate-400 hover:text-slate-700 transition-colors mt-0.5"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Search hint */}
+            <div className="px-6 py-2 text-xs text-slate-400 border-b border-slate-100">
+              {recipients.length} recipient{recipients.length !== 1 ? 's' : ''}
+            </div>
+
+            {/* Recipient list */}
+            <div className="overflow-y-auto flex-1">
+              {recipientsLoading ? (
+                <div className="flex justify-center py-10">
+                  <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : recipients.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+                  <Users className="w-7 h-7 mb-2 opacity-40" />
+                  <p className="text-sm">No recipients recorded</p>
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-slate-50 border-b border-slate-100">
+                    <tr>
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">#</th>
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Name</th>
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-6 py-3">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {recipients.map((r, i) => (
+                      <tr key={r.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-3 text-xs text-slate-400">{i + 1}</td>
+                        <td className="px-6 py-3 text-sm font-medium text-slate-900">{r.name}</td>
+                        <td className="px-6 py-3 text-sm text-slate-500">{r.email}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => setSelectedCampaign(null)}
+                className="px-4 py-2 text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

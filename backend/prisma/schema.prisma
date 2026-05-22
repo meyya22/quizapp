@@ -130,14 +130,26 @@ model EmailHistory {
 }
 
 model CampaignHistory {
-  id           String   @id @default(cuid())
+  id           String              @id @default(cuid())
   templateName String
   subject      String
   sent         Int
   failed       Int
-  sentAt       DateTime @default(now())
+  sentAt       DateTime            @default(now())
+  recipients   CampaignRecipient[]
 
   @@map("campaign_history")
+}
+
+model CampaignRecipient {
+  id         String          @id @default(cuid())
+  campaignId String
+  name       String
+  email      String
+
+  campaign   CampaignHistory @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_recipients")
 }
 
 model AttemptAnswer {

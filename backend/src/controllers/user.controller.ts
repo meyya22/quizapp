@@ -153,6 +153,7 @@ export async function sendEmailCampaign(req: AuthRequest, res: Response): Promis
   const appUrl = FRONTEND_URL || 'https://www.xambridge.com';
   let sent = 0;
   let failed = 0;
+  const sentRecipients: { name: string; email: string }[] = [];
 
   for (const user of recipients) {
     const personalizedSubject = subject.replace(/\{name\}/g, user.name);
@@ -165,6 +166,7 @@ export async function sendEmailCampaign(req: AuthRequest, res: Response): Promis
         html: buildCampaignHtml(user.name, personalizedBody, appUrl),
       });
       sent++;
+      sentRecipients.push({ name: user.name, email: user.email });
     } catch {
       failed++;
     }
@@ -176,6 +178,9 @@ export async function sendEmailCampaign(req: AuthRequest, res: Response): Promis
       subject,
       sent,
       failed,
+      recipients: {
+        create: sentRecipients.map((u) => ({ name: u.name, email: u.email })),
+      },
     },
   });
 
@@ -188,4 +193,17 @@ export async function getCampaignHistory(_req: AuthRequest, res: Response): Prom
     take: 50,
   });
   res.json(history);
+}
+
+export async function getCampaignRecipients(req: AuthRequest, res: Response): Promise<void> {
+  const { id } = req.params;
+  const campaign = await prisma.campaignHistory.findUnique({
+    where: { id },
+    include: { recipients: { orderBy: { name: 'asc' } } },
+  });
+  if (!campaign) {
+    res.status(404).json({ error: 'Campaign not found' });
+    return;
+  }
+  res.json(campaign.recipients);
 }
