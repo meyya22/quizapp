@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { BookOpen, AlertCircle, Mail, Lock } from 'lucide-react';
 import Footer from '../../components/Footer';
 import { Button } from '../../components/ui/Button';
-import MicrosoftLoginButton from '../../components/ui/MicrosoftLoginButton';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 
@@ -187,26 +186,6 @@ export default function Login() {
             )}
           </div>
 
-          <div className="flex justify-center mt-2">
-            <div className="w-[320px]">
-              <MicrosoftLoginButton
-                onSuccess={async (idToken) => {
-                  setLoading(true);
-                  setAuthError(null);
-                  try {
-                    const res = await api.post('/auth/microsoft', { idToken });
-                    setAuth(res.data.user, res.data.token);
-                    navigate(from || (res.data.user.role === 'ADMIN' ? '/admin' : '/participant'));
-                  } catch {
-                    setAuthError({ type: 'general', message: 'Microsoft sign-in failed. Please try again.' });
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                onError={(msg) => setAuthError({ type: 'general', message: msg })}
-              />
-            </div>
-          </div>
         </div>
       </div>
       <Footer />

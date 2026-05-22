@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import MicrosoftLoginButton from '../../components/ui/MicrosoftLoginButton';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 
@@ -221,27 +220,6 @@ export default function RegisterAdmin() {
                 onError={() => setGeneralError('Google sign-up failed. Please try again.')}
                 shape="rectangular" theme="outline" size="large" width="320"
               />
-            </div>
-
-            <div className="flex justify-center mt-2">
-              <div className="w-[320px]">
-                <MicrosoftLoginButton
-                  onSuccess={async (idToken) => {
-                    setLoading(true);
-                    setGeneralError(null);
-                    try {
-                      const res = await api.post('/auth/microsoft', { idToken });
-                      setAuth(res.data.user, res.data.token);
-                      navigate(from || '/admin');
-                    } catch {
-                      setGeneralError('Microsoft sign-up failed. Please try again.');
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                  onError={(msg) => setGeneralError(msg)}
-                />
-              </div>
             </div>
 
             <p className="text-xs text-center text-slate-400 mt-5">
