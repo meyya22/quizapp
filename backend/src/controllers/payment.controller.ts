@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
+import { sendSubscriptionConfirmationEmail } from '../services/email.service';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' } as any);
@@ -86,6 +87,11 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
         if (obj.mode === 'subscription' && obj.subscription) {
           const sub = await stripe.subscriptions.retrieve(obj.subscription as string);
           const plan = (obj.metadata?.plan ?? 'MONTHLY') as string;
+          const periodEnd = periodEndFromSub(sub);
+          const updatedUsers = await prisma.user.findMany({
+            where: { stripeCustomerId: obj.customer as string },
+            select: { email: true, name: true },
+          });
           await prisma.user.updateMany({
             where: { stripeCustomerId: obj.customer as string },
             data: {
@@ -93,9 +99,12 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
               stripeSubscriptionId: sub.id,
               subscriptionStatus: sub.status,
               subscriptionPlan: plan,
-              subscriptionCurrentPeriodEnd: periodEndFromSub(sub),
+              subscriptionCurrentPeriodEnd: periodEnd,
             },
           });
+          for (const u of updatedUsers) {
+            sendSubscriptionConfirmationEmail(u.email, u.name, plan, periodEnd);
+          }
         }
         break;
       }
