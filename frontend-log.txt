@@ -1977,3 +1977,30 @@
 [2m1:31:57 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/EmailCampaign.tsx, /src/index.css[22m
 [2m1:32:13 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/EmailCampaign.tsx, /src/index.css[22m
 [2m1:57:43 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
+[2m1:57:53 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
+[2m1:57:58 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m1:58:06 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m1:58:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m1:58:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m2:09:02 PM[22m [36m[1m[vite][22m[39m [32m✨ new dependencies optimized: [33m@azure/msal-browser[32m[39m
+[2m2:09:02 PM[22m [36m[1m[vite][22m[39m [32m✨ optimized dependencies changed. reloading[39m
+[2m2:16:58 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ui/MicrosoftLoginButton.tsx, /src/index.css[22m
+[2m2:28:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ui/MicrosoftLoginButton.tsx, /src/index.css[22m
+[2m2:28:22 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.tsx[22m
+[2m2:49:14 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.tsx[22m
+[2m2:52:56 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
+[2m2:53:03 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
+[2m2:53:07 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m2:53:13 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m2:53:17 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m2:53:23 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m2:53:28 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/main.tsx[22m
+[2m3:03:50 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m3:03:54 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m3:21:32 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/ui/MicrosoftLoginButton.tsx, /src/index.css[22m
+[2m3:21:32 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
+[2m3:21:32 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m3:21:32 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m3:22:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
+[2m3:22:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
+[2m3:22:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m

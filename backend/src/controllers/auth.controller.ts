@@ -2,35 +2,9 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
-import jwksRsa from 'jwks-rsa';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
 import { sendWelcomeEmail, sendNewUserNotification } from '../services/email.service';
-
-const microsoftJwksClient = jwksRsa({
-  jwksUri: 'https://login.microsoftonline.com/common/discovery/v2.0/keys',
-  cache: true,
-  rateLimit: true,
-});
-
-async function verifyMicrosoftToken(token: string): Promise<{ oid: string; email: string; name: string }> {
-  const decoded = jwt.decode(token, { complete: true });
-  if (!decoded || typeof decoded === 'string' || !decoded.header.kid) {
-    throw new Error('Invalid token structure');
-  }
-  const key = await microsoftJwksClient.getSigningKey(decoded.header.kid);
-  const payload = jwt.verify(token, key.getPublicKey(), { algorithms: ['RS256'] }) as {
-    oid: string;
-    email?: string;
-    preferred_username?: string;
-    name?: string;
-    given_name?: string;
-  };
-  const email = payload.email || payload.preferred_username;
-  if (!email) throw new Error('No email in Microsoft token');
-  const name = payload.name || payload.given_name || email.split('@')[0];
-  return { oid: payload.oid, email, name };
-}
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -105,14 +79,12 @@ export async function login(req: Request, res: Response): Promise<void> {
 }
 
 export async function googleAuth(req: Request, res: Response): Promise<void> {
-  const { idToken, role } = req.body;
+  const { idToken } = req.body;
 
   if (!idToken) {
     res.status(400).json({ error: 'idToken is required' });
     return;
   }
-
-  const assignedRole = role === 'ADMIN' ? 'ADMIN' : 'PARTICIPANT';
 
   try {
     const ticket = await googleClient.verifyIdToken({
@@ -135,7 +107,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
           name: payload.name || payload.email.split('@')[0],
           email: payload.email,
           googleId: payload.sub,
-          role: assignedRole,
+          role: 'PARTICIPANT',
         },
       });
       sendWelcomeEmail(user.email, user.name, user.role);
@@ -175,37 +147,4 @@ export async function upgradeTier(req: AuthRequest, res: Response): Promise<void
     token,
     user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier },
   });
-}
-
-export async function microsoftAuth(req: Request, res: Response): Promise<void> {
-  const { idToken } = req.body;
-  if (!idToken) {
-    res.status(400).json({ error: 'idToken is required' });
-    return;
-  }
-  try {
-    const { oid, email, name } = await verifyMicrosoftToken(idToken);
-
-    let user = await prisma.user.findFirst({
-      where: { OR: [{ microsoftId: oid }, { email }] },
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: { name, email, microsoftId: oid, role: 'PARTICIPANT' },
-      });
-      sendWelcomeEmail(user.email, user.name, user.role);
-      sendNewUserNotification(user.name, user.email, user.role);
-    } else if (!user.microsoftId) {
-      user = await prisma.user.update({ where: { id: user.id }, data: { microsoftId: oid } });
-    }
-
-    const token = signToken(user);
-    res.json({
-      token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier },
-    });
-  } catch {
-    res.status(401).json({ error: 'Microsoft authentication failed' });
-  }
 }

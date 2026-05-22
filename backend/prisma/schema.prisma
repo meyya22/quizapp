@@ -15,7 +15,6 @@ model User {
   role         String        @default("PARTICIPANT")
   tier         String        @default("FREE")
   googleId     String?       @unique
-  microsoftId  String?       @unique
   stripeCustomerId             String?   @unique
   stripeSubscriptionId         String?   @unique
   subscriptionStatus           String?

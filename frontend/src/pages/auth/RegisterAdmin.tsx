@@ -81,7 +81,7 @@ export default function RegisterAdmin() {
     setLoading(true);
     setGeneralError(null);
     try {
-      const res = await api.post('/auth/google', { idToken: credentialResponse.credential, role: 'ADMIN' });
+      const res = await api.post('/auth/google', { idToken: credentialResponse.credential });
       setAuth(res.data.user, res.data.token);
       navigate(from || '/admin');
     } catch {
