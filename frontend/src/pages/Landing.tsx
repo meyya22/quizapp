@@ -68,6 +68,7 @@ export default function Landing() {
     <Helmet>
       <title>Xam Bridge  - Free Online Quiz Maker for Teachers &amp; Trainers</title>
       <meta name="description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support (Hindi, Tamil, Bengali &amp; more), analytics, and free to start. No credit card required." />
+      <meta name="keywords" content="online quiz maker, free quiz builder, quiz creator for teachers, AI quiz generator, employee training quiz, Google Forms alternative, MCQ maker, online assessment tool, multilingual quiz, quiz platform" />
       <link rel="canonical" href="https://www.xambridge.com/" />
       <meta property="og:title" content="Xam Bridge  - Free Online Quiz Maker for Teachers &amp; Trainers" />
       <meta property="og:description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support, and free to start." />

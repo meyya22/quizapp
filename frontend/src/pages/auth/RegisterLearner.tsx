@@ -96,6 +96,7 @@ export default function RegisterLearner() {
     <Helmet>
       <title>Join as a Learner  - Xam Bridge</title>
       <meta name="description" content="Sign up to take quizzes assigned by your teacher or trainer. Track your scores, review answers, and learn at your own pace." />
+      <meta name="keywords" content="take online quiz, learner account, student quiz platform, free quiz taker, online test, quiz results tracker" />
       <link rel="canonical" href="https://www.xambridge.com/register/learner" />
     </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col">

@@ -96,6 +96,7 @@ export default function RegisterAdmin() {
     <Helmet>
       <title>Create Free Quiz Admin Account  - Xam Bridge</title>
       <meta name="description" content="Sign up free as an educator or trainer. Create up to 5 quizzes, use AI to generate questions, and share with your audience. No credit card required." />
+      <meta name="keywords" content="create quiz account, free quiz maker signup, quiz admin, teacher quiz tool, trainer assessment platform, free quiz creator, quiz builder registration" />
       <link rel="canonical" href="https://www.xambridge.com/register/admin" />
     </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col">

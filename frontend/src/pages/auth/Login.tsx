@@ -87,6 +87,7 @@ export default function Login() {
     <Helmet>
       <title>Sign In  - Xam Bridge</title>
       <meta name="description" content="Sign in to your Xam Bridge account to manage quizzes, view reports, and take tests." />
+      <meta name="keywords" content="quiz platform login, sign in quiz maker, Xam Bridge login, quiz admin sign in" />
       <link rel="canonical" href="https://www.xambridge.com/login" />
     </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">

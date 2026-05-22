@@ -176,6 +176,7 @@ export default function FAQ() {
           name="description"
           content="Answers to common questions about Xam Bridge — free quiz creation, AI question generation, multilingual support, plans, and more."
         />
+        <meta name="keywords" content="quiz maker FAQ, online quiz questions, Xam Bridge help, AI quiz generation, multilingual quiz, free quiz platform, quiz pricing, quiz for teachers FAQ" />
         <link rel="canonical" href="https://www.xambridge.com/faq" />
         <script type="application/ld+json">{JSON.stringify(schemaFAQ)}</script>
       </Helmet>
