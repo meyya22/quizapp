@@ -168,12 +168,13 @@ export default function ParticipantDashboard() {
                             Pass: {quiz.passingScore}%
                           </span>
                         </div>
-                        {quiz.category.admin?.name && (
-                          <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
-                            <UserCircle className="w-3.5 h-3.5" />
-                            <span>By {quiz.category.admin.name}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1 mt-2 text-xs text-slate-400">
+                          <UserCircle className="w-3.5 h-3.5" />
+                          <span>Created by {quiz.category.admin?.name ?? 'Unknown'}</span>
+                        </div>
+                        <div className="mt-1 text-xs text-slate-400">
+                          Published {new Date(quiz.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </div>
                       </div>
 
                       <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
