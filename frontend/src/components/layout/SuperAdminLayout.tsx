@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Footer from '../Footer';
-import { Users, LogOut, ShieldCheck, CreditCard, Menu, X } from 'lucide-react';
+import { Users, LogOut, ShieldCheck, CreditCard, Mail, Menu, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -23,6 +23,7 @@ export default function SuperAdminLayout() {
   const navItems = [
     { to: '/superadmin/users', icon: Users, label: 'User Report' },
     { to: '/superadmin/payments', icon: CreditCard, label: 'Payment Metrics' },
+    { to: '/superadmin/email-campaign', icon: Mail, label: 'Email Campaign' },
   ];
 
   return (

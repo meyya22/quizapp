@@ -23,6 +23,7 @@ import Results from './pages/participant/Results';
 import SuperAdminLayout from './components/layout/SuperAdminLayout';
 import UserReport from './pages/superadmin/UserReport';
 import PaymentMetricsPage from './pages/superadmin/PaymentMetrics';
+import EmailCampaign from './pages/superadmin/EmailCampaign';
 import HelpSupport from './pages/HelpSupport';
 import FAQ from './pages/FAQ';
 
@@ -97,6 +98,7 @@ export default function App() {
         <Route index element={<Navigate to="users" replace />} />
         <Route path="users" element={<UserReport />} />
         <Route path="payments" element={<PaymentMetricsPage />} />
+        <Route path="email-campaign" element={<EmailCampaign />} />
       </Route>
 
       {/* Standalone share routes — no navigation chrome, no login required */}
