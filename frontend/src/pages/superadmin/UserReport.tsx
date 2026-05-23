@@ -39,9 +39,13 @@ function tierBadge(tier: Tier) {
   return <Badge variant="neutral">Free</Badge>;
 }
 
+const PAGE_SIZE_OPTIONS = [10, 30, 50];
+
 export default function UserReport() {
   const qc = useQueryClient();
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const { data: users = [], isLoading } = useQuery<UserRecord[]>({
     queryKey: ['all-users'],
@@ -85,6 +89,15 @@ export default function UserReport() {
   const participants = users.filter((u) => u.role === 'PARTICIPANT').length;
   const paid = users.filter((u) => u.tier === 'PAID').length;
 
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pagedUsers = users.slice((safePage - 1) * pageSize, safePage * pageSize);
+
+  function handlePageSize(size: number) {
+    setPageSize(size);
+    setPage(1);
+  }
+
   return (
     <div>
       <div className="mb-6">
@@ -127,7 +140,7 @@ export default function UserReport() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map((user) => (
+              {pagedUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-5 py-4">
                     <p className="font-medium text-slate-900">{user.name}</p>
@@ -174,6 +187,48 @@ export default function UserReport() {
               ))}
             </tbody>
           </table>
+
+          {/* Pagination footer */}
+          <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-slate-50">
+            <div className="flex items-center gap-2 text-sm text-slate-500">
+              <span>Rows per page:</span>
+              {PAGE_SIZE_OPTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handlePageSize(s)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    pageSize === s
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-3 text-sm text-slate-500">
+              <span>
+                {total === 0 ? '0' : `${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, total)}`} of {total}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={safePage === 1}
+                  className="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Prev
+                </button>
+                <span className="px-2 text-xs font-medium">{safePage} / {totalPages}</span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={safePage === totalPages}
+                  className="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
