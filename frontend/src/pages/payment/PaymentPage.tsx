@@ -32,7 +32,7 @@ const features = [
   'Custom email composer with preview',
   'CSV / Excel import',
   'Generate Q&A with AI — 25 times/month (max 10 questions each)',
-  'Quiz translation (6 languages)',
+  'Quiz translation (9 languages)',
   'Study mode for participants',
   'Advanced analytics & reports — export Excel & PDF',
   'Cancel anytime',

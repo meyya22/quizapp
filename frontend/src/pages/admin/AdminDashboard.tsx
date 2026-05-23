@@ -28,7 +28,7 @@ const PAID_BENEFITS = [
   { icon: Mail,         label: '500 emails / month',       sub: '500 contacts' },
   { icon: Trophy,       label: '2,000 responses / month',  sub: 'Resets 1st of each month' },
   { icon: Upload,       label: 'CSV / Excel import',        sub: 'Bulk-import questions & contacts' },
-  { icon: Globe,        label: 'Quiz translation',          sub: '6 languages' },
+  { icon: Globe,        label: 'Quiz translation',          sub: '9 languages' },
   { icon: Users,        label: 'Custom email composer',     sub: 'With live preview' },
   { icon: BarChart3,    label: 'Advanced analytics',        sub: 'Export Excel & PDF' },
   { icon: Shield,       label: 'Study mode',                sub: 'For participants' },

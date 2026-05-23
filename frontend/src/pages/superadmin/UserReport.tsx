@@ -41,11 +41,26 @@ function tierBadge(tier: Tier) {
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50];
 
+const ROLE_FILTER_OPTIONS = [
+  { value: '', label: 'All Roles' },
+  { value: 'PARTICIPANT', label: 'Participant' },
+  { value: 'ADMIN', label: 'Admin' },
+  { value: 'SUPER_ADMIN', label: 'Super Admin' },
+];
+
+const TIER_FILTER_OPTIONS = [
+  { value: '', label: 'All Tiers' },
+  { value: 'FREE', label: 'Free' },
+  { value: 'PAID', label: 'Paid' },
+];
+
 export default function UserReport() {
   const qc = useQueryClient();
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [filterRole, setFilterRole] = useState('');
+  const [filterTier, setFilterTier] = useState('');
 
   const { data: users = [], isLoading } = useQuery<UserRecord[]>({
     queryKey: ['all-users'],
@@ -89,12 +104,28 @@ export default function UserReport() {
   const participants = users.filter((u) => u.role === 'PARTICIPANT').length;
   const paid = users.filter((u) => u.tier === 'PAID').length;
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const filtered = users.filter((u) => {
+    if (filterRole && u.role !== filterRole) return false;
+    if (filterTier && u.tier !== filterTier) return false;
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
-  const pagedUsers = users.slice((safePage - 1) * pageSize, safePage * pageSize);
+  const pagedUsers = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   function handlePageSize(size: number) {
     setPageSize(size);
+    setPage(1);
+  }
+
+  function handleFilterRole(val: string) {
+    setFilterRole(val);
+    setPage(1);
+  }
+
+  function handleFilterTier(val: string) {
+    setFilterTier(val);
     setPage(1);
   }
 
@@ -118,6 +149,52 @@ export default function UserReport() {
             <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Filters */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Role</label>
+          <div className="flex gap-1">
+            {ROLE_FILTER_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => handleFilterRole(opt.value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                  filterRole === opt.value
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="w-px h-5 bg-slate-200" />
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">Tier</label>
+          <div className="flex gap-1">
+            {TIER_FILTER_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => handleFilterTier(opt.value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                  filterTier === opt.value
+                    ? 'bg-amber-500 text-white border-amber-500'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {(filterRole || filterTier) && (
+          <span className="text-xs text-slate-400 ml-1">
+            {filtered.length} of {total} users
+          </span>
+        )}
       </div>
 
       {isLoading ? (
@@ -210,7 +287,7 @@ export default function UserReport() {
             </div>
             <div className="flex items-center gap-3 text-sm text-slate-500">
               <span>
-                {total === 0 ? '0' : `${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, total)}`} of {total}
+                {filtered.length === 0 ? '0' : `${(safePage - 1) * pageSize + 1}–${Math.min(safePage * pageSize, filtered.length)}`} of {filtered.length}
               </span>
               <div className="flex items-center gap-1">
                 <button

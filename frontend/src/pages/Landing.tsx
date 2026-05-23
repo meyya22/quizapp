@@ -28,7 +28,7 @@ const PAID_FEATURES = [
   { label: '2,000 quiz responses / month', ok: true },
   { label: 'Custom email composer', ok: true },
   { label: 'CSV / Excel import', ok: true },
-  { label: 'Quiz translation (6 languages)', ok: true },
+  { label: 'Quiz translation (9 languages)', ok: true },
   { label: 'Study mode for participants', ok: true },
   { label: 'Advanced analytics & reports', ok: true },
 ];
@@ -53,7 +53,7 @@ const HOW_IT_WORKS = [
 
 const HIGHLIGHTS = [
   { icon: Brain, label: 'AI Question Generator', desc: 'Describe a topic and let Claude AI draft questions for you.' },
-  { icon: Globe, label: 'Multi-language Quizzes', desc: 'Translate quizzes into 6 languages with one click.' },
+  { icon: Globe, label: 'Multi-language Quizzes', desc: 'Translate quizzes into 9 languages with one click.' },
   { icon: Upload, label: 'CSV / Excel Import', desc: 'Bulk-import questions from spreadsheets in seconds.' },
   { icon: Users, label: 'Audience Management', desc: 'Maintain contact lists and broadcast quizzes by email.' },
   { icon: BarChart3, label: 'Rich Analytics', desc: 'Score distributions, pass rates, and per-question insights.' },

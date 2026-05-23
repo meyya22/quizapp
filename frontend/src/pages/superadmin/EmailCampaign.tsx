@@ -50,7 +50,7 @@ With Xam Bridge Pro ($5/month) you unlock:
 - 25 AI question generations per month
 - 2,000 quiz responses per month
 - 500 contacts + 500 broadcast emails per month
-- Quiz translation in 6 languages
+- Quiz translation in 9 languages
 - Advanced analytics, Excel & PDF export
 
 Your learners deserve a better experience. Make the jump — it's less than a coffee per week.`,
@@ -88,7 +88,7 @@ Xam Bridge Pro removes that ceiling entirely:
 - 2,000 quiz responses per month
 - 500 contacts in your audience
 - 500 broadcast emails per month to notify learners about new quizzes
-- Quizzes in 6 languages: Hindi, Spanish, French, Arabic, Portuguese & Chinese
+- Quizzes in 9 languages: Hindi, Bengali, Telugu, Marathi, Tamil, Gujarati, Portuguese, Spanish & Indonesian
 
 Whether you're training a small team or testing an entire class, Pro scales with you — at just $5/month.`,
   },

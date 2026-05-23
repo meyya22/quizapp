@@ -40,7 +40,7 @@ const SECTIONS: { heading: string; items: FAQItem[] }[] = [
       {
         question: 'What does the Paid plan include?',
         answer:
-          'The Paid plan unlocks 50 quizzes, 100 questions per quiz, 25 AI generations per month, 500 contacts, 500 broadcast emails per month, 2,000 quiz responses per month, quiz translation into 6 languages, study mode, CSV import, and advanced analytics.',
+          'The Paid plan unlocks 50 quizzes, 100 questions per quiz, 25 AI generations per month, 500 contacts, 500 broadcast emails per month, 2,000 quiz responses per month, quiz translation into 9 languages, study mode, CSV import, and advanced analytics.',
       },
       {
         question: 'How much does the Paid plan cost?',

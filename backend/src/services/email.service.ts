@@ -227,7 +227,7 @@ export async function sendSubscriptionConfirmationEmail(
               <li>25 AI question generations / month</li>
               <li>2,000 quiz responses / month</li>
               <li>500 contacts &amp; 500 broadcast emails / month</li>
-              <li>Quiz translation in 6 languages</li>
+              <li>Quiz translation in 9 languages</li>
               <li>Advanced analytics &amp; Excel / PDF export</li>
             </ul>
 

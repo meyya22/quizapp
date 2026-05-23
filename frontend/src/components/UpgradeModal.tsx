@@ -17,7 +17,7 @@ const features: { label: string; free: string | boolean; paid: string | boolean 
   { label: 'Quizzes', free: '5 max', paid: '50 total max' },
   { label: 'Questions per quiz', free: '10 max', paid: '100 max' },
   { label: 'Publish & share quizzes', free: true, paid: true },
-  { label: 'Quiz translation (6 languages)', free: true, paid: true },
+  { label: 'Quiz translation (9 languages)', free: true, paid: true },
   { label: 'Answer explanations', free: true, paid: true },
   { label: 'CSV / Excel import', free: true, paid: true },
   { label: 'Advanced analytics', free: false, paid: true },

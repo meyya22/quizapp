@@ -27,7 +27,7 @@ const FEATURES = [
   '500 contacts & 500 emails / month',
   'Custom email composer with preview',
   'CSV / Excel import',
-  'Quiz translation (6 languages)',
+  'Quiz translation (9 languages)',
   'Study mode for participants',
   'Advanced analytics & export (Excel / PDF)',
   'Cancel anytime',
@@ -101,7 +101,7 @@ export default function SubscribePage() {
     <>
     <Helmet>
       <title>Pricing — Xam Bridge</title>
-      <meta name="description" content="Upgrade to Xam Bridge Pro for $5/month. Get 50 quizzes, AI question generation, quiz translation in 6 languages, advanced analytics, and 2,000 responses per month." />
+      <meta name="description" content="Upgrade to Xam Bridge Pro for $5/month. Get 50 quizzes, AI question generation, quiz translation in 9 languages, advanced analytics, and 2,000 responses per month." />
       <meta name="keywords" content="quiz maker pricing, quiz platform subscription, online quiz pro plan, quiz builder paid plan, assessment tool pricing, quiz maker upgrade" />
       <link rel="canonical" href="https://www.xambridge.com/subscribe" />
     </Helmet>
