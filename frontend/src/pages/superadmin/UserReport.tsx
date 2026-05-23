@@ -126,51 +126,52 @@ export default function UserReport() {
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[820px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">User</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Role</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Tier</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Quizzes</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Attempts</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Location</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Joined</th>
-                <th className="px-5 py-3" />
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">User</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Role</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Tier</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Quizzes</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Attempts</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Location</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Joined</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {pagedUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-5 py-4">
-                    <p className="font-medium text-slate-900">{user.name}</p>
-                    <p className="text-xs text-slate-500">{user.email}</p>
+                  <td className="px-4 py-3">
+                    <p className="text-sm font-medium text-slate-900">{user.name}</p>
+                    <p className="text-xs text-slate-400">{user.email}</p>
                   </td>
-                  <td className="px-5 py-4">{roleBadge(user.role)}</td>
-                  <td className="px-5 py-4">{tierBadge(user.tier)}</td>
-                  <td className="px-5 py-4 text-sm text-slate-600">{user.quizCount}</td>
-                  <td className="px-5 py-4 text-sm text-slate-600">{user._count.attempts}</td>
-                  <td className="px-5 py-4 text-sm text-slate-500">
+                  <td className="px-4 py-3">{roleBadge(user.role)}</td>
+                  <td className="px-4 py-3">{tierBadge(user.tier)}</td>
+                  <td className="px-4 py-3 text-xs text-slate-600">{user.quizCount}</td>
+                  <td className="px-4 py-3 text-xs text-slate-600">{user._count.attempts}</td>
+                  <td className="px-4 py-3 text-xs text-slate-500">
                     {user.city || user.country ? (
                       <span className="flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                         {[user.city, user.country].filter(Boolean).join(', ')}
                       </span>
                     ) : (
                       <span className="text-slate-300">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                  <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
                     {new Date(user.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-4 py-3 whitespace-nowrap w-px">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => openEdit(user)}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                         title="Edit user"
                       >
-                        <Pencil className="w-4 h-4" />
+                        <Pencil className="w-3.5 h-3.5" />
                       </button>
                       {user.role !== 'SUPER_ADMIN' && (
                         <button
@@ -178,7 +179,7 @@ export default function UserReport() {
                           className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                           title="Delete user"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -187,6 +188,7 @@ export default function UserReport() {
               ))}
             </tbody>
           </table>
+          </div>
 
           {/* Pagination footer */}
           <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-slate-50">
