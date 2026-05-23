@@ -88,6 +88,8 @@ export interface UserRecord {
   email: string;
   role: Role;
   tier: Tier;
+  country?: string;
+  city?: string;
   createdAt: string;
   quizCount: number;
   _count: { attempts: number };

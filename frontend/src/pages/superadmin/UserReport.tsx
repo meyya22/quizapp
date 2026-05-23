@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, Crown, Users, UserCheck, ShieldCheck } from 'lucide-react';
+import { Pencil, Trash2, Crown, Users, UserCheck, ShieldCheck, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -121,6 +121,7 @@ export default function UserReport() {
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Tier</th>
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Quizzes</th>
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Attempts</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Location</th>
                 <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Joined</th>
                 <th className="px-5 py-3" />
               </tr>
@@ -136,6 +137,16 @@ export default function UserReport() {
                   <td className="px-5 py-4">{tierBadge(user.tier)}</td>
                   <td className="px-5 py-4 text-sm text-slate-600">{user.quizCount}</td>
                   <td className="px-5 py-4 text-sm text-slate-600">{user._count.attempts}</td>
+                  <td className="px-5 py-4 text-sm text-slate-500">
+                    {user.city || user.country ? (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        {[user.city, user.country].filter(Boolean).join(', ')}
+                      </span>
+                    ) : (
+                      <span className="text-slate-300">—</span>
+                    )}
+                  </td>
                   <td className="px-5 py-4 text-sm text-slate-500">
                     {new Date(user.createdAt).toLocaleDateString()}
                   </td>

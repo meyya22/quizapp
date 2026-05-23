@@ -60,6 +60,8 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
       email: true,
       role: true,
       tier: true,
+      country: true,
+      city: true,
       createdAt: true,
       _count: { select: { attempts: true } },
       categories: { select: { _count: { select: { quizzes: true } } } },

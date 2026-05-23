@@ -8,6 +8,16 @@ import { sendWelcomeEmail, sendNewUserNotification } from '../services/email.ser
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+async function getLocationFromIp(ip: string): Promise<{ country: string; city: string } | null> {
+  const clean = (ip || '').replace(/^::ffff:/, '');
+  if (!clean || clean === '::1' || clean.startsWith('127.') || clean.startsWith('10.') || clean.startsWith('192.168.')) return null;
+  try {
+    const res = await fetch(`http://ip-api.com/json/${clean}?fields=status,country,city`);
+    const data = await res.json() as { status: string; country: string; city: string };
+    return data.status === 'success' ? { country: data.country, city: data.city } : null;
+  } catch { return null; }
+}
+
 function signToken(user: { id: string; email: string; role: string; tier: string; name: string }): string {
   return jwt.sign(
     { id: user.id, email: user.email, role: user.role, tier: user.tier, name: user.name },
@@ -33,8 +43,9 @@ export async function register(req: Request, res: Response): Promise<void> {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
+  const location = await getLocationFromIp(req.ip || '');
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: assignedRole },
+    data: { name, email, passwordHash, role: assignedRole, country: location?.country, city: location?.city },
   });
 
   sendWelcomeEmail(user.email, user.name, user.role);
@@ -102,12 +113,15 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     });
 
     if (!user) {
+      const location = await getLocationFromIp(req.ip || '');
       user = await prisma.user.create({
         data: {
           name: payload.name || payload.email.split('@')[0],
           email: payload.email,
           googleId: payload.sub,
           role: 'PARTICIPANT',
+          country: location?.country,
+          city: location?.city,
         },
       });
       sendWelcomeEmail(user.email, user.name, user.role);
