@@ -147,8 +147,8 @@ export default function UserReport() {
                       <span className="text-slate-300">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-500">
-                    {new Date(user.createdAt).toLocaleDateString()}
+                  <td className="px-5 py-4 text-sm text-slate-500 whitespace-nowrap">
+                    {new Date(user.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-1">
