@@ -12,6 +12,7 @@ import { Select } from '../../components/ui/Select';
 import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
 import api from '../../services/api';
+import { LANGUAGES } from '../../services/translate';
 import { Category, Layout, Quiz } from '../../types';
 
 interface FormData {
@@ -20,6 +21,7 @@ interface FormData {
   description: string;
   passingScore: number;
   layout: Layout;
+  defaultLanguage: string;
 }
 
 export default function QuizzesList() {
@@ -41,7 +43,7 @@ export default function QuizzesList() {
   });
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
-    defaultValues: { passingScore: 70, layout: 'VERTICAL' },
+    defaultValues: { passingScore: 70, layout: 'VERTICAL', defaultLanguage: 'en' },
   });
   const selectedLayout = watch('layout');
 
@@ -108,7 +110,7 @@ export default function QuizzesList() {
 
   function openCreate() {
     setEditing(null);
-    reset({ categoryId: '', title: '', description: '', passingScore: 70, layout: 'VERTICAL' });
+    reset({ categoryId: '', title: '', description: '', passingScore: 70, layout: 'VERTICAL', defaultLanguage: 'en' });
     setModalOpen(true);
   }
 
@@ -120,6 +122,7 @@ export default function QuizzesList() {
       description: quiz.description || '',
       passingScore: quiz.passingScore,
       layout: quiz.layout,
+      defaultLanguage: quiz.defaultLanguage ?? 'en',
     });
     setModalOpen(true);
   }
@@ -357,6 +360,11 @@ export default function QuizzesList() {
               min: { value: 1, message: 'Min is 1' },
               max: { value: 100, message: 'Max is 100' },
             })}
+          />
+          <Select
+            label="Default Quiz Language"
+            options={LANGUAGES.map((l) => ({ value: l.code, label: l.label }))}
+            {...register('defaultLanguage')}
           />
           <div>
             <p className="text-sm font-medium text-slate-700 mb-2">Quiz Layout</p>

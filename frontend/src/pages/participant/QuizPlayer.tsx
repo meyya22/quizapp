@@ -224,7 +224,7 @@ export default function QuizPlayer() {
   const [currentPage, setCurrentPage] = useState(0);
   const [studyMode, setStudyMode] = useState(false);
 
-  // Language state
+  // Language state — initialized from quiz.defaultLanguage once loaded
   const [selectedLang, setSelectedLang] = useState('en');
   const [isTranslating, setIsTranslating] = useState(false);
   const [displayContent, setDisplayContent] = useState<TranslatedQuizContent>({
@@ -238,6 +238,10 @@ export default function QuizPlayer() {
     queryFn: () => api.get(`/quizzes/${id}`).then((r) => r.data),
     retry: false,
   });
+
+  useEffect(() => {
+    if (quiz?.defaultLanguage) setSelectedLang(quiz.defaultLanguage);
+  }, [quiz?.defaultLanguage]);
 
   const isPrivateError =
     (quizError as { response?: { data?: { code?: string } } } | null)

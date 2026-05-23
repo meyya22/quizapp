@@ -79,7 +79,7 @@ export async function toggleVisibility(req: AuthRequest, res: Response): Promise
 
 export async function createQuiz(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
-  const { categoryId, title, description, passingScore, visibility, layout } = req.body;
+  const { categoryId, title, description, passingScore, visibility, layout, defaultLanguage } = req.body;
   if (!categoryId || !title) {
     res.status(400).json({ error: 'categoryId and title are required' });
     return;
@@ -115,6 +115,7 @@ export async function createQuiz(req: AuthRequest, res: Response): Promise<void>
       categoryId, title, description, passingScore: passingScore ?? 70,
       visibility: visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
       layout: layout === 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL',
+      ...(defaultLanguage && { defaultLanguage }),
     },
     include: { category: { select: { id: true, name: true } } },
   });
@@ -124,7 +125,7 @@ export async function createQuiz(req: AuthRequest, res: Response): Promise<void>
 export async function updateQuiz(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
   const { id } = req.params;
-  const { categoryId, title, description, passingScore, visibility, layout } = req.body;
+  const { categoryId, title, description, passingScore, visibility, layout, defaultLanguage } = req.body;
 
   const existing = await prisma.quiz.findUnique({
     where: { id },
@@ -141,6 +142,7 @@ export async function updateQuiz(req: AuthRequest, res: Response): Promise<void>
       categoryId, title, description, passingScore,
       ...(visibility !== undefined && { visibility: visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC' }),
       ...(layout !== undefined && { layout: layout === 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' }),
+      ...(defaultLanguage !== undefined && { defaultLanguage }),
     },
     include: { category: { select: { id: true, name: true } } },
   });

@@ -31,6 +31,7 @@ export interface Quiz {
   published: boolean;
   visibility: Visibility;
   layout: Layout;
+  defaultLanguage: string;
   createdAt: string;
   category: { id: string; name: string; admin?: { name: string } };
   _count?: { questions: number; attempts?: number };

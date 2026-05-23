@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, ArrowLeft, Upload, Download, GripVertical, Eye, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowLeft, Upload, Download, GripVertical, Eye, Sparkles, Loader2, Globe } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
@@ -12,6 +12,7 @@ import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
 import { UpgradeModal } from '../../components/UpgradeModal';
 import api from '../../services/api';
+import { LANGUAGES } from '../../services/translate';
 import { Question, Quiz, QuestionType } from '../../types';
 
 const TYPE_LABELS: Record<QuestionType, string> = {
@@ -268,7 +269,21 @@ export default function QuizBuilder() {
               {quiz?.category && <Badge variant="neutral">{quiz.category.name}</Badge>}
               <span className="text-sm text-slate-500">Passing: {quiz?.passingScore}%</span>
               <span className="text-sm text-slate-500">{questions.length} questions</span>
+              {quiz?.defaultLanguage && quiz.defaultLanguage !== 'en' && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                  <Globe className="w-3 h-3" />
+                  {LANGUAGES.find((l) => l.code === quiz.defaultLanguage)?.label ?? quiz.defaultLanguage}
+                </span>
+              )}
             </div>
+            {quiz?.defaultLanguage && quiz.defaultLanguage !== 'en' && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2 flex items-center gap-2">
+                <span className="font-medium">Language reminder:</span>
+                Write your questions and answers in{' '}
+                <span className="font-semibold">{LANGUAGES.find((l) => l.code === quiz.defaultLanguage)?.label ?? quiz.defaultLanguage}</span>
+                — participants will see this quiz in that language by default.
+              </p>
+            )}
           </div>
           <div className="flex gap-2">
             <Link
