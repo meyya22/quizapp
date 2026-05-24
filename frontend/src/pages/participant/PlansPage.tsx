@@ -41,9 +41,9 @@ const COMPARE_ROWS: CompareRow[] = [
   {
     label: 'Total questions',
     icon: <Zap className="w-4 h-4 text-violet-500" />,
-    starter: '50 max (lifetime)',
-    prepready: '525 / month',
-    examelite: '1,020 / month',
+    starter: 'Max 50 questions only',
+    prepready: '525 questions, resets monthly',
+    examelite: '1020 questions, resets monthly',
   },
   {
     label: 'Difficulty levels',
