@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles, Brain, Clock, Trophy, CheckCircle, XCircle,
-  AlertCircle, ChevronRight, BookOpen, Zap, Target, Globe, Loader2, Lock, FileDown,
+  AlertCircle, ChevronRight, ChevronLeft, BookOpen, Zap, Target, Globe, Loader2, Lock, FileDown,
+  LayoutList, Square,
 } from 'lucide-react';
 import api from '../../services/api';
 import { LANGUAGES } from '../../services/translate';
@@ -194,6 +195,10 @@ export default function ExamPrepPage() {
   const [boolLabels, setBoolLabels] = useState({ true: 'True', false: 'False' });
   const translationCache = useRef<Map<string, TranslatedContent>>(new Map());
 
+  // Layout toggle
+  const [quizLayout, setQuizLayout] = useState<'vertical' | 'one-by-one'>('vertical');
+  const [currentQIdx, setCurrentQIdx] = useState(0);
+
   // Results
   const [attemptResult, setAttemptResult] = useState<AttemptResult | null>(null);
 
@@ -278,6 +283,7 @@ export default function ExamPrepPage() {
       setActiveQuiz(quiz);
       setUserAnswers(new Map());
       setElapsed(0);
+      setCurrentQIdx(0);
       setPhase('taking');
       queryClient.invalidateQueries({ queryKey: ['ai-quizzes'] });
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -345,6 +351,7 @@ export default function ExamPrepPage() {
     setElapsed(0);
     setAttemptResult(null);
     setSelectedLang('en');
+    setCurrentQIdx(0);
     if (activeQuiz) setDisplayQuestions(activeQuiz.questions);
     setBoolLabels({ true: 'True', false: 'False' });
     translationCache.current.clear();
@@ -715,6 +722,24 @@ export default function ExamPrepPage() {
                 {formatTimer(elapsed)}
               </span>
 
+              {/* Layout toggle */}
+              <div className="flex items-center gap-0.5 border border-slate-200 rounded-lg p-0.5 shrink-0">
+                <button
+                  onClick={() => setQuizLayout('vertical')}
+                  title="All questions"
+                  className={`p-1.5 rounded-md transition-colors ${quizLayout === 'vertical' ? 'bg-violet-100 text-violet-700' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <LayoutList className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => setQuizLayout('one-by-one')}
+                  title="One question at a time"
+                  className={`p-1.5 rounded-md transition-colors ${quizLayout === 'one-by-one' ? 'bg-violet-100 text-violet-700' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  <Square className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
               {/* Submit button */}
               <button
                 onClick={handleSubmitQuiz}
@@ -738,6 +763,131 @@ export default function ExamPrepPage() {
           </div>
 
           {/* Questions */}
+          {quizLayout === 'one-by-one' && (() => {
+            const safeIdx = Math.min(currentQIdx, questionsToShow.length - 1);
+            const q = questionsToShow[safeIdx];
+            const originalQ = activeQuiz.questions[safeIdx];
+            const selected = userAnswers.get(originalQ.id);
+            const total = questionsToShow.length;
+            return (
+              <div className="bg-white rounded-xl border border-slate-200 p-5">
+                {/* Question number dots */}
+                <div className="flex items-center gap-1 mb-4 flex-wrap">
+                  {questionsToShow.map((_, i) => {
+                    const oq = activeQuiz.questions[i];
+                    const ans = userAnswers.get(oq.id);
+                    const answered = ans !== undefined && ans !== '' && !(Array.isArray(ans) && ans.length === 0);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setCurrentQIdx(i)}
+                        className={`w-7 h-7 rounded-md text-xs font-bold transition-colors ${
+                          i === safeIdx
+                            ? 'bg-violet-600 text-white'
+                            : answered
+                              ? 'bg-violet-100 text-violet-700'
+                              : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                        }`}
+                      >
+                        {i + 1}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex gap-3 mb-4">
+                  <span className="shrink-0 w-7 h-7 bg-violet-50 text-violet-700 text-xs font-bold rounded-lg flex items-center justify-center">
+                    {safeIdx + 1}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-900 leading-relaxed">{q.text}</p>
+                    {q.type === 'MULTIPLE_RESPONSE' && (
+                      <p className="text-xs text-amber-600 mt-1 font-medium">Select all that apply</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="ml-10 space-y-2 mb-6">
+                  {q.type === 'TRUE_FALSE' ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['true', 'false'] as const).map((val) => (
+                        <button
+                          key={val}
+                          onClick={() => handleAnswer(originalQ.id, val, originalQ.type)}
+                          className={`py-2.5 rounded-lg text-sm font-semibold border transition-colors ${
+                            selected === val
+                              ? 'bg-violet-600 text-white border-violet-600'
+                              : 'bg-white text-slate-700 border-slate-200 hover:border-violet-300 hover:bg-violet-50'
+                          }`}
+                        >
+                          {val === 'true' ? boolLabels.true : boolLabels.false}
+                        </button>
+                      ))}
+                    </div>
+                  ) : q.options ? (
+                    Object.entries(q.options).map(([key, value]) => {
+                      const isSelected =
+                        q.type === 'MULTIPLE_RESPONSE'
+                          ? ((selected as string[] | undefined) ?? []).includes(key)
+                          : selected === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => handleAnswer(originalQ.id, key, originalQ.type)}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-colors ${
+                            isSelected
+                              ? 'bg-violet-50 border-violet-400'
+                              : 'bg-white border-slate-200 hover:border-violet-200 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs font-bold border transition-colors ${
+                            isSelected
+                              ? 'bg-violet-600 border-violet-600 text-white'
+                              : 'border-slate-300 text-slate-500'
+                          }`}>
+                            {key}
+                          </span>
+                          <span className="text-sm text-slate-800">{value}</span>
+                        </button>
+                      );
+                    })
+                  ) : null}
+                </div>
+
+                {/* Back / Next navigation */}
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                  <button
+                    onClick={() => setCurrentQIdx((i) => Math.max(0, i - 1))}
+                    disabled={safeIdx === 0}
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Back
+                  </button>
+                  <span className="text-xs text-slate-400">{safeIdx + 1} / {total}</span>
+                  {safeIdx < total - 1 ? (
+                    <button
+                      onClick={() => setCurrentQIdx((i) => Math.min(total - 1, i + 1))}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-violet-700 border border-violet-200 bg-violet-50 rounded-lg hover:bg-violet-100 transition-colors"
+                    >
+                      Next <ChevronRight className="w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleSubmitQuiz}
+                      disabled={submitMutation.isPending}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
+                    >
+                      {submitMutation.isPending
+                        ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <>Submit <ChevronRight className="w-4 h-4" /></>}
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {quizLayout === 'vertical' && (
           <div className="space-y-4">
             {questionsToShow.map((q, idx) => {
               // Always use original question IDs for answer tracking
@@ -807,8 +957,10 @@ export default function ExamPrepPage() {
               );
             })}
           </div>
+          )}
 
-          {/* Bottom submit bar */}
+          {/* Bottom submit bar — vertical layout only */}
+          {quizLayout === 'vertical' && (
           <div className="mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white border border-slate-200 rounded-xl p-4">
             <p className="text-sm">
               {answeredCount < activeQuiz.questions.length ? (
@@ -832,6 +984,7 @@ export default function ExamPrepPage() {
               }
             </button>
           </div>
+          )}
         </div>
       )}
 
