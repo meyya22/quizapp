@@ -27,9 +27,9 @@ const COMPARE_ROWS: CompareRow[] = [
   {
     label: 'AI quiz generations',
     icon: <BrainCircuit className="w-4 h-4 text-violet-500" />,
-    starter: '5 (lifetime)',
-    prepready: '35 / month',
-    examelite: '68 / month',
+    starter: '5 AI Generation (lifetime)',
+    prepready: '45 AI Generation/mo',
+    examelite: '68 AI Generation/mo',
   },
   {
     label: 'Questions per quiz',
