@@ -628,10 +628,6 @@ export default function ExamPrepPage() {
                   onChange={(e) => setPassingScore(Number(e.target.value))}
                   className="w-full accent-violet-600 cursor-pointer"
                 />
-                <div className="flex justify-between text-xs text-slate-400 mt-0.5">
-                  <span>30% (easier)</span>
-                  <span>100% (hardest)</span>
-                </div>
               </div>
 
               {genError && (
