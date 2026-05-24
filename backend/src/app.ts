@@ -14,6 +14,7 @@ import paymentRoutes from './routes/payment.routes';
 import contactRoutes from './routes/contact.routes';
 import supportRoutes from './routes/support.routes';
 import aiRoutes from './routes/ai.routes';
+import aiQuizRoutes from './routes/aiQuiz.routes';
 import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
@@ -50,6 +51,7 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api/support', supportRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/ai-quiz', aiQuizRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

@@ -2004,3 +2004,44 @@
 [2m3:22:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/Login.tsx, /src/index.css[22m
 [2m3:22:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterAdmin.tsx, /src/index.css[22m
 [2m3:22:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/auth/RegisterLearner.tsx, /src/index.css[22m
+[2m4:42:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/ParticipantDashboard.tsx, /src/index.css[22m
+[2m4:55:04 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/ParticipantDashboard.tsx, /src/index.css[22m
+[2m8:22:44 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/types/index.ts[22m
+[2m8:22:49 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:22:59 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:23:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:29:03 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:35:54 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:36:00 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:36:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:36:15 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m8:46:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/index.css, /src/pages/participant/QuizPlayer.tsx, /src/pages/participant/Results.tsx[22m
+[2m8:57:14 PM[22m [36m[1m[vite][22m[39m [32mpage reload [39m[2msrc/types/index.ts[22m
+[2m8:57:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizzesList.tsx, /src/index.css[22m
+[2m8:57:23 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizzesList.tsx, /src/index.css[22m
+[2m8:57:28 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizzesList.tsx, /src/index.css[22m
+[2m8:57:34 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizzesList.tsx, /src/index.css[22m
+[2m8:57:41 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizzesList.tsx, /src/index.css[22m
+[2m8:57:45 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizBuilder.tsx, /src/index.css[22m
+[2m8:57:56 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizBuilder.tsx, /src/index.css[22m
+[2m8:58:05 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/QuizBuilder.tsx, /src/index.css[22m
+[2m8:58:18 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/QuizPlayer.tsx, /src/index.css[22m
+[2m9:11:08 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m9:23:11 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m9:23:19 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m9:23:29 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m9:23:35 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/UserReport.tsx, /src/index.css[22m
+[2m9:23:54 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/UpgradeModal.tsx, /src/index.css[22m
+[2m9:23:55 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/SubscribePage.tsx, /src/index.css[22m
+[2m9:23:56 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/PaymentPage.tsx, /src/index.css[22m
+[2m9:24:21 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Landing.tsx, /src/index.css[22m
+[2m9:24:22 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/Landing.tsx, /src/index.css[22m
+[2m9:24:23 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/FAQ.tsx, /src/index.css[22m
+[2m9:24:24 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/admin/AdminDashboard.tsx, /src/index.css[22m
+[2m9:24:26 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/EmailCampaign.tsx, /src/index.css[22m
+[2m9:24:27 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/superadmin/EmailCampaign.tsx, /src/index.css[22m
+[2m9:24:40 PM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/payment/SubscribePage.tsx, /src/index.css[22m
+[2m5:35:44 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/pages/participant/ParticipantDashboard.tsx, /src/index.css[22m
+[2m6:19:54 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/components/layout/ParticipantLayout.tsx, /src/index.css[22m
+[2m6:20:00 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m6:20:06 AM[22m [36m[1m[vite][22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m

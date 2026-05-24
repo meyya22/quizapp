@@ -1130,3 +1130,211 @@ Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
 }
 [INFO] 15:22:04 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
 Server running on http://localhost:3001
+Unhandled rejection: PrismaClientInitializationError: 
+Invalid `prisma.user.findUnique()` invocation in
+C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:34
+
+  55   return;
+  56 }
+  57 
+→ 58 const user = await prisma.user.findUnique(
+error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at $n.handleRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:7615)
+    at $n.handleAndLogRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at l (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at login (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:16) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+Unhandled rejection: PrismaClientInitializationError: 
+Invalid `prisma.user.findUnique()` invocation in
+C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:34
+
+  55   return;
+  56 }
+  57 
+→ 58 const user = await prisma.user.findUnique(
+error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at $n.handleRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:7615)
+    at $n.handleAndLogRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at l (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at login (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:16) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+Unhandled rejection: PrismaClientInitializationError: 
+Invalid `prisma.user.findUnique()` invocation in
+C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:34
+
+  55   return;
+  56 }
+  57 
+→ 58 const user = await prisma.user.findUnique(
+error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at $n.handleRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:7615)
+    at $n.handleAndLogRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at l (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at login (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:16) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+Unhandled rejection: PrismaClientInitializationError: 
+Invalid `prisma.user.findUnique()` invocation in
+C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:34
+
+  55   return;
+  56 }
+  57 
+→ 58 const user = await prisma.user.findUnique(
+error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at $n.handleRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:7615)
+    at $n.handleAndLogRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at l (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at login (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:16) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+Unhandled rejection: PrismaClientInitializationError: 
+Invalid `prisma.user.findUnique()` invocation in
+C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:34
+
+  55   return;
+  56 }
+  57 
+→ 58 const user = await prisma.user.findUnique(
+error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+    at $n.handleRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:7615)
+    at $n.handleAndLogRequestError (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at l (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at login (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts:58:16) {
+  clientVersion: '5.22.0',
+  errorCode: undefined
+}
+[INFO] 20:22:07 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
+[ERROR] 20:22:09 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 20:22:15 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
+Server running on http://localhost:3001
+[INFO] 20:22:21 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\auth.controller.ts has been modified
+Server running on http://localhost:3001
+[INFO] 20:22:28 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\user.controller.ts has been modified
+[ERROR] 20:22:29 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 20:56:43 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\quiz.controller.ts has been modified
+[ERROR] 20:56:44 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 20:56:49 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\quiz.controller.ts has been modified
+Server running on http://localhost:3001
+[INFO] 20:56:53 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\quiz.controller.ts has been modified
+[ERROR] 20:56:54 Error: listen EADDRINUSE: address already in use :::3001
+Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
+    at Server.setupListenHandle [as _listen2] (node:net:2008:16)
+    at listenInCluster (node:net:2065:12)
+    at Server.listen (node:net:2170:7)
+    at app.listen (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\server.ts:6:5)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1830:14)
+    at Module._compile (C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\node_modules\source-map-support\source-map-support.js:568:25)
+    at Module.m._compile (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:69:33)
+    at node:internal/modules/cjs/loader:1961:10
+    at require.extensions..jsx.require.extensions..js (C:\Users\kmeyy\AppData\Local\Temp\ts-node-dev-hook-08602135563392932.js:114:20) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3001
+}
+[INFO] 21:24:35 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\services\email.service.ts has been modified
+Server running on http://localhost:3001
+[INFO] 06:17:33 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Server running on http://localhost:3001
+[INFO] 06:17:37 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\app.ts has been modified
+Server running on http://localhost:3001

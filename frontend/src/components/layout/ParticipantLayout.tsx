@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LogOut, BookOpen, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, LogOut, BookOpen, HelpCircle, Sparkles } from 'lucide-react';
 import Footer from '../Footer';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
@@ -8,16 +8,16 @@ export default function ParticipantLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  function handleQuizzesClick(e: React.MouseEvent) {
-    e.preventDefault();
-    window.location.href = '/participant';
-  }
-
   function handleLogout() {
     logout();
     toast.success('Logged out');
     navigate('/');
   }
+
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+      isActive ? 'bg-violet-50 text-violet-700' : 'text-slate-600 hover:bg-slate-100'
+    }`;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -27,28 +27,21 @@ export default function ParticipantLayout() {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-slate-900 text-lg">Xam Bridge</span>
+            <span className="font-bold text-slate-900 text-lg hidden sm:block">Xam Bridge</span>
           </Link>
 
-          <nav className="flex items-center gap-1">
-            <a
-              href="/participant"
-              onClick={handleQuizzesClick}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-700"
-            >
+          <nav className="flex items-center gap-0.5">
+            <NavLink to="/participant" end className={navLinkClass}>
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden sm:inline">ExamPrep</span>
+            </NavLink>
+            <NavLink to="/participant/quizzes" className={navLinkClass}>
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Quizzes</span>
-            </a>
-            <NavLink
-              to="/participant/help"
-              className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-100'
-                }`
-              }
-            >
+            </NavLink>
+            <NavLink to="/participant/help" className={navLinkClass}>
               <HelpCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Help & Support</span>
+              <span className="hidden sm:inline">Help</span>
             </NavLink>
           </nav>
 

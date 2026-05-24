@@ -18,6 +18,7 @@ import Reports from './pages/admin/Reports';
 import Account from './pages/admin/Account';
 import Audience from './pages/admin/Audience';
 import ParticipantDashboard from './pages/participant/ParticipantDashboard';
+import ExamPrepPage from './pages/participant/ExamPrepPage';
 import QuizPlayer from './pages/participant/QuizPlayer';
 import Results from './pages/participant/Results';
 import SuperAdminLayout from './components/layout/SuperAdminLayout';
@@ -81,7 +82,8 @@ export default function App() {
           </RequireAuth>
         }
       >
-        <Route index element={<ParticipantDashboard />} />
+        <Route index element={<ExamPrepPage />} />
+        <Route path="quizzes" element={<ParticipantDashboard />} />
         <Route path="quiz/:id" element={<QuizPlayer />} />
         <Route path="results/:attemptId" element={<Results />} />
         <Route path="help" element={<HelpSupport />} />

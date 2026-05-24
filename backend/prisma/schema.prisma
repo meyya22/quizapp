@@ -31,6 +31,7 @@ model User {
   categories   Category[]
   contacts     Contact[]
   emailHistory EmailHistory[]
+  aiQuizzes    AiQuiz[]
 
   @@map("users")
 }
@@ -166,4 +167,34 @@ model AttemptAnswer {
   question   Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("attempt_answers")
+}
+
+model AiQuiz {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title        String
+  topic        String
+  difficulty   String
+  numQuestions Int
+  passingScore Int
+  questions    Json
+  attempts     AiQuizAttempt[]
+  createdAt    DateTime        @default(now())
+
+  @@map("ai_quizzes")
+}
+
+model AiQuizAttempt {
+  id          String   @id @default(cuid())
+  aiQuizId    String
+  aiQuiz      AiQuiz   @relation(fields: [aiQuizId], references: [id], onDelete: Cascade)
+  userId      String
+  score       Float
+  passed      Boolean
+  timeTaken   Int
+  answers     Json
+  completedAt DateTime @default(now())
+
+  @@map("ai_quiz_attempts")
 }
