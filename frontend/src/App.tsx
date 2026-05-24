@@ -30,6 +30,7 @@ import EmailCampaign from './pages/superadmin/EmailCampaign';
 import ParticipantEmailCampaign from './pages/superadmin/ParticipantEmailCampaign';
 import ParticipantAiQuizReport from './pages/superadmin/ParticipantAiQuizReport';
 import AnonymousQuizTracker from './pages/superadmin/AnonymousQuizTracker';
+import ContactBuilder from './pages/superadmin/ContactBuilder';
 import HelpSupport from './pages/HelpSupport';
 import FAQ from './pages/FAQ';
 import AboutUs from './pages/AboutUs';
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="participant-campaign" element={<ParticipantEmailCampaign />} />
         <Route path="ai-quiz-report" element={<ParticipantAiQuizReport />} />
         <Route path="anonymous-quizzes" element={<AnonymousQuizTracker />} />
+        <Route path="contact-builder" element={<ContactBuilder />} />
       </Route>
 
       {/* Standalone share routes — no navigation chrome, no login required */}

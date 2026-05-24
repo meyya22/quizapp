@@ -135,6 +135,7 @@ model EmailHistory {
 
 model CampaignHistory {
   id           String              @id @default(cuid())
+  type         String              @default("ADMIN")
   templateName String
   subject      String
   sent         Int
@@ -143,6 +144,17 @@ model CampaignHistory {
   recipients   CampaignRecipient[]
 
   @@map("campaign_history")
+}
+
+model MarketingContact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  location  String?
+  source    String   @default("manual")
+  createdAt DateTime @default(now())
+
+  @@map("marketing_contacts")
 }
 
 model CampaignRecipient {
