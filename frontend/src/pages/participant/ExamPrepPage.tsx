@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles, Brain, Clock, Trophy, CheckCircle, XCircle,
-  AlertCircle, ChevronRight, BookOpen, Zap, Target, Globe, Loader2, Lock,
+  AlertCircle, ChevronRight, BookOpen, Zap, Target, Globe, Loader2, Lock, FileDown,
 } from 'lucide-react';
 import api from '../../services/api';
 import { LANGUAGES } from '../../services/translate';
@@ -211,6 +211,7 @@ export default function ExamPrepPage() {
     allowedQuestionCounts: (historyData?.allowedQuestionCounts ?? [5, 10]) as QuestionCount[],
     allowedDifficulties: (historyData?.allowedDifficulties ?? ['Easy', 'Moderate']) as Difficulty[],
     monthlyReset: (historyData?.monthlyReset ?? false) as boolean,
+    pdfExport: (historyData?.pdfExport ?? false) as boolean,
   };
 
   // Timer
@@ -358,6 +359,81 @@ export default function ExamPrepPage() {
     setSelectedLang('en');
     setPhase('form');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function generatePDF() {
+    if (!activeQuiz || !attemptResult) return;
+
+    function optionLabel(key: string, q: AiQuestion): string {
+      if (q.type === 'TRUE_FALSE') return key === 'true' ? 'True' : 'False';
+      return q.options?.[key] ? `${key}. ${q.options[key]}` : key;
+    }
+
+    function correctLabel(q: AiQuestion): string {
+      if (q.type === 'TRUE_FALSE') return String(q.correctAnswer) === 'true' ? 'True' : 'False';
+      if (Array.isArray(q.correctAnswer)) {
+        return q.correctAnswer.map((k) => optionLabel(k, q)).join(', ');
+      }
+      return optionLabel(String(q.correctAnswer), q);
+    }
+
+    const questionsHtml = activeQuiz.questions.map((q, idx) => {
+      const optionKeys = q.type === 'TRUE_FALSE'
+        ? ['true', 'false']
+        : Object.keys(q.options ?? {});
+
+      const optionsHtml = optionKeys.map((k) => `
+        <div style="padding:4px 0; color:#334155;">${optionLabel(k, q)}</div>
+      `).join('');
+
+      return `
+        <div style="margin-bottom:24px; page-break-inside:avoid;">
+          <p style="font-weight:600; color:#1e293b; margin:0 0 8px 0;">
+            <span style="color:#94a3b8; font-size:13px; margin-right:6px;">Q${idx + 1}.</span>${q.text}
+          </p>
+          <div style="margin-left:16px; margin-bottom:10px; font-size:14px;">${optionsHtml}</div>
+          <div style="margin-left:16px; background:#f0fdf4; border-left:3px solid #22c55e; padding:8px 12px; border-radius:4px; margin-bottom:6px;">
+            <span style="color:#166534; font-weight:600;">Correct Answer: </span>
+            <span style="color:#15803d;">${correctLabel(q)}</span>
+          </div>
+          ${q.explanation ? `
+          <div style="margin-left:16px; background:#f8fafc; border-left:3px solid #94a3b8; padding:8px 12px; border-radius:4px; font-size:13px; color:#475569;">
+            <span style="font-weight:600; color:#334155;">Explanation: </span>${q.explanation}
+          </div>` : ''}
+        </div>
+      `;
+    }).join('');
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${activeQuiz.title} — Question Review</title>
+  <style>
+    body { font-family: system-ui, sans-serif; color: #1e293b; padding: 32px; max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 800; color: #1e293b; margin: 0 0 4px 0; }
+    .meta { font-size: 13px; color: #64748b; margin-bottom: 24px; }
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 16px 0 24px 0; }
+    @media print { body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <h1>${activeQuiz.title}</h1>
+  <div class="meta">
+    Topic: ${activeQuiz.topic} &nbsp;·&nbsp; Difficulty: ${activeQuiz.difficulty} &nbsp;·&nbsp;
+    Score: ${Math.round(attemptResult.score)}% (${attemptResult.passed ? 'Passed' : 'Not Passed'})
+  </div>
+  <hr class="divider" />
+  ${questionsHtml}
+</body>
+</html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
   }
 
   const answeredCount = activeQuiz
@@ -828,7 +904,18 @@ export default function ExamPrepPage() {
           </div>
 
           {/* Question review */}
-          <h3 className="text-base font-semibold text-slate-900 mb-3">Question Review</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-semibold text-slate-900">Question Review</h3>
+            {planInfo.pdfExport && (
+              <button
+                onClick={generatePDF}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                Download PDF
+              </button>
+            )}
+          </div>
           <div className="space-y-3">
             {activeQuiz.questions.map((q, idx) => {
               const graded = attemptResult.gradedAnswers.find((a) => a.questionId === q.id);
