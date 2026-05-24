@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate, requireSuperAdmin } from '../middleware/auth';
 import {
   createCheckoutSession,
+  createParticipantCheckoutSession,
   handleWebhook,
   verifySession,
   getSubscription,
@@ -18,6 +19,7 @@ router.post('/webhook', handleWebhook);
 
 // Authenticated routes
 router.post('/create-checkout-session', authenticate, createCheckoutSession);
+router.post('/create-participant-checkout-session', authenticate, createParticipantCheckoutSession);
 router.get('/verify-session', authenticate, verifySession);
 router.get('/subscription', authenticate, getSubscription);
 router.post('/cancel', authenticate, cancelSubscription);

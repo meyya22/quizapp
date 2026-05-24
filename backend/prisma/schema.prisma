@@ -198,3 +198,16 @@ model AiQuizAttempt {
 
   @@map("ai_quiz_attempts")
 }
+
+model PreviewSession {
+  id        String   @id @default(cuid())
+  topic     String
+  score     Float
+  passed    Boolean
+  city      String?
+  country   String?
+  device    String?
+  createdAt DateTime @default(now())
+
+  @@map("preview_sessions")
+}

@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles, Brain, Clock, Trophy, CheckCircle, XCircle,
-  AlertCircle, ChevronRight, BookOpen, Zap, Target,
+  AlertCircle, ChevronRight, BookOpen, Zap, Target, Globe, Loader2, Lock,
 } from 'lucide-react';
 import api from '../../services/api';
+import { LANGUAGES } from '../../services/translate';
+import ParticipantPlanCards, { type ParticipantPlanKey } from './ParticipantPlanCards';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -49,6 +51,92 @@ interface AttemptResult {
 interface HistoryQuiz extends AiQuizFull {
   attempts: Array<{ score: number; passed: boolean; timeTaken: number; completedAt: string }>;
   _count: { attempts: number };
+}
+
+interface TranslatedContent {
+  questions: AiQuestion[];
+  boolLabels: { true: string; false: string };
+}
+
+// ─── Translation helpers (mirrors translate.ts pattern for AiQuestion[]) ──────
+
+async function translateOne(text: string, targetLang: string): Promise<string> {
+  if (!text.trim() || targetLang === 'en') return text;
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Translation failed: ${res.status}`);
+  const data: string[][][] = await res.json();
+  return data[0].map((chunk) => chunk[0]).join('');
+}
+
+async function translateAiQuestions(
+  questions: AiQuestion[],
+  targetLang: string
+): Promise<TranslatedContent> {
+  if (targetLang === 'en') {
+    return { questions, boolLabels: { true: 'True', false: 'False' } };
+  }
+
+  const texts: string[] = [];
+  const meta: {
+    textIdx: number;
+    optionIdxMap: Record<string, number>;
+    explanationIdx: number | null;
+  }[] = [];
+
+  for (const q of questions) {
+    const m = {
+      textIdx: texts.length,
+      optionIdxMap: {} as Record<string, number>,
+      explanationIdx: null as number | null,
+    };
+    texts.push(q.text);
+    if (q.options) {
+      for (const [key, value] of Object.entries(q.options)) {
+        m.optionIdxMap[key] = texts.length;
+        texts.push(value);
+      }
+    }
+    if (q.explanation) {
+      m.explanationIdx = texts.length;
+      texts.push(q.explanation);
+    }
+    meta.push(m);
+  }
+
+  const boolStart = texts.length;
+  texts.push('True', 'False');
+
+  const BATCH = 8;
+  const translated: string[] = [];
+  for (let i = 0; i < texts.length; i += BATCH) {
+    const results = await Promise.all(
+      texts.slice(i, i + BATCH).map((t) => translateOne(t, targetLang))
+    );
+    translated.push(...results);
+  }
+
+  const translatedQuestions = questions.map((q, i) => {
+    const m = meta[i];
+    let translatedOptions: Record<string, string> | null = null;
+    if (q.options) {
+      translatedOptions = {};
+      for (const key of Object.keys(q.options)) {
+        translatedOptions[key] = translated[m.optionIdxMap[key]];
+      }
+    }
+    return {
+      ...q,
+      text: translated[m.textIdx],
+      options: translatedOptions,
+      explanation: m.explanationIdx !== null ? translated[m.explanationIdx] : q.explanation,
+    };
+  });
+
+  return {
+    questions: translatedQuestions,
+    boolLabels: { true: translated[boolStart], false: translated[boolStart + 1] },
+  };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -99,11 +187,18 @@ export default function ExamPrepPage() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
 
+  // Translation
+  const [selectedLang, setSelectedLang] = useState('en');
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [displayQuestions, setDisplayQuestions] = useState<AiQuestion[]>([]);
+  const [boolLabels, setBoolLabels] = useState({ true: 'True', false: 'False' });
+  const translationCache = useRef<Map<string, TranslatedContent>>(new Map());
+
   // Results
   const [attemptResult, setAttemptResult] = useState<AttemptResult | null>(null);
 
   // History
-  const { data: historyData, refetch: refetchHistory } = useQuery({
+  const { data: historyData } = useQuery({
     queryKey: ['ai-quizzes'],
     queryFn: () => api.get('/ai-quiz').then((r) => r.data),
     staleTime: 30_000,
@@ -111,6 +206,12 @@ export default function ExamPrepPage() {
 
   const historyQuizzes: HistoryQuiz[] = historyData?.quizzes ?? [];
   const usage = { used: historyData?.used ?? 0, limit: historyData?.limit ?? 5 };
+  const planInfo = {
+    plan: (historyData?.plan ?? 'STARTER') as ParticipantPlanKey,
+    allowedQuestionCounts: (historyData?.allowedQuestionCounts ?? [5, 10]) as QuestionCount[],
+    allowedDifficulties: (historyData?.allowedDifficulties ?? ['Easy', 'Moderate']) as Difficulty[],
+    monthlyReset: (historyData?.monthlyReset ?? false) as boolean,
+  };
 
   // Timer
   useEffect(() => {
@@ -125,6 +226,44 @@ export default function ExamPrepPage() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  // Reset language + display questions when the active quiz changes
+  useEffect(() => {
+    if (activeQuiz) {
+      setSelectedLang('en');
+      setDisplayQuestions(activeQuiz.questions);
+      setBoolLabels({ true: 'True', false: 'False' });
+      translationCache.current.clear();
+    }
+  }, [activeQuiz?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Translate whenever language changes (during taking phase)
+  useEffect(() => {
+    if (!activeQuiz || phase !== 'taking') return;
+
+    if (selectedLang === 'en') {
+      setDisplayQuestions(activeQuiz.questions);
+      setBoolLabels({ true: 'True', false: 'False' });
+      return;
+    }
+
+    const cached = translationCache.current.get(selectedLang);
+    if (cached) {
+      setDisplayQuestions(cached.questions);
+      setBoolLabels(cached.boolLabels);
+      return;
+    }
+
+    setIsTranslating(true);
+    translateAiQuestions(activeQuiz.questions, selectedLang)
+      .then((result) => {
+        translationCache.current.set(selectedLang, result);
+        setDisplayQuestions(result.questions);
+        setBoolLabels(result.boolLabels);
+      })
+      .catch(() => setSelectedLang('en'))
+      .finally(() => setIsTranslating(false));
+  }, [selectedLang, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate quiz
   const generateMutation = useMutation({
@@ -204,6 +343,10 @@ export default function ExamPrepPage() {
     setUserAnswers(new Map());
     setElapsed(0);
     setAttemptResult(null);
+    setSelectedLang('en');
+    if (activeQuiz) setDisplayQuestions(activeQuiz.questions);
+    setBoolLabels({ true: 'True', false: 'False' });
+    translationCache.current.clear();
     setPhase('taking');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -212,6 +355,7 @@ export default function ExamPrepPage() {
     setActiveQuiz(null);
     setAttemptResult(null);
     setUserAnswers(new Map());
+    setSelectedLang('en');
     setPhase('form');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -222,6 +366,8 @@ export default function ExamPrepPage() {
         return a !== undefined && (Array.isArray(a) ? a.length > 0 : a !== '');
       }).length
     : 0;
+
+  const questionsToShow = displayQuestions.length > 0 ? displayQuestions : (activeQuiz?.questions ?? []);
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -258,14 +404,27 @@ export default function ExamPrepPage() {
           </div>
 
           {usage.used >= usage.limit ? (
-            <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl text-sm">
-              <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
-              <div className="text-red-700">
-                <p className="font-semibold">Quiz slot limit reached</p>
-                <p className="text-xs mt-0.5">
-                  You've used all {usage.limit} lifetime AI-generated quiz slots. Retake your existing quizzes below to keep practising.
-                </p>
+            <div className="space-y-6">
+              <div className="flex items-start gap-3 p-4 bg-violet-50 border border-violet-200 rounded-xl text-sm">
+                <AlertCircle className="w-4 h-4 text-violet-500 mt-0.5 shrink-0" />
+                <div className="text-violet-800">
+                  <p className="font-semibold">
+                    {planInfo.plan === 'STARTER'
+                      ? "You've mastered your free questions! Keep the momentum going with PrepReady"
+                      : `You've used all ${usage.limit} AI quiz generations${planInfo.monthlyReset ? ' this month' : ''}`}
+                  </p>
+                  <p className="text-xs mt-0.5 text-violet-700">
+                    {planInfo.plan === 'STARTER'
+                      ? 'Upgrade to get 35 monthly quiz slots, all difficulty levels, and up to 15 questions per quiz.'
+                      : planInfo.monthlyReset
+                      ? 'Your limit resets at the start of next month.'
+                      : 'Retake your existing quizzes below to keep practising.'}
+                  </p>
+                </div>
               </div>
+              {planInfo.plan === 'STARTER' && (
+                <ParticipantPlanCards currentPlan="STARTER" />
+              )}
             </div>
           ) : (
             <form
@@ -295,21 +454,34 @@ export default function ExamPrepPage() {
                   Difficulty Level <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {(['Easy', 'Moderate', 'Difficult'] as Difficulty[]).map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDifficulty(d)}
-                      className={`py-2.5 text-sm font-semibold rounded-lg border transition-colors ${
-                        difficulty === d
-                          ? DIFFICULTY_BTN_ACTIVE[d]
-                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
+                  {(['Easy', 'Moderate', 'Difficult'] as Difficulty[]).map((d) => {
+                    const locked = !planInfo.allowedDifficulties.includes(d);
+                    return (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => !locked && setDifficulty(d)}
+                        disabled={locked}
+                        title={locked ? `Upgrade your plan to unlock ${d} difficulty` : undefined}
+                        className={`py-2.5 text-sm font-semibold rounded-lg border transition-colors flex items-center justify-center gap-1.5 ${
+                          locked
+                            ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                            : difficulty === d
+                            ? DIFFICULTY_BTN_ACTIVE[d]
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        {locked && <Lock className="w-3 h-3" />}
+                        {d}
+                      </button>
+                    );
+                  })}
                 </div>
+                {planInfo.plan === 'STARTER' && (
+                  <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Difficult unlocks with PrepReady or ExamElite
+                  </p>
+                )}
               </div>
 
               {/* Number of questions */}
@@ -318,21 +490,34 @@ export default function ExamPrepPage() {
                   Number of Questions <span className="text-red-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
-                  {([5, 10, 15] as QuestionCount[]).map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setNumQuestions(n)}
-                      className={`py-2.5 text-sm font-semibold rounded-lg border transition-colors ${
-                        numQuestions === n
-                          ? 'bg-violet-600 text-white border-violet-600'
-                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      {n}
-                    </button>
-                  ))}
+                  {([5, 10, 15] as QuestionCount[]).map((n) => {
+                    const locked = !planInfo.allowedQuestionCounts.includes(n);
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => !locked && setNumQuestions(n)}
+                        disabled={locked}
+                        title={locked ? `Upgrade your plan to unlock ${n} questions` : undefined}
+                        className={`py-2.5 text-sm font-semibold rounded-lg border transition-colors flex items-center justify-center gap-1.5 ${
+                          locked
+                            ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed'
+                            : numQuestions === n
+                            ? 'bg-violet-600 text-white border-violet-600'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        {locked && <Lock className="w-3 h-3" />}
+                        {n}
+                      </button>
+                    );
+                  })}
                 </div>
+                {planInfo.plan === 'STARTER' && (
+                  <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> 15 questions unlocks with PrepReady or ExamElite
+                  </p>
+                )}
               </div>
 
               {/* Passing score */}
@@ -411,41 +596,79 @@ export default function ExamPrepPage() {
       {/* ── TAKING PHASE ─────────────────────────────────────────────────────── */}
       {phase === 'taking' && activeQuiz && (
         <div className="mb-8">
-          {/* Sticky progress bar */}
-          <div className="sticky top-16 z-20 bg-white border border-slate-200 rounded-xl shadow-sm px-4 py-3 mb-5 flex items-center gap-3">
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-slate-800 truncate">{activeQuiz.title}</p>
-              <p className="text-xs text-slate-400">{answeredCount}/{activeQuiz.questions.length} answered</p>
+          {/* Sticky progress + language header */}
+          <div className="sticky top-16 z-20 bg-white border border-slate-200 rounded-xl shadow-sm px-4 py-3 mb-5">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Quiz title + answered count */}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-slate-800 truncate">{activeQuiz.title}</p>
+                <p className="text-xs text-slate-400">{answeredCount}/{activeQuiz.questions.length} answered</p>
+              </div>
+
+              {/* Language selector */}
+              <div className="flex items-center gap-1.5">
+                <Globe className="w-4 h-4 text-slate-400 shrink-0" />
+                <select
+                  value={selectedLang}
+                  onChange={(e) => setSelectedLang(e.target.value)}
+                  disabled={isTranslating}
+                  className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-wait bg-white"
+                >
+                  {LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+                {isTranslating && (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-violet-500 shrink-0" />
+                )}
+              </div>
+
+              {/* Progress bar (sm+) */}
+              <div className="hidden sm:block w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
+                <div
+                  className="h-full bg-violet-500 rounded-full transition-all duration-300"
+                  style={{ width: `${(answeredCount / activeQuiz.questions.length) * 100}%` }}
+                />
+              </div>
+
+              {/* Timer */}
+              <span className="flex items-center gap-1 text-sm font-semibold text-slate-700 shrink-0">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                {formatTimer(elapsed)}
+              </span>
+
+              {/* Submit button */}
+              <button
+                onClick={handleSubmitQuiz}
+                disabled={submitMutation.isPending}
+                className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
+              >
+                {submitMutation.isPending
+                  ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  : <>Submit <ChevronRight className="w-3.5 h-3.5" /></>
+                }
+              </button>
             </div>
-            {/* Progress fill */}
-            <div className="hidden sm:block w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
-              <div
-                className="h-full bg-violet-500 rounded-full transition-all duration-300"
-                style={{ width: `${(answeredCount / activeQuiz.questions.length) * 100}%` }}
-              />
-            </div>
-            <span className="flex items-center gap-1 text-sm font-semibold text-slate-700 shrink-0">
-              <Clock className="w-3.5 h-3.5 text-slate-400" />
-              {formatTimer(elapsed)}
-            </span>
-            <button
-              onClick={handleSubmitQuiz}
-              disabled={submitMutation.isPending}
-              className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 disabled:opacity-50 transition-colors"
-            >
-              {submitMutation.isPending
-                ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                : <>Submit <ChevronRight className="w-3.5 h-3.5" /></>
-              }
-            </button>
+
+            {/* Translating notice */}
+            {isTranslating && (
+              <p className="text-xs text-violet-600 mt-2 flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Translating quiz via Google Translate…
+              </p>
+            )}
           </div>
 
           {/* Questions */}
           <div className="space-y-4">
-            {activeQuiz.questions.map((q, idx) => {
-              const selected = userAnswers.get(q.id);
+            {questionsToShow.map((q, idx) => {
+              // Always use original question IDs for answer tracking
+              const originalQ = activeQuiz.questions[idx];
+              const selected = userAnswers.get(originalQ.id);
               return (
-                <div key={q.id} className="bg-white rounded-xl border border-slate-200 p-5">
+                <div key={originalQ.id} className="bg-white rounded-xl border border-slate-200 p-5">
                   <div className="flex gap-3 mb-4">
                     <span className="shrink-0 w-7 h-7 bg-violet-50 text-violet-700 text-xs font-bold rounded-lg flex items-center justify-center">
                       {idx + 1}
@@ -464,14 +687,14 @@ export default function ExamPrepPage() {
                         {(['true', 'false'] as const).map((val) => (
                           <button
                             key={val}
-                            onClick={() => handleAnswer(q.id, val, q.type)}
+                            onClick={() => handleAnswer(originalQ.id, val, originalQ.type)}
                             className={`py-2.5 rounded-lg text-sm font-semibold border transition-colors ${
                               selected === val
                                 ? 'bg-violet-600 text-white border-violet-600'
                                 : 'bg-white text-slate-700 border-slate-200 hover:border-violet-300 hover:bg-violet-50'
                             }`}
                           >
-                            {val === 'true' ? 'True' : 'False'}
+                            {val === 'true' ? boolLabels.true : boolLabels.false}
                           </button>
                         ))}
                       </div>
@@ -484,7 +707,7 @@ export default function ExamPrepPage() {
                         return (
                           <button
                             key={key}
-                            onClick={() => handleAnswer(q.id, key, q.type)}
+                            onClick={() => handleAnswer(originalQ.id, key, originalQ.type)}
                             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-colors ${
                               isSelected
                                 ? 'bg-violet-50 border-violet-400'
@@ -581,15 +804,14 @@ export default function ExamPrepPage() {
               >
                 Retake Quiz
               </button>
-              {usage.used < usage.limit && (
+              {usage.used < usage.limit ? (
                 <button
                   onClick={handleNewQuiz}
                   className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition-colors text-sm"
                 >
                   <Sparkles className="w-4 h-4" /> Generate New Quiz
                 </button>
-              )}
-              {usage.used >= usage.limit && (
+              ) : (
                 <button
                   onClick={handleNewQuiz}
                   className="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-sm"
@@ -598,6 +820,11 @@ export default function ExamPrepPage() {
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Plan comparison */}
+          <div className="mb-8 p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
+            <ParticipantPlanCards currentPlan={planInfo.plan} />
           </div>
 
           {/* Question review */}
@@ -613,11 +840,11 @@ export default function ExamPrepPage() {
                 if (Array.isArray(val)) {
                   return val.length === 0
                     ? 'Not answered'
-                    : val.map((k) => (q.options?.[k] ? `${k}. ${q.options[k]}` : k)).join(', ');
+                    : val.map((k) => (q.options?.[k] ? `${k}. ${q.options![k]}` : k)).join(', ');
                 }
                 if (val === '') return 'Not answered';
                 if (q.type === 'TRUE_FALSE') return val === 'true' ? 'True' : 'False';
-                return q.options?.[val] ? `${val}. ${q.options[val]}` : val;
+                return q.options?.[val] ? `${val}. ${q.options![val]}` : val;
               }
 
               function displayCorrect(): string {
@@ -626,11 +853,11 @@ export default function ExamPrepPage() {
                 }
                 if (Array.isArray(q.correctAnswer)) {
                   return q.correctAnswer
-                    .map((k) => (q.options?.[k] ? `${k}. ${q.options[k]}` : k))
+                    .map((k) => (q.options?.[k] ? `${k}. ${q.options![k]}` : k))
                     .join(', ');
                 }
                 const ca = String(q.correctAnswer);
-                return q.options?.[ca] ? `${ca}. ${q.options[ca]}` : ca;
+                return q.options?.[ca] ? `${ca}. ${q.options![ca]}` : ca;
               }
 
               return (

@@ -8,7 +8,7 @@ import { useAuthStore } from '../../store/authStore';
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
+  const { setAuth, user } = useAuthStore();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export default function PaymentSuccess() {
             Your payment went through but we couldn't confirm it yet. Please check your{' '}
             <strong>Account</strong> page in a few minutes.
           </p>
-          <Button onClick={() => navigate('/admin')}>Go to Dashboard</Button>
+          <Button onClick={() => navigate(user?.role === 'PARTICIPANT' ? '/participant' : '/admin')}>Go to Dashboard</Button>
         </div>
       </div>
     );
@@ -60,9 +60,9 @@ export default function PaymentSuccess() {
           <CheckCircle2 className="w-9 h-9 text-emerald-600" />
         </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">You're all set!</h2>
-        <p className="text-slate-500 mb-1">Your <strong>Paid Plan</strong> is now active.</p>
+        <p className="text-slate-500 mb-1">Your <strong>{user?.role === 'PARTICIPANT' ? 'XamGeni' : 'Paid'} Plan</strong> is now active.</p>
         <p className="text-slate-400 text-sm mb-8">Manage your subscription anytime from Account settings.</p>
-        <Button className="w-full justify-center" size="lg" onClick={() => navigate('/admin')}>
+        <Button className="w-full justify-center" size="lg" onClick={() => navigate(user?.role === 'PARTICIPANT' ? '/participant' : '/admin')}>
           Go to Dashboard
         </Button>
       </div>

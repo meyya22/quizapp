@@ -226,7 +226,18 @@ export default function UserReport() {
                   </td>
                   <td className="px-4 py-3">{roleBadge(user.role)}</td>
                   <td className="px-4 py-3">{tierBadge(user.tier)}</td>
-                  <td className="px-4 py-3 text-xs text-slate-600">{user.quizCount}</td>
+                  <td className="px-4 py-3 text-xs text-slate-600">
+                    {user.role === 'PARTICIPANT' ? (
+                      <span className="flex items-center gap-1.5">
+                        {user.aiQuizCount}
+                        {user.aiQuizCount > 0 && (
+                          <span className="text-[10px] font-medium text-violet-600 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded-full leading-none">XamGeni</span>
+                        )}
+                      </span>
+                    ) : (
+                      user.quizCount
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-xs text-slate-600">{user._count.attempts}</td>
                   <td className="px-4 py-3 text-xs text-slate-500">
                     {user.city || user.country ? (

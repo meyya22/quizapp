@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
 import { sendSubscriptionConfirmationEmail } from '../services/email.service';
+import { PARTICIPANT_PLANS } from '../config/participantPlans';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-04-22.dahlia' } as any);
@@ -56,6 +57,58 @@ export async function createCheckoutSession(req: AuthRequest, res: Response): Pr
     }],
     success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
+    metadata: { userId: user.id, plan },
+    subscription_data: { metadata: { userId: user.id, plan } },
+  });
+
+  res.json({ url: session.url });
+}
+
+export async function createParticipantCheckoutSession(req: AuthRequest, res: Response): Promise<void> {
+  const { plan } = req.body as { plan: 'PREPREADY' | 'EXAMELITE' };
+  if (!['PREPREADY', 'EXAMELITE'].includes(plan)) {
+    res.status(400).json({ error: 'plan must be PREPREADY or EXAMELITE' });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+  if (!user) { res.status(404).json({ error: 'User not found' }); return; }
+  if (user.tier === 'PAID') {
+    res.status(400).json({ error: 'You already have an active subscription.' });
+    return;
+  }
+
+  const planConfig = PARTICIPANT_PLANS[plan];
+  if (!planConfig.stripeProductId) {
+    res.status(503).json({ error: 'Plan not configured.' });
+    return;
+  }
+
+  let customerId = user.stripeCustomerId ?? undefined;
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: user.email,
+      name: user.name,
+      metadata: { userId: user.id },
+    });
+    customerId = customer.id;
+    await prisma.user.update({ where: { id: user.id }, data: { stripeCustomerId: customerId } });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    customer: customerId,
+    mode: 'subscription',
+    line_items: [{
+      quantity: 1,
+      price_data: {
+        currency: 'usd',
+        product: planConfig.stripeProductId,
+        unit_amount: planConfig.priceMonthly,
+        recurring: { interval: 'month' },
+      },
+    }],
+    success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL}/participant`,
     metadata: { userId: user.id, plan },
     subscription_data: { metadata: { userId: user.id, plan } },
   });

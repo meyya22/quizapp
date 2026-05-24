@@ -93,6 +93,7 @@ export interface UserRecord {
   city?: string;
   createdAt: string;
   quizCount: number;
+  aiQuizCount: number;
   _count: { attempts: number };
 }
 

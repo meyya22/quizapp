@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, LogOut, BookOpen, HelpCircle, Sparkles } from 'lucide-react';
+import { LayoutDashboard, LogOut, BookOpen, HelpCircle, Sparkles, CreditCard } from 'lucide-react';
 import Footer from '../Footer';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
@@ -39,6 +39,10 @@ export default function ParticipantLayout() {
               <LayoutDashboard className="w-4 h-4" />
               <span className="hidden sm:inline">Quizzes</span>
             </NavLink>
+            <NavLink to="/participant/plans" className={navLinkClass}>
+              <CreditCard className="w-4 h-4" />
+              <span className="hidden sm:inline">Payment Plans</span>
+            </NavLink>
             <NavLink to="/participant/help" className={navLinkClass}>
               <HelpCircle className="w-4 h-4" />
               <span className="hidden sm:inline">Help</span>
@@ -46,14 +50,14 @@ export default function ParticipantLayout() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+            <NavLink to="/participant/account" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                 <span className="text-sm font-semibold text-blue-700">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
               <span className="text-sm font-medium text-slate-700 hidden sm:block">{user?.name}</span>
-            </div>
+            </NavLink>
             <button
               onClick={handleLogout}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"

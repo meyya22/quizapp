@@ -63,14 +63,16 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
       country: true,
       city: true,
       createdAt: true,
-      _count: { select: { attempts: true } },
+      _count: { select: { attempts: true, aiQuizzes: true } },
       categories: { select: { _count: { select: { quizzes: true } } } },
     },
   });
 
-  const result = users.map(({ categories, ...u }) => ({
+  const result = users.map(({ categories, _count, ...u }) => ({
     ...u,
+    _count: { attempts: _count.attempts },
     quizCount: categories.reduce((sum, c) => sum + c._count.quizzes, 0),
+    aiQuizCount: _count.aiQuizzes,
   }));
 
   res.json(result);
@@ -189,6 +191,140 @@ export async function sendEmailCampaign(req: AuthRequest, res: Response): Promis
   res.json({ sent, failed, total: recipients.length });
 }
 
+function buildParticipantCampaignHtml(name: string, body: string, appUrl: string): string {
+  const paragraphs = body
+    .split(/\n\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.7;">${p.replace(/\n/g, '<br/>')}</p>`)
+    .join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f3ff;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ff;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:28px 40px;text-align:center;">
+            <span style="color:#ffffff;font-size:20px;font-weight:bold;letter-spacing:1px;">&#10024; XamGeni by Xam Bridge</span>
+            <p style="margin:6px 0 0;color:#ddd6fe;font-size:13px;">AI-powered quiz prep for every learner</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 40px;">
+            ${paragraphs}
+            <table cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
+              <tr>
+                <td style="background:#7c3aed;border-radius:10px;padding:12px 28px;">
+                  <a href="${appUrl}/login" style="color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">Open XamGeni &rarr;</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:18px 40px;text-align:center;">
+            <p style="margin:0;color:#94a3b8;font-size:12px;">
+              &copy; ${new Date().getFullYear()} Xam Bridge &middot; You are receiving this because you registered as a learner.
+              &middot; <a href="${appUrl}" style="color:#94a3b8;">xambridge.com</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+export async function sendParticipantEmailCampaign(req: AuthRequest, res: Response): Promise<void> {
+  const { recipientIds, subject, body, templateName } = req.body as {
+    recipientIds: string[];
+    subject: string;
+    body: string;
+    templateName: string;
+  };
+
+  if (!Array.isArray(recipientIds) || !recipientIds.length || !subject?.trim() || !body?.trim()) {
+    res.status(400).json({ error: 'recipientIds, subject, and body are required' });
+    return;
+  }
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, FRONTEND_URL } = process.env;
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    res.status(503).json({ error: 'Email service not configured' });
+    return;
+  }
+
+  const recipients = await prisma.user.findMany({
+    where: { id: { in: recipientIds }, role: 'PARTICIPANT' },
+    select: { id: true, name: true, email: true },
+  });
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT || 587),
+    secure: SMTP_PORT === '465',
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+  });
+
+  const appUrl = FRONTEND_URL || 'https://www.xambridge.com';
+  let sent = 0;
+  let failed = 0;
+  const sentRecipients: { name: string; email: string }[] = [];
+
+  for (const user of recipients) {
+    const personalizedSubject = subject.replace(/\{name\}/g, user.name);
+    const personalizedBody = body.replace(/\{name\}/g, user.name);
+    try {
+      await transporter.sendMail({
+        from: SMTP_FROM || SMTP_USER,
+        to: user.email,
+        subject: personalizedSubject,
+        html: buildParticipantCampaignHtml(user.name, personalizedBody, appUrl),
+      });
+      sent++;
+      sentRecipients.push({ name: user.name, email: user.email });
+    } catch {
+      failed++;
+    }
+  }
+
+  await prisma.campaignHistory.create({
+    data: {
+      templateName: templateName || 'Custom',
+      subject,
+      sent,
+      failed,
+      recipients: {
+        create: sentRecipients.map((u) => ({ name: u.name, email: u.email })),
+      },
+    },
+  });
+
+  res.json({ sent, failed, total: recipients.length });
+}
+
+export async function getParticipantAiQuizReport(_req: AuthRequest, res: Response): Promise<void> {
+  const quizzes = await prisma.aiQuiz.findMany({
+    where: { user: { role: 'PARTICIPANT' } },
+    select: {
+      id: true,
+      topic: true,
+      difficulty: true,
+      numQuestions: true,
+      questions: true,
+      createdAt: true,
+      user: { select: { name: true, email: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 500,
+  });
+  res.json(quizzes);
+}
+
 export async function getCampaignHistory(_req: AuthRequest, res: Response): Promise<void> {
   const history = await prisma.campaignHistory.findMany({
     orderBy: { sentAt: 'desc' },
@@ -208,4 +344,12 @@ export async function getCampaignRecipients(req: AuthRequest, res: Response): Pr
     return;
   }
   res.json(campaign.recipients);
+}
+
+export async function getAnonymousQuizSessions(_req: AuthRequest, res: Response): Promise<void> {
+  const sessions = await prisma.previewSession.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 500,
+  });
+  res.json({ sessions });
 }

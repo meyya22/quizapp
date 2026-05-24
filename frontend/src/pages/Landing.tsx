@@ -1,362 +1,646 @@
-﻿import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
-  BookOpen, Check, X, Zap, Crown, Users, BarChart3, Mail,
-  Brain, Globe, Upload, ShieldCheck, Star, ArrowRight, Sparkles,
-  GraduationCap, ChevronRight,
+  BookOpen, Sparkles, Zap, ArrowRight, Clock, ChevronRight,
+  CheckCircle, XCircle, AlertCircle, Lock, Trophy, Crown,
 } from 'lucide-react';
+import api from '../services/api';
 
-const FREE_FEATURES = [
-  { label: '5 quizzes', ok: true },
-  { label: '10 questions per quiz', ok: true },
-  { label: '3 AI generations / month', ok: true },
-  { label: '10 contacts', ok: true },
-  { label: '50 emails / month', ok: true },
-  { label: '50 quiz responses (lifetime)', ok: true },
-  { label: 'CSV import', ok: false },
-  { label: 'Quiz translation', ok: false },
-  { label: 'Study mode', ok: false },
-  { label: 'Advanced analytics', ok: false },
-];
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-const PAID_FEATURES = [
-  { label: '50 quizzes', ok: true },
-  { label: '100 questions per quiz', ok: true },
-  { label: '25 AI generations / month', ok: true },
-  { label: '500 contacts', ok: true },
-  { label: '500 emails / month', ok: true },
-  { label: '2,000 quiz responses / month', ok: true },
-  { label: 'Custom email composer', ok: true },
-  { label: 'CSV / Excel import', ok: true },
-  { label: 'Quiz translation (9 languages)', ok: true },
-  { label: 'Study mode for participants', ok: true },
-  { label: 'Advanced analytics & reports', ok: true },
-];
+type Phase = 'home' | 'generating' | 'taking' | 'results';
 
-const HOW_IT_WORKS = [
-  {
-    icon: BookOpen,
-    title: 'Create your quiz',
-    desc: 'Build quizzes with multiple question types  - MCQ, True/False, Free Text, or let AI generate them for you.',
-  },
-  {
-    icon: Mail,
-    title: 'Invite participants',
-    desc: 'Share a link or email your contact list directly. No sign-up required for learners to take a quiz.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Track results',
-    desc: 'Review detailed reports, scores, and responses. See who passed and where learners struggled.',
-  },
-];
+interface PreviewQuestion {
+  id: string;
+  type: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'MULTIPLE_RESPONSE';
+  text: string;
+  options: Record<string, string> | null;
+  correctAnswer: string | string[];
+  explanation: string;
+}
 
-const HIGHLIGHTS = [
-  { icon: Brain, label: 'AI Question Generator', desc: 'Describe a topic and let Claude AI draft questions for you.' },
-  { icon: Globe, label: 'Multi-language Quizzes', desc: 'Translate quizzes into 9 languages with one click.' },
-  { icon: Upload, label: 'CSV / Excel Import', desc: 'Bulk-import questions from spreadsheets in seconds.' },
-  { icon: Users, label: 'Audience Management', desc: 'Maintain contact lists and broadcast quizzes by email.' },
-  { icon: BarChart3, label: 'Rich Analytics', desc: 'Score distributions, pass rates, and per-question insights.' },
-  { icon: ShieldCheck, label: 'Secure & Private', desc: 'Your data is yours. No ads, no tracking, no nonsense.' },
-];
+interface GradedAnswer {
+  questionId: string;
+  answer: string | string[] | null;
+  isCorrect: boolean;
+  correctAnswer: string | string[];
+}
+
+interface QuizResult {
+  score: number;
+  passed: boolean;
+  correctCount: number;
+  totalCount: number;
+  gradedAnswers: GradedAnswer[];
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const PREVIEW_PASSING_SCORE = 60;
+
+function scoreQuiz(
+  questions: PreviewQuestion[],
+  answers: Map<string, string | string[]>
+): QuizResult {
+  let correct = 0;
+  const gradedAnswers: GradedAnswer[] = questions.map((q) => {
+    const submitted = answers.get(q.id) ?? null;
+    let isCorrect = false;
+    if (q.type === 'MULTIPLE_RESPONSE') {
+      const ca = (Array.isArray(q.correctAnswer) ? [...q.correctAnswer] : [String(q.correctAnswer)]).sort();
+      const sa = (Array.isArray(submitted) ? [...submitted] : submitted ? [String(submitted)] : []).sort();
+      isCorrect = JSON.stringify(ca) === JSON.stringify(sa);
+    } else {
+      isCorrect =
+        String(submitted ?? '').trim().toLowerCase() ===
+        String(q.correctAnswer).trim().toLowerCase();
+    }
+    if (isCorrect) correct++;
+    return { questionId: q.id, answer: submitted, isCorrect, correctAnswer: q.correctAnswer };
+  });
+  const score = questions.length > 0 ? (correct / questions.length) * 100 : 0;
+  return {
+    score,
+    passed: score >= PREVIEW_PASSING_SCORE,
+    correctCount: correct,
+    totalCount: questions.length,
+    gradedAnswers,
+  };
+}
+
+function formatTimer(s: number): string {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+}
+
+function formatCorrectAnswer(q: PreviewQuestion): string {
+  if (q.type === 'TRUE_FALSE') {
+    return String(q.correctAnswer) === 'true' ? 'True' : 'False';
+  }
+  if (q.type === 'MULTIPLE_RESPONSE') {
+    const keys = Array.isArray(q.correctAnswer) ? q.correctAnswer : [String(q.correctAnswer)];
+    return keys.map((k) => (q.options ? `${k}: ${q.options[k] ?? k}` : k)).join(', ');
+  }
+  const key = String(q.correctAnswer);
+  return q.options ? `${key}: ${q.options[key] ?? key}` : key;
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Landing() {
-  const navigate = useNavigate();
+  const [phase, setPhase] = useState<Phase>('home');
+  const [topic, setTopic] = useState('');
+  const [genError, setGenError] = useState<string | null>(null);
+
+  const [questions, setQuestions] = useState<PreviewQuestion[]>([]);
+  const [quizTopic, setQuizTopic] = useState('');
+  const [userAnswers, setUserAnswers] = useState<Map<string, string | string[]>>(new Map());
+  const [elapsed, setElapsed] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef(0);
+  const [result, setResult] = useState<QuizResult | null>(null);
+
+  // Timer
+  useEffect(() => {
+    if (phase === 'taking') {
+      startTimeRef.current = Date.now();
+      timerRef.current = setInterval(() => {
+        setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }, 1000);
+    } else {
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [phase]);
+
+  async function handleGenerate() {
+    if (!topic.trim() || phase === 'generating') return;
+    setGenError(null);
+    setPhase('generating');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const res = await api.post('/ai-quiz/preview/generate', { topic: topic.trim() });
+      setQuestions(res.data.questions);
+      setQuizTopic(res.data.topic);
+      setUserAnswers(new Map());
+      setElapsed(0);
+      setPhase('taking');
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { error?: string } } }).response?.data?.error ??
+        'Failed to generate quiz. Please try again.';
+      setGenError(msg);
+      setPhase('home');
+    }
+  }
+
+  function handleAnswer(questionId: string, value: string, type: string) {
+    setUserAnswers((prev) => {
+      const next = new Map(prev);
+      if (type === 'MULTIPLE_RESPONSE') {
+        const cur = (next.get(questionId) as string[] | undefined) ?? [];
+        next.set(
+          questionId,
+          cur.includes(value) ? cur.filter((a) => a !== value) : [...cur, value]
+        );
+      } else {
+        next.set(questionId, value);
+      }
+      return next;
+    });
+  }
+
+  function handleSubmit() {
+    const scored = scoreQuiz(questions, userAnswers);
+    setResult(scored);
+    setPhase('results');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    api.post('/ai-quiz/preview/submit', { topic: quizTopic, score: scored.score, passed: scored.passed }).catch(() => {});
+  }
+
+  function handleTryAgain() {
+    setPhase('home');
+    setQuestions([]);
+    setUserAnswers(new Map());
+    setResult(null);
+    setElapsed(0);
+    setGenError(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const answeredCount = questions.filter((q) => {
+    const a = userAnswers.get(q.id);
+    return a !== undefined && (Array.isArray(a) ? a.length > 0 : a !== '');
+  }).length;
 
   return (
     <>
-    <Helmet>
-      <title>Xam Bridge  - Free Online Quiz Maker for Teachers &amp; Trainers</title>
-      <meta name="description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support (Hindi, Tamil, Bengali &amp; more), analytics, and free to start. No credit card required." />
-      <meta name="keywords" content="online quiz maker, free quiz builder, quiz creator for teachers, AI quiz generator, employee training quiz, Google Forms alternative, MCQ maker, online assessment tool, multilingual quiz, quiz platform" />
-      <link rel="canonical" href="https://www.xambridge.com/" />
-      <meta property="og:title" content="Xam Bridge  - Free Online Quiz Maker for Teachers &amp; Trainers" />
-      <meta property="og:description" content="Create quizzes for your students or team in minutes. AI-powered question generation, multilingual support, and free to start." />
-      <meta property="og:url" content="https://www.xambridge.com/" />
-      <meta property="og:image" content="https://www.xambridge.com/og-image.svg" />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:image" content="https://www.xambridge.com/og-image.svg" />
-    </Helmet>
-    <div className="min-h-screen bg-white text-slate-900 font-sans">
+      <Helmet>
+        <title>XamGeni — Free AI Quiz Prep · Xam Bridge</title>
+        <meta
+          name="description"
+          content="Generate a personalised quiz on any topic instantly with XamGeni, powered by Claude AI. Free quiz prep — no sign-up needed."
+        />
+        <meta name="keywords" content="AI quiz generator, free quiz prep, XamGeni, online quiz maker, study tool, exam preparation" />
+        <link rel="canonical" href="https://www.xambridge.com/" />
+        <meta property="og:title" content="XamGeni — Free AI Quiz Prep · Xam Bridge" />
+        <meta property="og:description" content="Generate a personalised quiz on any topic instantly with XamGeni, powered by Claude AI." />
+        <meta property="og:url" content="https://www.xambridge.com/" />
+        <meta property="og:image" content="https://www.xambridge.com/og-image.svg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://www.xambridge.com/og-image.svg" />
+      </Helmet>
 
-      {/* â"€â"€ Nav â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" />
+      <div className="min-h-screen bg-white text-slate-900 font-sans flex flex-col">
+
+        {/* ── Nav ───────────────────────────────────────────────────────────── */}
+        <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
+          <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-lg font-bold tracking-tight">Xam Bridge</span>
             </div>
-            <span className="text-xl font-bold tracking-tight">Xam Bridge</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/register/admin"
-              className="text-sm font-semibold bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Get Started Free
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* â"€â"€ Hero â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="pt-32 pb-20 px-6 text-center bg-gradient-to-b from-blue-50 to-white">
-        <div className="max-w-3xl mx-auto">
-          {/* Free learner badge */}
-          <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold px-4 py-1.5 rounded-full mb-6">
-            <GraduationCap className="w-4 h-4" />
-            100% Free for every learner, at any age
-          </div>
-
-          <h1 className="text-5xl md:text-6xl font-extrabold leading-tight tracking-tight mb-5">
-            Build, share&nbsp;&amp;&nbsp;track<br />
-            <span className="text-blue-600">quizzes that matter</span>
-          </h1>
-
-          <p className="text-lg text-slate-500 leading-relaxed mb-8 max-w-xl mx-auto">
-            Xam Bridge is a modern quiz platform for educators, trainers, and teams.
-            Create engaging assessments in minutes, invite learners with a single link,
-            and gain instant insights  - no experience needed.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/register/admin"
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors text-base shadow-md shadow-blue-100"
-            >
-              Start for Free <ArrowRight className="w-4 h-4" />
-            </Link>
-            <button
-              onClick={() => navigate('/payment')}
-              className="inline-flex items-center justify-center gap-2 border border-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl hover:bg-slate-50 transition-colors text-base"
-            >
-              <Crown className="w-4 h-4 text-amber-500" /> See Paid Plan
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* â"€â"€ Learner Callout â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="py-10 bg-emerald-600 text-white text-center px-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <Star className="w-5 h-5 text-emerald-200" />
-            <span className="text-xl font-bold">Learners always take quizzes for free</span>
-            <Star className="w-5 h-5 text-emerald-200" />
-          </div>
-          <p className="text-emerald-100 text-sm mb-5">
-            Just sign up to take a quiz. Students, employees, and curious minds of any age
-            can jump in instantly with a shared link. Knowledge has no price.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/register/learner"
-              className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-5 py-2.5 rounded-xl hover:bg-emerald-50 transition-colors shadow text-sm"
-            >
-              Sign Up as Learner <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/register/admin"
-              className="inline-flex items-center gap-2 bg-emerald-800 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-emerald-900 transition-colors shadow text-sm"
-            >
-              Sign Up as Teacher / Admin <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* â"€â"€ How it works â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="py-20 px-6 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How it works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {HOW_IT_WORKS.map((step, i) => (
-              <div key={i} className="text-center">
-                <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <step.icon className="w-7 h-7 text-blue-600" />
-                </div>
-                <div className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">Step {i + 1}</div>
-                <h3 className="text-lg font-bold mb-2">{step.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* â"€â"€ Feature highlights â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="py-20 px-6 bg-slate-50">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Everything you need to teach &amp; assess</h2>
-            <p className="text-slate-500">Powerful tools for educators, trainers, and teams  - built to be simple.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {HIGHLIGHTS.map((h) => (
-              <div key={h.label} className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center mb-3">
-                  <h.icon className="w-5 h-5 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-slate-900 mb-1">{h.label}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{h.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* â"€â"€ Pricing / Plan comparison â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="py-20 px-6 bg-white" id="pricing">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Simple, honest pricing</h2>
-            <p className="text-slate-500">Start free. Upgrade when you need more power.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-
-            {/* Free Plan */}
-            <div className="rounded-2xl border border-slate-200 p-7">
-              <div className="mb-5">
-                <div className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">Free Plan</div>
-                <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-slate-900">$0</span>
-                  <span className="text-slate-400 mb-1.5">/ forever</span>
-                </div>
-                <p className="text-sm text-slate-500 mt-2">Perfect for individuals getting started.</p>
-              </div>
-              <ul className="space-y-2.5 mb-7">
-                {FREE_FEATURES.map((f) => (
-                  <li key={f.label} className="flex items-center gap-2.5 text-sm">
-                    {f.ok
-                      ? <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                      : <X className="w-4 h-4 text-slate-300 flex-shrink-0" />}
-                    <span className={f.ok ? 'text-slate-700' : 'text-slate-400'}>{f.label}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="flex items-center gap-3">
               <Link
-                to="/register/admin"
-                className="flex items-center justify-center gap-2 w-full border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl hover:bg-slate-50 transition-colors"
+                to="/login"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
               >
-                Get Started Free <ChevronRight className="w-4 h-4" />
+                Sign In
+              </Link>
+              <Link
+                to="/register/learner"
+                className="text-sm font-semibold bg-violet-600 text-white px-4 py-2 rounded-lg hover:bg-violet-700 transition-colors"
+              >
+                Get Started Free
               </Link>
             </div>
+          </div>
+        </nav>
 
-            {/* Paid Plan */}
-            <div className="rounded-2xl border-2 border-blue-600 p-7 relative shadow-lg shadow-blue-50">
-              <div className="absolute -top-3 right-5 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
-                Most Popular
-              </div>
-              <div className="mb-5">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <Crown className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-semibold text-blue-600 uppercase tracking-widest">Paid Plan</span>
+        {/* ── Main ──────────────────────────────────────────────────────────── */}
+        <main className="flex-1 pt-16 flex flex-col">
+
+          {/* ── HOME PHASE ──────────────────────────────────────────────────── */}
+          {phase === 'home' && (
+            <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
+              <div className="w-full max-w-lg">
+
+                {/* Badge */}
+                <div className="flex justify-center mb-5">
+                  <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 text-violet-700 text-sm font-semibold px-4 py-1.5 rounded-full">
+                    <Sparkles className="w-4 h-4" />
+                    XamGeni — AI Quiz Prep, no sign-up needed
+                  </div>
                 </div>
-                <div className="flex items-end gap-1">
-                  <span className="text-5xl font-extrabold text-slate-900">$5</span>
-                  <span className="text-slate-400 mb-1.5">/ month</span>
+
+                {/* Headline */}
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-center tracking-tight leading-tight mb-3">
+                  Quiz yourself on<br />
+                  <span className="text-violet-600">anything. Instantly.</span>
+                </h1>
+                <p className="text-center text-slate-500 mb-7 text-base leading-relaxed">
+                  Type any topic — get 5 AI-crafted questions in seconds.<br className="hidden sm:block" />
+                  No account. No cost. Just knowledge.
+                </p>
+
+                {/* Preview form card */}
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                  <div className="space-y-4">
+
+                    {/* Topic input */}
+                    <div>
+                      <input
+                        type="text"
+                        maxLength={100}
+                        placeholder='e.g. "SAT Math", "Python basics", "World War II"'
+                        value={topic}
+                        onChange={(e) => setTopic(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 placeholder:text-slate-400"
+                        autoFocus
+                      />
+                    </div>
+
+                    {/* Selectors row */}
+                    <div className="grid grid-cols-2 gap-4">
+
+                      {/* Difficulty */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Difficulty</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <button className="py-2 text-xs font-bold rounded-lg border bg-emerald-500 text-white border-emerald-500">
+                            Easy
+                          </button>
+                          <button
+                            disabled
+                            className="py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center gap-0.5 cursor-not-allowed"
+                          >
+                            <Lock className="w-2.5 h-2.5" /> Med
+                          </button>
+                          <button
+                            disabled
+                            className="py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center gap-0.5 cursor-not-allowed"
+                          >
+                            <Lock className="w-2.5 h-2.5" /> Hard
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Questions */}
+                      <div>
+                        <p className="text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Questions</p>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          <button className="py-2 text-xs font-bold rounded-lg border bg-violet-600 text-white border-violet-600">
+                            5
+                          </button>
+                          <button
+                            disabled
+                            className="py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center gap-0.5 cursor-not-allowed"
+                          >
+                            <Lock className="w-2.5 h-2.5" /> 10
+                          </button>
+                          <button
+                            disabled
+                            className="py-2 text-xs font-medium rounded-lg border border-slate-200 bg-slate-50 text-slate-400 flex items-center justify-center gap-0.5 cursor-not-allowed"
+                          >
+                            <Lock className="w-2.5 h-2.5" /> 15
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Error */}
+                    {genError && (
+                      <div className="flex items-start gap-2.5 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                        <p className="text-sm text-red-700">{genError}</p>
+                      </div>
+                    )}
+
+                    {/* Generate button */}
+                    <button
+                      onClick={handleGenerate}
+                      disabled={!topic.trim()}
+                      className="w-full flex items-center justify-center gap-2 py-3 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                    >
+                      <Zap className="w-4 h-4" />
+                      Generate My Quiz — Free
+                    </button>
+
+                    {/* Locked hint */}
+                    <p className="text-center text-xs text-slate-400 leading-relaxed">
+                      <Lock className="w-3 h-3 inline mr-1 -mt-0.5" />
+                      More options unlock when you{' '}
+                      <Link to="/register/learner" className="text-violet-600 hover:underline font-medium">
+                        sign up free
+                      </Link>
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-emerald-600 font-medium mt-0.5">or $50/year  - save 16%</p>
-                <p className="text-sm text-slate-500 mt-2">For educators and teams who want full power.</p>
+
+                {/* Educator callout */}
+                <p className="text-center text-xs text-slate-400 mt-5">
+                  Building quizzes for your team or classroom?{' '}
+                  <Link to="/register/admin" className="text-blue-600 hover:underline font-medium">
+                    Get started as an educator →
+                  </Link>
+                </p>
               </div>
-              <ul className="space-y-2.5 mb-7">
-                {PAID_FEATURES.map((f) => (
-                  <li key={f.label} className="flex items-center gap-2.5 text-sm">
-                    <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                    <span className="text-slate-700">{f.label}</span>
+            </div>
+          )}
+
+          {/* ── GENERATING PHASE ────────────────────────────────────────────── */}
+          {phase === 'generating' && (
+            <div className="flex-1 flex items-center justify-center px-4">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                  <Sparkles className="w-8 h-8 text-violet-600 animate-pulse" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">XamGeni is crafting your quiz…</h2>
+                <p className="text-slate-500 text-sm">5 easy questions on "{topic}"</p>
+                <div className="flex items-center justify-center gap-1.5 mt-6">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="w-2 h-2 bg-violet-400 rounded-full animate-bounce"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── TAKING PHASE ────────────────────────────────────────────────── */}
+          {phase === 'taking' && (
+            <div className="max-w-2xl mx-auto w-full px-4 py-6">
+
+              {/* Sticky header */}
+              <div className="sticky top-16 z-20 bg-white border border-slate-200 rounded-xl shadow-sm px-4 py-3 mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 truncate">{quizTopic} — Easy Preview</p>
+                    <p className="text-xs text-slate-400">{answeredCount}/{questions.length} answered</p>
+                  </div>
+                  <div className="hidden sm:block w-20 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
+                    <div
+                      className="h-full bg-violet-500 rounded-full transition-all duration-300"
+                      style={{ width: `${(answeredCount / questions.length) * 100}%` }}
+                    />
+                  </div>
+                  <span className="flex items-center gap-1 text-sm font-semibold text-slate-700 shrink-0">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    {formatTimer(elapsed)}
+                  </span>
+                  <button
+                    onClick={handleSubmit}
+                    className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors"
+                  >
+                    Submit <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Questions */}
+              <div className="space-y-4">
+                {questions.map((q, idx) => {
+                  const selected = userAnswers.get(q.id);
+                  return (
+                    <div key={q.id} className="bg-white rounded-xl border border-slate-200 p-5">
+                      <div className="flex gap-3 mb-4">
+                        <span className="shrink-0 w-7 h-7 bg-violet-50 text-violet-700 text-xs font-bold rounded-lg flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-slate-900 leading-relaxed">{q.text}</p>
+                          {q.type === 'MULTIPLE_RESPONSE' && (
+                            <p className="text-xs text-amber-600 mt-1 font-medium">Select all that apply</p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="ml-10 space-y-2">
+                        {q.type === 'TRUE_FALSE' ? (
+                          <div className="grid grid-cols-2 gap-2">
+                            {(['true', 'false'] as const).map((val) => (
+                              <button
+                                key={val}
+                                onClick={() => handleAnswer(q.id, val, q.type)}
+                                className={`py-2.5 rounded-lg text-sm font-semibold border transition-colors ${
+                                  selected === val
+                                    ? 'bg-violet-600 text-white border-violet-600'
+                                    : 'bg-white text-slate-700 border-slate-200 hover:border-violet-300 hover:bg-violet-50'
+                                }`}
+                              >
+                                {val === 'true' ? 'True' : 'False'}
+                              </button>
+                            ))}
+                          </div>
+                        ) : q.options ? (
+                          Object.entries(q.options).map(([key, value]) => {
+                            const isSelected =
+                              q.type === 'MULTIPLE_RESPONSE'
+                                ? ((selected as string[] | undefined) ?? []).includes(key)
+                                : selected === key;
+                            return (
+                              <button
+                                key={key}
+                                onClick={() => handleAnswer(q.id, key, q.type)}
+                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-colors ${
+                                  isSelected
+                                    ? 'bg-violet-50 border-violet-400'
+                                    : 'bg-white border-slate-200 hover:border-violet-200 hover:bg-slate-50'
+                                }`}
+                              >
+                                <span className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs font-bold border transition-colors ${
+                                  isSelected
+                                    ? 'bg-violet-600 border-violet-600 text-white'
+                                    : 'border-slate-300 text-slate-500'
+                                }`}>
+                                  {key}
+                                </span>
+                                <span className="text-sm text-slate-800">{value}</span>
+                              </button>
+                            );
+                          })
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Bottom submit bar */}
+              <div className="mt-5 bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3">
+                <p className="text-sm text-slate-500">
+                  {answeredCount < questions.length ? (
+                    <span className="text-amber-600">
+                      {questions.length - answeredCount} unanswered — will count as wrong
+                    </span>
+                  ) : (
+                    <span className="text-emerald-600 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" /> All answered!
+                    </span>
+                  )}
+                </p>
+                <button
+                  onClick={handleSubmit}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-violet-600 text-white font-semibold rounded-lg hover:bg-violet-700 transition-colors text-sm"
+                >
+                  Submit Quiz
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── RESULTS PHASE ───────────────────────────────────────────────── */}
+          {phase === 'results' && result && (
+            <div className="max-w-2xl mx-auto w-full px-4 py-6 space-y-4">
+
+              {/* Score card */}
+              <div className={`rounded-2xl p-6 text-center border ${
+                result.passed
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div className={`text-5xl font-extrabold mb-2 ${
+                  result.passed ? 'text-emerald-600' : 'text-slate-700'
+                }`}>
+                  {Math.round(result.score)}%
+                </div>
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold mb-2 ${
+                  result.passed
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  {result.passed
+                    ? <><Trophy className="w-4 h-4" /> Passed!</>
+                    : <><XCircle className="w-4 h-4" /> Not quite — keep going!</>
+                  }
+                </div>
+                <p className="text-slate-500 text-sm">
+                  {result.correctCount} of {result.totalCount} correct on "{quizTopic}"
+                </p>
+              </div>
+
+              {/* Per-question results */}
+              <div className="space-y-3">
+                {questions.map((q, idx) => {
+                  const ga = result.gradedAnswers[idx];
+                  return (
+                    <div
+                      key={q.id}
+                      className={`rounded-xl border p-4 ${
+                        ga.isCorrect
+                          ? 'border-emerald-200 bg-emerald-50'
+                          : 'border-red-100 bg-red-50'
+                      }`}
+                    >
+                      <div className="flex gap-3 mb-1.5">
+                        <span className={`shrink-0 mt-0.5 ${ga.isCorrect ? 'text-emerald-500' : 'text-red-400'}`}>
+                          {ga.isCorrect
+                            ? <CheckCircle className="w-5 h-5" />
+                            : <XCircle className="w-5 h-5" />
+                          }
+                        </span>
+                        <p className="text-sm font-medium text-slate-900 leading-relaxed">{q.text}</p>
+                      </div>
+                      {!ga.isCorrect && (
+                        <p className="text-xs text-emerald-700 font-semibold ml-8 mb-1">
+                          Correct: {formatCorrectAnswer(q)}
+                        </p>
+                      )}
+                      {q.explanation && (
+                        <p className="text-xs text-slate-500 ml-8 leading-relaxed">{q.explanation}</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Sign-up CTA */}
+              <div className="rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 p-6 text-white">
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <Sparkles className="w-5 h-5 text-violet-200" />
+                  <h3 className="text-lg font-bold">Unlock the full XamGeni experience</h3>
+                </div>
+                <p className="text-violet-200 text-sm text-center mb-4">Sign up free — it takes 30 seconds.</p>
+                <ul className="text-sm space-y-2 mb-5 max-w-xs mx-auto">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-300 shrink-0" />
+                    Moderate &amp; Difficult difficulty levels
                   </li>
-                ))}
-              </ul>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-300 shrink-0" />
+                    10 &amp; 15 question quizzes
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-300 shrink-0" />
+                    Save up to 5 quiz sessions
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-300 shrink-0" />
+                    Retake &amp; track your progress
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-300 shrink-0" />
+                    Translate quizzes into 9 languages
+                  </li>
+                </ul>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link
+                    to="/register/learner"
+                    className="flex items-center justify-center gap-2 bg-white text-violet-700 font-bold px-5 py-2.5 rounded-xl hover:bg-violet-50 transition-colors text-sm shadow"
+                  >
+                    Sign Up as Learner <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    to="/register/admin"
+                    className="flex items-center justify-center gap-2 bg-violet-800 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-900 transition-colors text-sm"
+                  >
+                    I'm an Educator <Crown className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Try another topic */}
               <button
-                onClick={() => navigate('/payment')}
-                className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors shadow-md shadow-blue-100"
+                onClick={handleTryAgain}
+                className="w-full py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
               >
-                <Zap className="w-4 h-4" /> Subscribe  - $5/month
+                Try another topic
               </button>
             </div>
-          </div>
+          )}
 
-          <p className="text-center text-xs text-slate-400 mt-6">
-            <ShieldCheck className="w-3.5 h-3.5 inline-block mr-1" />
-            Secure checkout via Stripe &nbsp;Â·&nbsp; Cancel anytime &nbsp;Â·&nbsp; No hidden fees
-          </p>
-        </div>
-      </section>
+        </main>
 
-      {/* â"€â"€ AI callout strip â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="py-16 px-6 bg-gradient-to-r from-violet-600 to-blue-600 text-white text-center">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Sparkles className="w-6 h-6 text-violet-200" />
-            <span className="text-2xl font-bold">AI-powered question generation</span>
-          </div>
-          <p className="text-blue-100 mb-6">
-            Type a topic  - "Grade 5 Science", "JavaScript Basics", "Food Safety"  - and Claude AI
-            drafts up to 10 ready-to-use questions with options and explanations in seconds.
-          </p>
-          <Link
-            to="/register/admin"
-            className="inline-flex items-center gap-2 bg-white text-violet-700 font-bold px-6 py-3 rounded-xl hover:bg-violet-50 transition-colors shadow"
-          >
-            Try it free <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      </section>
+        {/* ── Footer (home + results only) ──────────────────────────────────── */}
+        {(phase === 'home' || phase === 'results') && (
+          <footer className="border-t border-slate-100 py-6 px-6 text-center mt-auto">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                <BookOpen className="w-3 h-3 text-white" />
+              </div>
+              <span className="font-bold text-slate-800 text-sm">Xam Bridge</span>
+            </div>
+            <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
+              <Link to="/login" className="hover:text-slate-700 transition-colors">Sign In</Link>
+              <Link to="/register/admin" className="hover:text-slate-700 transition-colors">For Educators</Link>
+              <Link to="/payment" className="hover:text-slate-700 transition-colors">Pricing</Link>
+              <Link to="/faq" className="hover:text-slate-700 transition-colors">FAQ</Link>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">
+              © {new Date().getFullYear()} Xam Bridge · Empowering learners everywhere.
+            </p>
+          </footer>
+        )}
 
-      {/* â"€â"€ Final CTA â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <section className="py-20 px-6 bg-slate-50 text-center">
-        <div className="max-w-xl mx-auto">
-          <h2 className="text-3xl font-bold mb-3">Ready to bridge the knowledge gap?</h2>
-          <p className="text-slate-500 mb-8">
-            Join quiz creators who use Xam Bridge to educate, assess, and inspire  - for free.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/register/admin"
-              className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors text-base shadow-md shadow-blue-100"
-            >
-              Create free admin account <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 border border-slate-200 text-slate-700 font-semibold px-6 py-3 rounded-xl hover:bg-white transition-colors text-base"
-            >
-              Sign in
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* â"€â"€ Footer â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€ */}
-      <footer className="bg-white border-t border-slate-100 py-8 px-6 text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
-            <BookOpen className="w-3 h-3 text-white" />
-          </div>
-          <span className="font-bold text-slate-800">Xam Bridge</span>
-        </div>
-        <p className="text-xs text-slate-400">
-          Â© {new Date().getFullYear()} Xam Bridge Â· Empowering learners everywhere, free of charge.
-        </p>
-        <div className="flex items-center justify-center gap-4 mt-3 text-xs text-slate-400">
-          <Link to="/login" className="hover:text-slate-700 transition-colors">Sign In</Link>
-          <Link to="/register/admin" className="hover:text-slate-700 transition-colors">Register</Link>
-          <Link to="/payment" className="hover:text-slate-700 transition-colors">Pricing</Link>
-          <Link to="/faq" className="hover:text-slate-700 transition-colors">FAQ</Link>
-        </div>
-      </footer>
-
-    </div>
+      </div>
     </>
   );
 }
-

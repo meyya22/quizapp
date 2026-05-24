@@ -21,12 +21,19 @@ import ParticipantDashboard from './pages/participant/ParticipantDashboard';
 import ExamPrepPage from './pages/participant/ExamPrepPage';
 import QuizPlayer from './pages/participant/QuizPlayer';
 import Results from './pages/participant/Results';
+import PlansPage from './pages/participant/PlansPage';
+import ParticipantAccount from './pages/participant/ParticipantAccount';
 import SuperAdminLayout from './components/layout/SuperAdminLayout';
 import UserReport from './pages/superadmin/UserReport';
 import PaymentMetricsPage from './pages/superadmin/PaymentMetrics';
 import EmailCampaign from './pages/superadmin/EmailCampaign';
+import ParticipantEmailCampaign from './pages/superadmin/ParticipantEmailCampaign';
+import ParticipantAiQuizReport from './pages/superadmin/ParticipantAiQuizReport';
+import AnonymousQuizTracker from './pages/superadmin/AnonymousQuizTracker';
 import HelpSupport from './pages/HelpSupport';
 import FAQ from './pages/FAQ';
+import AboutUs from './pages/AboutUs';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function RootRedirect() {
   const { isAuthenticated, user } = useAuthStore();
@@ -86,6 +93,8 @@ export default function App() {
         <Route path="quizzes" element={<ParticipantDashboard />} />
         <Route path="quiz/:id" element={<QuizPlayer />} />
         <Route path="results/:attemptId" element={<Results />} />
+        <Route path="plans" element={<PlansPage />} />
+        <Route path="account" element={<ParticipantAccount />} />
         <Route path="help" element={<HelpSupport />} />
       </Route>
 
@@ -101,6 +110,9 @@ export default function App() {
         <Route path="users" element={<UserReport />} />
         <Route path="payments" element={<PaymentMetricsPage />} />
         <Route path="email-campaign" element={<EmailCampaign />} />
+        <Route path="participant-campaign" element={<ParticipantEmailCampaign />} />
+        <Route path="ai-quiz-report" element={<ParticipantAiQuizReport />} />
+        <Route path="anonymous-quizzes" element={<AnonymousQuizTracker />} />
       </Route>
 
       {/* Standalone share routes — no navigation chrome, no login required */}
@@ -126,6 +138,8 @@ export default function App() {
       />
 
       <Route path="/faq" element={<FAQ />} />
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
