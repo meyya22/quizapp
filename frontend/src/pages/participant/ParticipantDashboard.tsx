@@ -54,10 +54,42 @@ export default function ParticipantDashboard() {
   });
 
   return (
-    <div className="flex gap-6 items-start">
+    <div className="flex flex-col lg:flex-row gap-6 items-start">
 
-      {/* ── Left Sidebar ─────────────────────────────────────── */}
-      <aside className="w-52 shrink-0 sticky top-24">
+      {/* ── Mobile tab bar (hidden on lg+) ───────────────────── */}
+      <div className="lg:hidden w-full flex rounded-xl border border-slate-200 bg-white overflow-hidden">
+        <button
+          onClick={() => setActiveSection('quizzes')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
+            activeSection === 'quizzes' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          Quizzes
+          <span className={`text-xs rounded-full px-1.5 py-0.5 leading-none ${
+            activeSection === 'quizzes' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'
+          }`}>
+            {quizzes.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setActiveSection('attempts')}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
+            activeSection === 'attempts' ? 'bg-blue-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <ClipboardList className="w-4 h-4" />
+          My Attempts
+          <span className={`text-xs rounded-full px-1.5 py-0.5 leading-none ${
+            activeSection === 'attempts' ? 'bg-blue-500 text-white' : 'bg-slate-100 text-slate-500'
+          }`}>
+            {myAttempts.length}
+          </span>
+        </button>
+      </div>
+
+      {/* ── Left Sidebar (hidden below lg) ───────────────────── */}
+      <aside className="hidden lg:block w-52 shrink-0 sticky top-24">
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           {/* User card */}
           <div className="p-4 border-b border-slate-100 bg-slate-50">
@@ -109,21 +141,21 @@ export default function ParticipantDashboard() {
       </aside>
 
       {/* ── Main Content ──────────────────────────────────────── */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 w-full">
 
         {/* Available Quizzes */}
         {activeSection === 'quizzes' && (
           <section>
-            <div className="flex items-center justify-between gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <h2 className="text-lg font-semibold text-slate-900">Available Quizzes</h2>
-              <div className="relative">
+              <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search quizzes..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-56 bg-white"
+                  className="pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-56 bg-white"
                 />
               </div>
             </div>
