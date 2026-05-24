@@ -144,7 +144,8 @@ Each question object must have exactly these fields:
       difficulty,
       numQuestions: questions.length,
       passingScore: passScore,
-      questions,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      questions: JSON.parse(JSON.stringify(questions)) as any,
     },
   });
 
