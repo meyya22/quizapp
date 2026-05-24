@@ -146,8 +146,11 @@ export default function ParticipantDashboard() {
         {/* Available Quizzes */}
         {activeSection === 'quizzes' && (
           <section>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">Available Quizzes</h2>
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Available Quizzes</h2>
+                <p className="text-sm text-slate-500 mt-0.5">These quizzes are generated and published by other users</p>
+              </div>
               <div className="relative w-full sm:w-auto">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 <input
