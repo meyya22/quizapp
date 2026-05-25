@@ -16,6 +16,7 @@ interface CampaignHistoryRecord {
   sent: number;
   failed: number;
   sentAt: string;
+  type: string;
 }
 
 interface CampaignRecipient {
@@ -528,6 +529,7 @@ export default function ParticipantEmailCampaign() {
                   <tr className="bg-slate-50 border-b border-slate-100">
                     <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Template</th>
                     <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Subject</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Type</th>
                     <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Sent</th>
                     <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Failed</th>
                     <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Date</th>
@@ -542,6 +544,15 @@ export default function ParticipantEmailCampaign() {
                         </span>
                       </td>
                       <td className="px-5 py-3 text-sm text-slate-600 max-w-xs truncate">{h.subject}</td>
+                      <td className="px-5 py-3">
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                          h.type === 'LEARNER'
+                            ? 'bg-violet-50 text-violet-700 border-violet-200'
+                            : 'bg-slate-100 text-slate-600 border-slate-200'
+                        }`}>
+                          {h.type === 'LEARNER' ? 'Learner' : 'Admin'}
+                        </span>
+                      </td>
                       <td className="px-5 py-3">
                         <button
                           onClick={() => setSelectedCampaign(h)}

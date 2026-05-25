@@ -298,6 +298,7 @@ export async function sendParticipantEmailCampaign(req: AuthRequest, res: Respon
       subject,
       sent,
       failed,
+      type: 'LEARNER',
       recipients: {
         create: sentRecipients.map((u) => ({ name: u.name, email: u.email })),
       },
