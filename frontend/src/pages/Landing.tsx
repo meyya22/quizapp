@@ -167,6 +167,7 @@ export default function Landing() {
     setResult(null);
     setElapsed(0);
     setGenError(null);
+    setTopic('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
