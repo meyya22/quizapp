@@ -34,9 +34,9 @@ const COMPARE_ROWS: CompareRow[] = [
   {
     label: 'Questions per quiz',
     icon: <BookOpenCheck className="w-4 h-4 text-violet-500" />,
-    starter: '5 or 10',
-    prepready: '5, 10, or 15',
-    examelite: '5, 10, or 15',
+    starter: 'Up to 10 questions per quiz',
+    prepready: 'Up to 15 questions per quiz',
+    examelite: 'Up to 15 questions per quiz',
   },
   {
     label: 'Total questions',
