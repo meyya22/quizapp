@@ -156,7 +156,7 @@ export default function ParticipantPlanCards({ currentPlan }: Props) {
                   </li>
                   <li className="flex items-center gap-2 text-sm py-1 border-b border-slate-100">
                     <BookOpenCheck className="w-3.5 h-3.5 text-violet-500 shrink-0" />
-                    <span className="text-slate-700">{plan.questions} questions/quiz</span>
+                    <span className="text-slate-700">{plan.questions}</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm py-1 border-b border-slate-100">
                     <Crown className="w-3.5 h-3.5 text-violet-500 shrink-0" />
