@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Mail, Users, CheckSquare, Square, Search, Send,
-  ChevronDown, ChevronUp, Pencil, CheckCircle, AlertCircle, History, X, Sparkles,
+  ChevronDown, ChevronUp, Pencil, CheckCircle, AlertCircle, History, X, Sparkles, Eye,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
@@ -135,6 +135,7 @@ export default function ParticipantEmailCampaign() {
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<{ sent: number; failed: number; total: number } | null>(null);
   const [showTemplates, setShowTemplates] = useState(true);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignHistoryRecord | null>(null);
 
@@ -221,6 +222,42 @@ export default function ParticipantEmailCampaign() {
 
   return (
     <div>
+      {/* Template preview modal */}
+      {previewTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={() => setPreviewTemplate(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+              <div>
+                <p className="font-semibold text-slate-900 text-sm">{previewTemplate.name}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{previewTemplate.tag}</p>
+              </div>
+              <button onClick={() => setPreviewTemplate(null)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="overflow-y-auto px-5 py-4 space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Subject</p>
+                <p className="text-sm text-slate-800 bg-slate-50 rounded-lg px-3 py-2">{previewTemplate.subject}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Body</p>
+                <pre className="text-sm text-slate-700 bg-slate-50 rounded-lg px-3 py-3 whitespace-pre-wrap font-sans leading-relaxed">{previewTemplate.body}</pre>
+              </div>
+            </div>
+            <div className="px-5 py-3 border-t border-slate-200 flex justify-end gap-2">
+              <button onClick={() => setPreviewTemplate(null)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50">Close</button>
+              <button
+                onClick={() => { applyTemplate(previewTemplate); setPreviewTemplate(null); }}
+                className="px-4 py-2 text-sm font-semibold bg-violet-600 text-white rounded-lg hover:bg-violet-700"
+              >
+                Use Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-9 h-9 bg-violet-600 rounded-xl flex items-center justify-center shrink-0">
@@ -353,22 +390,28 @@ export default function ParticipantEmailCampaign() {
             {showTemplates && (
               <div className="px-4 pb-4 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4">
                 {TEMPLATES.map((t) => (
-                  <button
+                  <div
                     key={t.id}
-                    onClick={() => applyTemplate(t)}
-                    className={`text-left p-3 rounded-lg border transition-colors ${
+                    className={`relative p-3 rounded-lg border transition-colors ${
                       activeTemplate === t.id
                         ? 'border-violet-400 bg-violet-50'
                         : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                     }`}
                   >
-                    <p className={`text-xs font-semibold ${
-                      activeTemplate === t.id ? 'text-violet-700' : 'text-slate-700'
-                    }`}>
-                      {t.name}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">{t.tag}</p>
-                  </button>
+                    <button className="text-left w-full" onClick={() => applyTemplate(t)}>
+                      <p className={`text-xs font-semibold pr-6 ${activeTemplate === t.id ? 'text-violet-700' : 'text-slate-700'}`}>
+                        {t.name}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-0.5">{t.tag}</p>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setPreviewTemplate(t); }}
+                      title="Preview"
+                      className="absolute top-2.5 right-2.5 text-slate-400 hover:text-violet-600 transition-colors"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
