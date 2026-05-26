@@ -101,6 +101,8 @@ export default function Landing() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
   const [result, setResult] = useState<QuizResult | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [generatingMore, setGeneratingMore] = useState(false);
 
   // Timer
   useEffect(() => {
@@ -155,9 +157,28 @@ export default function Landing() {
   function handleSubmit() {
     const scored = scoreQuiz(questions, userAnswers);
     setResult(scored);
+    setAttemptCount((c) => c + 1);
     setPhase('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     api.post('/ai-quiz/preview/submit', { topic: quizTopic, score: scored.score, passed: scored.passed }).catch(() => {});
+  }
+
+  async function handleGenerateMore() {
+    if (generatingMore || attemptCount >= 3) return;
+    setGeneratingMore(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const res = await api.post('/ai-quiz/preview/generate', { topic: quizTopic });
+      setQuestions(res.data.questions);
+      setUserAnswers(new Map());
+      setElapsed(0);
+      setResult(null);
+      setPhase('taking');
+    } catch {
+      // stay on results page if generation fails
+    } finally {
+      setGeneratingMore(false);
+    }
   }
 
   function handleTryAgain() {
@@ -168,6 +189,7 @@ export default function Landing() {
     setElapsed(0);
     setGenError(null);
     setTopic('');
+    setAttemptCount(0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -515,9 +537,31 @@ export default function Landing() {
                     : <><XCircle className="w-4 h-4" /> Not quite — keep going!</>
                   }
                 </div>
-                <p className="text-slate-500 text-sm">
+                <p className="text-slate-500 text-sm mb-4">
                   {result.correctCount} of {result.totalCount} correct on "{quizTopic}"
                 </p>
+                <p className="text-xs text-slate-400 mb-3">{attemptCount} of 3 free attempts used</p>
+                <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                  <button
+                    onClick={handleTryAgain}
+                    className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    Try another topic
+                  </button>
+                  {attemptCount < 3 && (
+                    <button
+                      onClick={handleGenerateMore}
+                      disabled={generatingMore}
+                      className="flex items-center justify-center gap-1.5 px-4 py-2 bg-violet-600 text-white text-sm font-semibold rounded-xl hover:bg-violet-700 transition-colors disabled:opacity-60"
+                    >
+                      {generatingMore ? (
+                        <><div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating…</>
+                      ) : (
+                        <><Sparkles className="w-3.5 h-3.5" /> Generate 5 more ({3 - attemptCount} left)</>
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Per-question results */}
@@ -600,13 +644,6 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* Try another topic */}
-              <button
-                onClick={handleTryAgain}
-                className="w-full py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                Try another topic
-              </button>
             </div>
           )}
 
