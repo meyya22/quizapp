@@ -104,6 +104,30 @@ export default function UserReport() {
   const participants = users.filter((u) => u.role === 'PARTICIPANT').length;
   const paid = users.filter((u) => u.tier === 'PAID').length;
 
+  // Build last-30-days daily signup data
+  const dailySignups = (() => {
+    const days: { date: string; label: string; admin: number; participant: number }[] = [];
+    const now = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      days.push({ date: key, label, admin: 0, participant: 0 });
+    }
+    users.forEach((u) => {
+      const key = u.createdAt.slice(0, 10);
+      const day = days.find((d) => d.date === key);
+      if (!day) return;
+      if (u.role === 'ADMIN') day.admin++;
+      else if (u.role === 'PARTICIPANT') day.participant++;
+    });
+    return days;
+  })();
+
+  const maxAdmin = Math.max(1, ...dailySignups.map((d) => d.admin));
+  const maxParticipant = Math.max(1, ...dailySignups.map((d) => d.participant));
+
   const filtered = users.filter((u) => {
     if (filterRole && u.role !== filterRole) return false;
     if (filterTier && u.tier !== filterTier) return false;
@@ -149,6 +173,75 @@ export default function UserReport() {
             <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
           </div>
         ))}
+      </div>
+
+      {/* Daily signup charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        {/* Admin signups */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Admin Signups</p>
+              <p className="text-xs text-slate-400 mt-0.5">Daily registrations — last 30 days</p>
+            </div>
+            <span className="text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+              {dailySignups.reduce((s, d) => s + d.admin, 0)} total
+            </span>
+          </div>
+          <div className="flex items-end gap-0.5 h-28 overflow-hidden">
+            {dailySignups.map((d) => (
+              <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5 group relative">
+                <div
+                  className="w-full bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
+                  style={{ height: `${(d.admin / maxAdmin) * 100}%`, minHeight: d.admin > 0 ? '3px' : '0' }}
+                />
+                {d.admin > 0 && (
+                  <span className="absolute -top-5 text-xs font-bold text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm">
+                    {d.admin}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between mt-1.5 text-xs text-slate-400">
+            <span>{dailySignups[0].label}</span>
+            <span>{dailySignups[14].label}</span>
+            <span>{dailySignups[29].label}</span>
+          </div>
+        </div>
+
+        {/* Participant signups */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Participant Signups</p>
+              <p className="text-xs text-slate-400 mt-0.5">Daily registrations — last 30 days</p>
+            </div>
+            <span className="text-xs font-medium text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
+              {dailySignups.reduce((s, d) => s + d.participant, 0)} total
+            </span>
+          </div>
+          <div className="flex items-end gap-0.5 h-28 overflow-hidden">
+            {dailySignups.map((d) => (
+              <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5 group relative">
+                <div
+                  className="w-full bg-violet-500 rounded-t transition-all duration-300 hover:bg-violet-600"
+                  style={{ height: `${(d.participant / maxParticipant) * 100}%`, minHeight: d.participant > 0 ? '3px' : '0' }}
+                />
+                {d.participant > 0 && (
+                  <span className="absolute -top-5 text-xs font-bold text-violet-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm">
+                    {d.participant}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between mt-1.5 text-xs text-slate-400">
+            <span>{dailySignups[0].label}</span>
+            <span>{dailySignups[14].label}</span>
+            <span>{dailySignups[29].label}</span>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
