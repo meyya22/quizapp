@@ -230,16 +230,8 @@ export default function Landing() {
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
               <div className="w-full max-w-lg">
 
-                {/* Badge */}
-                <div className="flex justify-center mb-5">
-                  <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-200 text-violet-700 text-sm font-semibold px-4 py-1.5 rounded-full">
-                    <Sparkles className="w-4 h-4" />
-                    XamGeni — AI Quiz Prep, no sign-up needed
-                  </div>
-                </div>
-
                 {/* Headline */}
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-center tracking-tight leading-tight mb-3">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-center tracking-tight leading-tight mb-3">
                   Quiz yourself on<br />
                   <span className="text-violet-600">anything. Instantly.</span>
                 </h1>
