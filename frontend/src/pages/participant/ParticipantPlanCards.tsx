@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Check, X, Zap, Crown, RefreshCw, BookOpenCheck } from 'lucide-react';
+import { Check, X, Zap, Crown, RefreshCw, BookOpenCheck, PlusCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -166,6 +166,17 @@ export default function ParticipantPlanCards({ currentPlan }: Props) {
                   <FeatureRow available={isPaid} label="PDF export" />
                   <FeatureRow available={isPaid} label="Study mode" />
                   <FeatureRow available={isPaid} label="All difficulty levels" />
+                  {plan.key === 'EXAMELITE' ? (
+                    <li className="flex items-center gap-2 text-sm py-1 last:border-0">
+                      <PlusCircle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <span className="text-amber-700 font-semibold">Expand quiz up to 100 questions</span>
+                    </li>
+                  ) : (
+                    <li className="flex items-center gap-2 text-sm py-1 last:border-0">
+                      <X className="w-3.5 h-3.5 text-slate-300 shrink-0" />
+                      <span className="text-slate-400">Expand quiz up to 100 questions</span>
+                    </li>
+                  )}
                 </ul>
               </div>
 

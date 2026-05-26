@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Crown, Zap, CheckCircle, RefreshCw, FileDown, BookOpenCheck, BrainCircuit } from 'lucide-react';
+import { Crown, Zap, CheckCircle, RefreshCw, FileDown, BookOpenCheck, BrainCircuit, PlusCircle } from 'lucide-react';
 import api from '../../services/api';
 import ParticipantPlanCards, { type ParticipantPlanKey } from './ParticipantPlanCards';
 
@@ -72,6 +72,13 @@ const COMPARE_ROWS: CompareRow[] = [
     starter: <span className="text-slate-300">—</span>,
     prepready: <CheckCircle className="w-4 h-4 text-emerald-500 mx-auto" />,
     examelite: <CheckCircle className="w-4 h-4 text-emerald-500 mx-auto" />,
+  },
+  {
+    label: 'Expand quiz (up to 100 Qs)',
+    icon: <PlusCircle className="w-4 h-4 text-amber-500" />,
+    starter: <span className="text-slate-300">—</span>,
+    prepready: <span className="text-slate-300">—</span>,
+    examelite: <span className="text-amber-600 font-semibold text-xs">ExamElite only</span>,
   },
 ];
 
