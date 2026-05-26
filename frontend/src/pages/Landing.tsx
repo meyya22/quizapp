@@ -249,7 +249,7 @@ export default function Landing() {
                 </p>
 
                 {/* Preview form card */}
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                <div className="bg-white rounded-2xl border-2 border-slate-800 shadow-sm p-6">
                   <div className="space-y-4">
 
                     {/* Topic input */}

@@ -364,7 +364,7 @@ export default function ExamPrepPage() {
       await queryClient.invalidateQueries({ queryKey: ['ai-quizzes'] });
       const remaining = MAX - quiz.questions.length;
       const added = Math.min(10, remaining);
-      toast.success(`${added} new question${added !== 1 ? 's' : ''} added!`);
+      toast.success(`${added} more new question${added !== 1 ? 's' : ''} added — click 'Retake Quiz' to run through all the questions`, { duration: 5000 });
     } catch (err) {
       const msg = (err as { response?: { data?: { error?: string } } }).response?.data?.error ?? 'Failed to expand quiz.';
       toast.error(msg);
@@ -498,7 +498,7 @@ export default function ExamPrepPage() {
 
       {/* ── FORM PHASE ───────────────────────────────────────────────────────── */}
       {phase === 'form' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-8">
+        <div className="bg-white rounded-2xl border-2 border-slate-800 shadow-sm p-6 mb-8">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h2 className="text-base font-semibold text-slate-900">Generate Your Quiz</h2>
             <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border ${
@@ -679,7 +679,7 @@ export default function ExamPrepPage() {
 
       {/* ── GENERATING PHASE ─────────────────────────────────────────────────── */}
       {phase === 'generating' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 mb-8 text-center">
+        <div className="bg-white rounded-2xl border-2 border-slate-800 shadow-sm p-12 mb-8 text-center">
           <div className="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Sparkles className="w-7 h-7 text-violet-600 animate-pulse" />
           </div>
