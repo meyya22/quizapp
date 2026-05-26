@@ -91,6 +91,19 @@ export default function AnonymousQuizTracker() {
   const maxAnon = Math.max(1, ...top5AnonCountries.map((d) => d.count));
   const maxUsers = Math.max(1, ...top5UserCountries.map((d) => d.count));
 
+  const deviceCounts = (() => {
+    const counts: Record<string, number> = {};
+    sessions.forEach((s) => {
+      const d = s.device?.trim() || 'Unknown';
+      counts[d] = (counts[d] ?? 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([device, count]) => ({ device, count }));
+  })();
+
+  const maxDevice = Math.max(1, ...deviceCounts.map((d) => d.count));
+
   function handleSearchChange(val: string) {
     setSearch(val);
     setPage(1);
@@ -255,8 +268,8 @@ export default function AnonymousQuizTracker() {
         )}
       </div>
 
-      {/* Country charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+      {/* Country + device charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
         {/* Anonymous quiz takers — Top 5 Countries */}
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <div className="flex items-center justify-between mb-4">
@@ -306,6 +319,35 @@ export default function AnonymousQuizTracker() {
                     <div
                       className="h-full bg-blue-500 rounded-full transition-all duration-500"
                       style={{ width: `${(count / maxUsers) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700 w-6 text-right">{count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Device breakdown */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Device Breakdown</p>
+              <p className="text-xs text-slate-400 mt-0.5">Anonymous quiz sessions by device</p>
+            </div>
+            <Monitor className="w-4 h-4 text-emerald-400" />
+          </div>
+          {deviceCounts.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">No data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {deviceCounts.map(({ device, count }) => (
+                <div key={device} className="flex items-center gap-3">
+                  <span className="text-xs text-slate-600 w-28 shrink-0 truncate">{device}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                      style={{ width: `${(count / maxDevice) * 100}%` }}
                     />
                   </div>
                   <span className="text-xs font-semibold text-slate-700 w-6 text-right">{count}</span>
