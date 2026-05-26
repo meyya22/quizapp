@@ -8,6 +8,7 @@ import {
   submitAiQuizAttempt,
   generatePreviewQuiz,
   submitPreviewSession,
+  expandAiQuiz,
 } from '../controllers/aiQuiz.controller';
 
 const router = Router();
@@ -20,6 +21,7 @@ router.post('/preview/submit', aiLimiter, submitPreviewSession);
 router.post('/generate', authenticate, generateAiQuiz);
 router.get('/', authenticate, getMyAiQuizzes);
 router.get('/:id', authenticate, getAiQuiz);
+router.post('/:id/expand', authenticate, expandAiQuiz);
 router.post('/:id/attempt', authenticate, submitAiQuizAttempt);
 
 export default router;

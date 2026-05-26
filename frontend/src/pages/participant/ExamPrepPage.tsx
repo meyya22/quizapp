@@ -3,9 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles, Brain, Clock, Trophy, CheckCircle, XCircle,
   AlertCircle, ChevronRight, ChevronLeft, BookOpen, Zap, Target, Globe, Loader2, Lock, FileDown,
-  LayoutList, Square,
+  LayoutList, Square, PlusCircle,
 } from 'lucide-react';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { LANGUAGES } from '../../services/translate';
 import ParticipantPlanCards, { type ParticipantPlanKey } from './ParticipantPlanCards';
 
@@ -199,6 +200,9 @@ export default function ExamPrepPage() {
   const [quizLayout, setQuizLayout] = useState<'vertical' | 'one-by-one'>('vertical');
   const [currentQIdx, setCurrentQIdx] = useState(0);
 
+  // Expand quiz (ExamElite)
+  const [expandingQuizId, setExpandingQuizId] = useState<string | null>(null);
+
   // Results
   const [attemptResult, setAttemptResult] = useState<AttemptResult | null>(null);
 
@@ -341,9 +345,32 @@ export default function ExamPrepPage() {
     setActiveQuiz({ ...quiz });
     setUserAnswers(new Map());
     setElapsed(0);
+    setCurrentQIdx(0);
     setAttemptResult(null);
     setPhase('taking');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function handleExpandQuiz(quiz: HistoryQuiz) {
+    if (expandingQuizId) return;
+    const MAX = 100;
+    if (quiz.questions.length >= MAX) {
+      toast.error('This quiz has reached the maximum of 100 questions.');
+      return;
+    }
+    setExpandingQuizId(quiz.id);
+    try {
+      await api.post(`/ai-quiz/${quiz.id}/expand`);
+      await queryClient.invalidateQueries({ queryKey: ['ai-quizzes'] });
+      const remaining = MAX - quiz.questions.length;
+      const added = Math.min(10, remaining);
+      toast.success(`${added} new question${added !== 1 ? 's' : ''} added!`);
+    } catch (err) {
+      const msg = (err as { response?: { data?: { error?: string } } }).response?.data?.error ?? 'Failed to expand quiz.';
+      toast.error(msg);
+    } finally {
+      setExpandingQuizId(null);
+    }
   }
 
   function handleRetakeCurrentQuiz() {
@@ -1184,7 +1211,10 @@ export default function ExamPrepPage() {
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mb-3">
-                        <span>{quiz.numQuestions} questions</span>
+                        <span>{quiz.questions.length} questions</span>
+                        {planInfo.plan === 'EXAMELITE' && (
+                          <span className="text-amber-600 font-medium">({quiz.questions.length}/100)</span>
+                        )}
                         <span>·</span>
                         <span>Pass: {quiz.passingScore}%</span>
                         <span>·</span>
@@ -1212,13 +1242,28 @@ export default function ExamPrepPage() {
                       )}
                     </div>
 
-                    <button
-                      onClick={() => handleStartQuiz(quiz)}
-                      className="mt-3 flex items-center justify-center gap-1.5 w-full py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors"
-                    >
-                      {attemptCount > 0 ? 'Retake Quiz' : 'Start Quiz'}
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <div className="mt-3 flex gap-2">
+                      {planInfo.plan === 'EXAMELITE' && quiz.questions.length < 100 && (
+                        <button
+                          onClick={() => handleExpandQuiz(quiz)}
+                          disabled={expandingQuizId === quiz.id}
+                          title={`${quiz.questions.length}/100 questions — add 10 more`}
+                          className="flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 disabled:opacity-60 transition-colors shrink-0"
+                        >
+                          {expandingQuizId === quiz.id
+                            ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            : <PlusCircle className="w-3.5 h-3.5" />}
+                          {expandingQuizId === quiz.id ? 'Generating…' : 'Create new questions'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleStartQuiz(quiz)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors"
+                      >
+                        {attemptCount > 0 ? 'Retake Quiz' : 'Start Quiz'}
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
