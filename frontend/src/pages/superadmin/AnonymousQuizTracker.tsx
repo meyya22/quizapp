@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { EyeOff, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, MapPin, Monitor } from 'lucide-react';
 import api from '../../services/api';
+import { UserRecord } from '../../types';
 
 interface PreviewSession {
   id: string;
@@ -54,6 +55,41 @@ export default function AnonymousQuizTracker() {
     sessions.length > 0
       ? (sessions.reduce((sum, s) => sum + s.score, 0) / sessions.length).toFixed(1)
       : '—';
+
+  const { data: usersData = [] } = useQuery<UserRecord[]>({
+    queryKey: ['all-users'],
+    queryFn: () => api.get('/users').then((r) => r.data),
+    staleTime: 60_000,
+  });
+
+  const top5AnonCountries = (() => {
+    const counts: Record<string, number> = {};
+    sessions.forEach((s) => {
+      const c = s.country?.trim() || 'Unknown';
+      counts[c] = (counts[c] ?? 0) + 1;
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([country, count]) => ({ country, count }));
+  })();
+
+  const top5UserCountries = (() => {
+    const counts: Record<string, number> = {};
+    usersData
+      .filter((u) => u.role === 'ADMIN' || u.role === 'PARTICIPANT')
+      .forEach((u) => {
+        const c = u.country?.trim() || 'Unknown';
+        counts[c] = (counts[c] ?? 0) + 1;
+      });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([country, count]) => ({ country, count }));
+  })();
+
+  const maxAnon = Math.max(1, ...top5AnonCountries.map((d) => d.count));
+  const maxUsers = Math.max(1, ...top5UserCountries.map((d) => d.count));
 
   function handleSearchChange(val: string) {
     setSearch(val);
@@ -217,6 +253,67 @@ export default function AnonymousQuizTracker() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Country charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+        {/* Anonymous quiz takers — Top 5 Countries */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Anonymous Quiz Takers</p>
+              <p className="text-xs text-slate-400 mt-0.5">Top 5 Countries</p>
+            </div>
+            <EyeOff className="w-4 h-4 text-rose-400" />
+          </div>
+          {top5AnonCountries.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">No data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {top5AnonCountries.map(({ country, count }) => (
+                <div key={country} className="flex items-center gap-3">
+                  <span className="text-xs text-slate-600 w-24 shrink-0 truncate">{country}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="h-full bg-rose-500 rounded-full transition-all duration-500"
+                      style={{ width: `${(count / maxAnon) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700 w-6 text-right">{count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Registered Users — Top 5 Countries */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Registered Users</p>
+              <p className="text-xs text-slate-400 mt-0.5">Top 5 Countries (Admins + Participants)</p>
+            </div>
+            <MapPin className="w-4 h-4 text-blue-400" />
+          </div>
+          {top5UserCountries.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">No data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {top5UserCountries.map(({ country, count }) => (
+                <div key={country} className="flex items-center gap-3">
+                  <span className="text-xs text-slate-600 w-24 shrink-0 truncate">{country}</span>
+                  <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                    <div
+                      className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                      style={{ width: `${(count / maxUsers) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700 w-6 text-right">{count}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
