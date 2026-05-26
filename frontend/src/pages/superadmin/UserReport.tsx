@@ -188,15 +188,15 @@ export default function UserReport() {
               {dailySignups.reduce((s, d) => s + d.admin, 0)} total
             </span>
           </div>
-          <div className="flex items-end gap-0.5 h-28 overflow-hidden">
+          <div className="flex items-end gap-0.5" style={{ height: 96 }}>
             {dailySignups.map((d) => (
-              <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5 group relative">
+              <div key={d.date} className="flex-1 flex flex-col justify-end group relative" style={{ height: 96 }}>
                 <div
                   className="w-full bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
-                  style={{ height: `${(d.admin / maxAdmin) * 100}%`, minHeight: d.admin > 0 ? '3px' : '0' }}
+                  style={{ height: d.admin > 0 ? Math.max(3, Math.round((d.admin / maxAdmin) * 96)) : 0 }}
                 />
                 {d.admin > 0 && (
-                  <span className="absolute -top-5 text-xs font-bold text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm">
+                  <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-bold text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm whitespace-nowrap z-10">
                     {d.admin}
                   </span>
                 )}
@@ -221,15 +221,15 @@ export default function UserReport() {
               {dailySignups.reduce((s, d) => s + d.participant, 0)} total
             </span>
           </div>
-          <div className="flex items-end gap-0.5 h-28 overflow-hidden">
+          <div className="flex items-end gap-0.5" style={{ height: 96 }}>
             {dailySignups.map((d) => (
-              <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5 group relative">
+              <div key={d.date} className="flex-1 flex flex-col justify-end group relative" style={{ height: 96 }}>
                 <div
                   className="w-full bg-violet-500 rounded-t transition-all duration-300 hover:bg-violet-600"
-                  style={{ height: `${(d.participant / maxParticipant) * 100}%`, minHeight: d.participant > 0 ? '3px' : '0' }}
+                  style={{ height: d.participant > 0 ? Math.max(3, Math.round((d.participant / maxParticipant) * 96)) : 0 }}
                 />
                 {d.participant > 0 && (
-                  <span className="absolute -top-5 text-xs font-bold text-violet-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm">
+                  <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-bold text-violet-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm whitespace-nowrap z-10">
                     {d.participant}
                   </span>
                 )}
