@@ -250,7 +250,7 @@ export default function Landing() {
 
           {/* ── HOME PHASE ──────────────────────────────────────────────────── */}
           {phase === 'home' && (
-            <div className="flex-1 flex flex-col items-center justify-center px-4 py-4">
+            <div className="flex-1 flex flex-col items-center px-4 pt-8 pb-4">
               <div className="w-full max-w-lg">
 
                 {/* Headline */}
