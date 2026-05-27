@@ -222,12 +222,12 @@ export default function Landing() {
         {/* ── Nav ───────────────────────────────────────────────────────────── */}
         <nav className="fixed top-0 inset-x-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
           <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+            <button onClick={handleTryAgain} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                 <BookOpen className="w-4 h-4 text-white" />
               </div>
               <span className="text-lg font-bold tracking-tight">Xam Bridge</span>
-            </div>
+            </button>
             <div className="flex items-center gap-3">
               <Link
                 to="/login"
