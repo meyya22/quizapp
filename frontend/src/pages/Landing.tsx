@@ -258,8 +258,7 @@ export default function Landing() {
                   <span className="text-violet-600">anything. Instantly.</span>
                 </h1>
                 <p className="text-center text-slate-500 mb-7 text-base leading-relaxed">
-                  Type any topic — get 5 AI-crafted questions in seconds.<br className="hidden sm:block" />
-                  No account. No cost. Just knowledge.
+                  Type any topic or subjects — get AI-crafted questions in seconds.
                 </p>
 
                 {/* Preview form card */}
