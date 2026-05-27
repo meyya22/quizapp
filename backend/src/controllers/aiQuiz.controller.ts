@@ -235,7 +235,7 @@ export async function getAiQuiz(req: AuthRequest, res: Response): Promise<void> 
 }
 
 export async function generatePreviewQuiz(req: Request, res: Response): Promise<void> {
-  const { topic } = req.body;
+  const { topic, previousQuestions } = req.body;
 
   if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
     res.status(400).json({ error: 'Topic is required.' }); return;
@@ -265,7 +265,11 @@ Each question object must have exactly these fields:
 - "correctAnswer": single letter "A"/"B"/"C"/"D" for MULTIPLE_CHOICE; "true" or "false" for TRUE_FALSE; array like ["A","C"] for MULTIPLE_RESPONSE
 - "explanation": one or two sentence explanation of why the answer is correct`;
 
-  const userPrompt = `Generate exactly ${n} quiz questions about "${trimmedTopic}" at ${difficulty} difficulty. Return ONLY the JSON array.`;
+  const prevList = Array.isArray(previousQuestions) && previousQuestions.length > 0
+    ? `\n\nDO NOT repeat or closely paraphrase any of these already-seen questions:\n${(previousQuestions as string[]).map((t, i) => `${i + 1}. ${String(t).slice(0, 120)}`).join('\n')}`
+    : '';
+
+  const userPrompt = `Generate exactly ${n} NEW quiz questions about "${trimmedTopic}" at ${difficulty} difficulty.${prevList}\n\nReturn ONLY the JSON array — no duplicates, no overlap with the above.`;
 
   let rawQuestions: unknown[];
   try {
@@ -273,7 +277,7 @@ Each question object must have exactly these fields:
     const message = await client.messages.create({
       model: process.env.CLAUDE_MODEL ?? 'claude-haiku-4-5-20251001',
       max_tokens: 2048,
-      temperature: 0.7,
+      temperature: 1.0,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }],
     });
@@ -510,7 +514,16 @@ Each question object must have exactly these fields:
 - "correctAnswer": single letter "A"/"B"/"C"/"D" for MULTIPLE_CHOICE; "true" or "false" for TRUE_FALSE; array like ["A","C"] for MULTIPLE_RESPONSE
 - "explanation": one or two sentence explanation of why the answer is correct`;
 
-  const userPrompt = `Generate exactly ${toGenerate} NEW quiz questions about "${quiz.topic}" at ${quiz.difficulty} difficulty. Make sure these are different from typical questions already generated. Return ONLY the JSON array.`;
+  const existingTexts = existingQuestions
+    .map((q, i) => `${i + 1}. ${String(q.text ?? '').slice(0, 120)}`)
+    .join('\n');
+
+  const userPrompt = `Generate exactly ${toGenerate} NEW quiz questions about "${quiz.topic}" at ${quiz.difficulty} difficulty.
+
+DO NOT repeat or closely paraphrase any of these already-existing questions:
+${existingTexts}
+
+Return ONLY the JSON array — no duplicates, no overlap with the above.`;
 
   let rawQuestions: unknown[];
   try {

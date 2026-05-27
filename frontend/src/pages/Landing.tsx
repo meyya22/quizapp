@@ -168,7 +168,8 @@ export default function Landing() {
     setGeneratingMore(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
-      const res = await api.post('/ai-quiz/preview/generate', { topic: quizTopic });
+      const seenTexts = questions.map((q) => q.text);
+      const res = await api.post('/ai-quiz/preview/generate', { topic: quizTopic, previousQuestions: seenTexts });
       setQuestions(res.data.questions);
       setUserAnswers(new Map());
       setElapsed(0);
