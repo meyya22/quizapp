@@ -249,21 +249,20 @@ export default function Landing() {
 
           {/* ── HOME PHASE ──────────────────────────────────────────────────── */}
           {phase === 'home' && (
-            <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
+            <div className="flex-1 flex flex-col items-center justify-center px-4 py-4">
               <div className="w-full max-w-lg">
 
                 {/* Headline */}
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-center tracking-tight leading-tight mb-3">
-                  Quiz yourself on<br />
-                  <span className="text-violet-600">anything. Instantly.</span>
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-center tracking-tight leading-tight mb-1">
+                  Quiz yourself on <span className="text-violet-600">anything. Instantly.</span>
                 </h1>
-                <p className="text-center text-slate-500 mb-7 text-base leading-relaxed">
+                <p className="text-center text-slate-500 mb-4 text-sm leading-relaxed">
                   Type any topic or subjects — get AI-crafted questions in seconds.
                 </p>
 
                 {/* Preview form card */}
-                <div className="bg-white rounded-2xl border-2 border-slate-800 shadow-sm p-6">
-                  <div className="space-y-4">
+                <div className="bg-white rounded-2xl border-2 border-slate-800 shadow-sm p-4">
+                  <div className="space-y-3">
 
                     {/* Topic input */}
                     <div>
