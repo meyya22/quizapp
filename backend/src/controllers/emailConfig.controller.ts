@@ -7,6 +7,11 @@ import { AuthRequest } from '../types';
 const prisma = new PrismaClient() as any;
 const MASK = '••••••••';
 
+function buildFrom(fromEmail: string, fromName: string): string {
+  const addr = fromEmail || '';
+  return fromName && addr ? `"${fromName}" <${addr}>` : addr || fromName;
+}
+
 export async function getEmailConfig(_req: AuthRequest, res: Response): Promise<void> {
   try {
     const config = await prisma.emailConfig.findUnique({ where: { id: 1 } });
@@ -16,6 +21,7 @@ export async function getEmailConfig(_req: AuthRequest, res: Response): Promise<
         port: config.port,
         user: config.user,
         pass: MASK,
+        fromEmail: config.fromEmail ?? '',
         fromName: config.fromName ?? '',
         source: 'database',
         updatedAt: config.updatedAt,
@@ -28,7 +34,8 @@ export async function getEmailConfig(_req: AuthRequest, res: Response): Promise<
       port: parseInt(process.env.SMTP_PORT ?? '587'),
       user: process.env.SMTP_USER ?? '',
       pass: process.env.SMTP_PASS ? MASK : '',
-      fromName: process.env.SMTP_FROM ?? '',
+      fromEmail: process.env.SMTP_FROM ?? '',
+      fromName: '',
       source: 'environment',
       updatedAt: null,
     });
@@ -38,14 +45,13 @@ export async function getEmailConfig(_req: AuthRequest, res: Response): Promise<
 }
 
 export async function updateEmailConfig(req: AuthRequest, res: Response): Promise<void> {
-  const { host, port, user, pass, fromName } = req.body;
+  const { host, port, user, pass, fromEmail, fromName } = req.body;
   if (!host || !user) {
     res.status(400).json({ error: 'host and user are required.' });
     return;
   }
 
   try {
-    // If pass is the mask placeholder, keep the existing stored password
     let resolvedPass = pass as string;
     if (resolvedPass === MASK) {
       const existing = await prisma.emailConfig.findUnique({ where: { id: 1 } });
@@ -62,8 +68,8 @@ export async function updateEmailConfig(req: AuthRequest, res: Response): Promis
 
     const config = await prisma.emailConfig.upsert({
       where: { id: 1 },
-      update: { host, port: Number(port) || 587, user, pass: resolvedPass, fromName: fromName || null },
-      create: { id: 1, host, port: Number(port) || 587, user, pass: resolvedPass, fromName: fromName || null },
+      update: { host, port: Number(port) || 587, user, pass: resolvedPass, fromEmail: fromEmail || null, fromName: fromName || null },
+      create: { id: 1, host, port: Number(port) || 587, user, pass: resolvedPass, fromEmail: fromEmail || null, fromName: fromName || null },
     });
     res.json({ success: true, updatedAt: config.updatedAt });
   } catch {
@@ -72,14 +78,13 @@ export async function updateEmailConfig(req: AuthRequest, res: Response): Promis
 }
 
 export async function testEmailConfig(req: AuthRequest, res: Response): Promise<void> {
-  const { host, port, user, pass, fromName, testTo } = req.body;
+  const { host, port, user, pass, fromEmail, fromName, testTo } = req.body;
   if (!host || !user || !testTo) {
     res.status(400).json({ error: 'host, user, and testTo are required.' });
     return;
   }
 
   try {
-    // Resolve masked password from DB
     let resolvedPass = pass as string;
     if (resolvedPass === MASK) {
       const existing = await prisma.emailConfig.findUnique({ where: { id: 1 } });
@@ -99,8 +104,9 @@ export async function testEmailConfig(req: AuthRequest, res: Response): Promise<
     });
 
     await transporter.verify();
+    const from = buildFrom(fromEmail, fromName);
     await transporter.sendMail({
-      from: fromName ? `"${fromName}" <${user}>` : user,
+      from,
       to: testTo,
       subject: 'Test Email — Xam Bridge SMTP',
       html: `

@@ -7,8 +7,8 @@ const prisma = new PrismaClient() as any;
 async function getFromAddress(): Promise<string> {
   try {
     const config = await prisma.emailConfig.findUnique({ where: { id: 1 } });
-    if (config?.user) {
-      return config.fromName ? `"${config.fromName}" <${config.user}>` : config.user;
+    if (config?.fromEmail) {
+      return config.fromName ? `"${config.fromName}" <${config.fromEmail}>` : config.fromEmail;
     }
   } catch { /* fall through */ }
   return process.env.SMTP_FROM || process.env.SMTP_USER || '';

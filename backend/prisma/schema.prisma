@@ -217,6 +217,7 @@ model EmailConfig {
   port      Int      @default(587)
   user      String
   pass      String
+  fromEmail String?
   fromName  String?
   updatedAt DateTime @updatedAt
 

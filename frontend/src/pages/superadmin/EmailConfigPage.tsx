@@ -9,6 +9,7 @@ interface EmailConfigData {
   port: number;
   user: string;
   pass: string;
+  fromEmail: string;
   fromName: string;
   source: 'database' | 'environment';
   updatedAt: string | null;
@@ -40,6 +41,7 @@ export default function EmailConfigPage() {
       port: current?.port,
       user: current?.user,
       pass: current?.pass,
+      fromEmail: current?.fromEmail,
       fromName: current?.fromName,
     }),
     onSuccess: () => {
@@ -58,6 +60,7 @@ export default function EmailConfigPage() {
       port: current?.port,
       user: current?.user,
       pass: current?.pass,
+      fromEmail: current?.fromEmail,
       fromName: current?.fromName,
       testTo,
     }),
@@ -140,14 +143,28 @@ export default function EmailConfigPage() {
 
           {/* SMTP User */}
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">SMTP Username / Email</label>
+            <label className="block text-xs font-medium text-slate-500 mb-1">SMTP Username</label>
             <input
               type="text"
               value={current?.user ?? ''}
               onChange={(e) => handleChange('user', e.target.value)}
+              placeholder="AKIAIOSFODNN7EXAMPLE (AWS SES) or your email"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+            />
+            <p className="text-xs text-slate-400 mt-1">For AWS SES this is the SMTP Access Key ID, not your email address.</p>
+          </div>
+
+          {/* Sender Email */}
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Sender Email Address <span className="text-red-400">*</span></label>
+            <input
+              type="email"
+              value={current?.fromEmail ?? ''}
+              onChange={(e) => handleChange('fromEmail', e.target.value)}
               placeholder="noreply@yourdomain.com"
               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
             />
+            <p className="text-xs text-slate-400 mt-1">Must be a verified email/domain in AWS SES. Used as the MAIL FROM address.</p>
           </div>
 
           {/* Password */}
