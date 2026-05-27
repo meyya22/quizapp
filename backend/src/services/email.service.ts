@@ -1,7 +1,8 @@
 import nodemailer from 'nodemailer';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const prisma = new PrismaClient() as any;
 
 async function getFromAddress(): Promise<string> {
   try {

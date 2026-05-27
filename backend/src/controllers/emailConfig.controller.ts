@@ -1,9 +1,10 @@
 import { Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import nodemailer from 'nodemailer';
-import { AuthRequest } from '../middleware/auth';
+import { AuthRequest } from '../types';
 
-const prisma = new PrismaClient();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const prisma = new PrismaClient() as any;
 const MASK = '••••••••';
 
 export async function getEmailConfig(_req: AuthRequest, res: Response): Promise<void> {
