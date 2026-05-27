@@ -543,7 +543,7 @@ export default function Landing() {
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <button
                     onClick={handleTryAgain}
-                    className="px-4 py-2 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2 border-2 border-slate-800 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
                   >
                     Try another topic
                   </button>
