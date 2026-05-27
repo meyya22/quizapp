@@ -211,6 +211,18 @@ model AiQuizAttempt {
   @@map("ai_quiz_attempts")
 }
 
+model EmailConfig {
+  id        Int      @id @default(1)
+  host      String
+  port      Int      @default(587)
+  user      String
+  pass      String
+  fromName  String?
+  updatedAt DateTime @updatedAt
+
+  @@map("email_config")
+}
+
 model PreviewSession {
   id        String   @id @default(cuid())
   topic     String

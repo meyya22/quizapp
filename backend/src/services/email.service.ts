@@ -1,6 +1,33 @@
 import nodemailer from 'nodemailer';
+import { PrismaClient } from '@prisma/client';
 
-function createTransporter() {
+const prisma = new PrismaClient();
+
+async function getFromAddress(): Promise<string> {
+  try {
+    const config = await prisma.emailConfig.findUnique({ where: { id: 1 } });
+    if (config?.user) {
+      return config.fromName ? `"${config.fromName}" <${config.user}>` : config.user;
+    }
+  } catch { /* fall through */ }
+  return process.env.SMTP_FROM || process.env.SMTP_USER || '';
+}
+
+async function createTransporter() {
+  // Prefer DB config if available
+  try {
+    const config = await prisma.emailConfig.findUnique({ where: { id: 1 } });
+    if (config?.host && config?.user && config?.pass) {
+      return nodemailer.createTransport({
+        host: config.host,
+        port: config.port,
+        secure: config.port === 465,
+        auth: { user: config.user, pass: config.pass },
+      });
+    }
+  } catch { /* fall through to env vars */ }
+
+  // Fall back to env vars
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return null;
   return nodemailer.createTransport({
@@ -12,10 +39,10 @@ function createTransporter() {
 }
 
 export async function sendWelcomeEmail(to: string, name: string, role: string): Promise<void> {
-  const transporter = createTransporter();
+  const transporter = await createTransporter();
   if (!transporter) return;
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const from = await getFromAddress();
   const appUrl = process.env.FRONTEND_URL || 'https://quizapp-frontend-552535177061.us-central1.run.app';
   const isAdmin = role === 'ADMIN';
 
@@ -157,10 +184,10 @@ export async function sendSubscriptionConfirmationEmail(
   plan: string,
   periodEnd: Date,
 ): Promise<void> {
-  const transporter = createTransporter();
+  const transporter = await createTransporter();
   if (!transporter) return;
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const from = await getFromAddress();
   const appUrl = process.env.FRONTEND_URL || 'https://www.xambridge.com';
   const isMonthly = plan !== 'YEARLY';
   const planLabel = isMonthly ? 'Monthly - $5/month' : 'Yearly - $50/year';
@@ -274,10 +301,10 @@ export async function sendSubscriptionConfirmationEmail(
 }
 
 export async function sendNewUserNotification(name: string, email: string, role: string): Promise<void> {
-  const transporter = createTransporter();
+  const transporter = await createTransporter();
   if (!transporter) return;
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const from = await getFromAddress();
   const isAdmin = role === 'ADMIN';
   const now = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
 

@@ -1684,3 +1684,5 @@ Uncaught exception: Error: listen EADDRINUSE: address already in use :::3001
   address: '::',
   port: 3001
 }
+[INFO] 06:25:26 Restarting: C:\Users\kmeyy\OneDrive\Documents\meyyas_claude_code\quiz-app\backend\src\controllers\user.controller.ts has been modified
+Server running on http://localhost:3001

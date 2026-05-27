@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Footer from '../Footer';
-import { Users, LogOut, ShieldCheck, CreditCard, Mail, Menu, X, Sparkles, BrainCircuit, EyeOff, BookUser } from 'lucide-react';
+import { Users, LogOut, ShieldCheck, CreditCard, Mail, Menu, X, Sparkles, BrainCircuit, EyeOff, BookUser, Settings } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -28,6 +28,7 @@ export default function SuperAdminLayout() {
     { to: '/superadmin/ai-quiz-report', icon: BrainCircuit, label: 'AI Quiz Report' },
     { to: '/superadmin/anonymous-quizzes', icon: EyeOff, label: 'Track Anonymous Quiz' },
     { to: '/superadmin/contact-builder', icon: BookUser, label: 'Contact Builder' },
+    { to: '/superadmin/email-config', icon: Settings, label: 'Email Config' },
   ];
 
   return (
