@@ -7,6 +7,7 @@ import {
   createQuestion,
   updateQuestion,
   deleteQuestion,
+  bulkDeleteQuestions,
   importQuestions,
   downloadSampleCsv,
 } from '../controllers/question.controller';
@@ -34,6 +35,7 @@ router.get('/sample-csv', authenticate, requireAdmin, downloadSampleCsv);
 router.get('/', optionalAuthenticate, getQuestions);
 router.post('/', authenticate, requireAdmin, createQuestion);
 router.put('/:id', authenticate, requireAdmin, updateQuestion);
+router.delete('/', authenticate, requireAdmin, bulkDeleteQuestions);
 router.delete('/:id', authenticate, requireAdmin, deleteQuestion);
 router.post('/import', authenticate, requireAdmin, upload.single('file'), importQuestions);
 

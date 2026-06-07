@@ -17,6 +17,9 @@ import aiRoutes from './routes/ai.routes';
 import aiQuizRoutes from './routes/aiQuiz.routes';
 import marketingContactRoutes from './routes/marketingContact.routes';
 import emailConfigRoutes from './routes/emailConfig.routes';
+import examContentRoutes from './routes/examContent.routes';
+import upcomingExamRoutes from './routes/upcomingExam.routes';
+import dbInfoRoutes from './routes/dbInfo.routes';
 import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
@@ -37,11 +40,12 @@ app.use(
 // Global rate limit: 200 requests per 15 min per IP
 app.use(globalLimiter);
 
-// Stripe webhook requires raw body — register before json parser
+// Stripe + Razorpay webhooks require raw body — register before json parser
 app.use('/api/payment/webhook', express.raw({ type: 'application/json' }));
+app.use('/api/payment/razorpay/webhook-rz', express.raw({ type: 'application/json' }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -56,6 +60,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/ai-quiz', aiQuizRoutes);
 app.use('/api/marketing-contacts', marketingContactRoutes);
 app.use('/api/email-config', emailConfigRoutes);
+app.use('/api/exam-content', examContentRoutes);
+app.use('/api/upcoming-exams', upcomingExamRoutes);
+app.use('/api/db-info', dbInfoRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

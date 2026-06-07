@@ -22,18 +22,51 @@ model User {
   subscriptionCurrentPeriodEnd DateTime?
   aiGenerationsUsed            Int       @default(0)
   aiGenerationsResetAt         DateTime  @default(now())
+  complimentaryQuizId          String?
+  purchasedCategoryIds         String    @default("[]")
   country      String?
   city         String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  attempts     QuizAttempt[]
-  categories   Category[]
-  contacts     Contact[]
-  emailHistory EmailHistory[]
-  aiQuizzes    AiQuiz[]
+  attempts          QuizAttempt[]
+  categories        Category[]
+  contacts          Contact[]
+  emailHistory      EmailHistory[]
+  aiQuizzes         AiQuiz[]
+  categoryPurchases CategoryPurchase[]
+  pendingPurchases  PendingPurchase[]
 
   @@map("users")
+}
+
+model CategoryPurchase {
+  id             String   @id @default(cuid())
+  userId         String
+  examCategoryId String
+  categoryName   String
+  paymentId      String?
+  orderId        String?
+  paymentMethod  String?
+  amountPaise    Int?
+  purchasedAt    DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, examCategoryId])
+  @@map("category_purchases")
+}
+
+model PendingPurchase {
+  id             String   @id @default(cuid())
+  userId         String
+  examCategoryId String
+  categoryName   String
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, examCategoryId])
+  @@map("pending_purchases")
 }
 
 model Contact {
@@ -72,9 +105,10 @@ model Quiz {
   passingScore     Int           @default(70)
   published        Boolean       @default(false)
   visibility       String        @default("PUBLIC")
-  layout           String        @default("VERTICAL")
-  defaultLanguage  String        @default("en")
-  createdAt        DateTime      @default(now())
+  layout              String        @default("VERTICAL")
+  defaultLanguage     String        @default("en")
+  randomizeQuestions  Boolean       @default(false)
+  createdAt           DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
   category     Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -92,6 +126,7 @@ model Question {
   options       String?
   correctAnswer String
   explanation   String?
+  tags          String?
   orderIndex    Int             @default(0)
 
   quiz          Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
@@ -211,6 +246,42 @@ model AiQuizAttempt {
   @@map("ai_quiz_attempts")
 }
 
+model ExamCategory {
+  id            String            @id @default(cuid())
+  name          String
+  order         Int               @default(0)
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  subCategories ExamSubCategory[]
+
+  @@map("exam_categories")
+}
+
+model ExamSubCategory {
+  id         String      @id @default(cuid())
+  categoryId String
+  name       String
+  order      Int         @default(0)
+  isActive   Boolean     @default(true)
+  category   ExamCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  quizzes    ExamQuiz[]
+
+  @@map("exam_sub_categories")
+}
+
+model ExamQuiz {
+  id            String          @id @default(cuid())
+  subCategoryId String
+  title         String
+  url           String?
+  order         Int             @default(0)
+  isActive      Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  subCategory   ExamSubCategory @relation(fields: [subCategoryId], references: [id], onDelete: Cascade)
+
+  @@map("exam_quizzes")
+}
+
 model EmailConfig {
   id        Int      @id @default(1)
   host      String
@@ -224,6 +295,18 @@ model EmailConfig {
   @@map("email_config")
 }
 
+model UpcomingExam {
+  id        String   @id @default(cuid())
+  examName  String
+  examDate  String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("upcoming_exams")
+}
+
 model PreviewSession {
   id        String   @id @default(cuid())
   topic     String
@@ -235,4 +318,22 @@ model PreviewSession {
   createdAt DateTime @default(now())
 
   @@map("preview_sessions")
+}
+
+model AnonymousAttempt {
+  id              String   @id @default(cuid())
+  eventType       String   @default("click")
+  quizId          String?
+  quizTitle       String?
+  adminCategory   String?
+  examCategory    String?
+  examSubCategory String?
+  score           Float?
+  passed          Boolean?
+  city            String?
+  country         String?
+  device          String?
+  createdAt       DateTime @default(now())
+
+  @@map("anonymous_attempts")
 }

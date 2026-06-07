@@ -54,7 +54,7 @@ export async function register(req: Request, res: Response): Promise<void> {
   const token = signToken(user);
   res.status(201).json({
     token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier },
+    user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier, complimentaryQuizId: (user as any).complimentaryQuizId ?? null },
   });
 }
 
@@ -67,25 +67,22 @@ export async function login(req: Request, res: Response): Promise<void> {
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    res.status(401).json({ error: 'No account found with that email address.' });
-    return;
-  }
-  if (!user.passwordHash) {
-    res.status(401).json({ error: 'This account was created with Google Sign-In. Please use the Google button to log in.' });
+  if (!user || !user.passwordHash) {
+    // Generic message — avoids revealing whether the email exists
+    res.status(401).json({ error: 'Invalid email or password.' });
     return;
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
-    res.status(401).json({ error: 'Incorrect password. Please try again.' });
+    res.status(401).json({ error: 'Invalid email or password.' });
     return;
   }
 
   const token = signToken(user);
   res.json({
     token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier },
+    user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier, complimentaryQuizId: (user as any).complimentaryQuizId ?? null },
   });
 }
 
@@ -136,7 +133,7 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
     const token = signToken(user);
     res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier, complimentaryQuizId: (user as any).complimentaryQuizId ?? null },
     });
   } catch {
     res.status(401).json({ error: 'Google token verification failed' });
@@ -151,14 +148,3 @@ export async function getMe(req: Request & { user?: { id: string } }, res: Respo
   res.json(user);
 }
 
-export async function upgradeTier(req: AuthRequest, res: Response): Promise<void> {
-  const user = await prisma.user.update({
-    where: { id: req.user!.id },
-    data: { tier: 'PAID' },
-  });
-  const token = signToken(user);
-  res.json({
-    token,
-    user: { id: user.id, name: user.name, email: user.email, role: user.role, tier: user.tier },
-  });
-}

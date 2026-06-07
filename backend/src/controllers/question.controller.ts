@@ -15,6 +15,7 @@ const FREE_QUESTION_LIMIT = 10;
 const PAID_QUESTION_LIMIT = 100;
 const FREE_RESPONSE_LIMIT = 50;
 const PAID_RESPONSE_LIMIT = 2000;
+const PARTICIPANT_FREE_LIMIT = 5;
 
 function getMonthStart(): Date {
   const now = new Date();
@@ -77,6 +78,11 @@ export async function getQuestions(req: AuthRequest, res: Response): Promise<voi
     }
   }
 
+  const quiz = await (prisma as any).quiz.findUnique({
+    where: { id: req.params.quizId },
+    select: { randomizeQuestions: true },
+  });
+
   const questions = await prisma.question.findMany({
     where: { quizId: req.params.quizId },
     orderBy: { orderIndex: 'asc' },
@@ -90,13 +96,75 @@ export async function getQuestions(req: AuthRequest, res: Response): Promise<voi
     correctAnswer: revealAnswers ? JSON.parse(q.correctAnswer) : undefined,
   }));
 
-  res.json(parsed);
+  // PARTICIPANT: return first 3 unless this is their complimentary quiz or they purchased this category
+  // NOTE: do NOT gate this on tier — a participant who bought one category still needs
+  // restriction on unpurchased categories (tier becomes PAID after first purchase).
+  if (req.user?.role === 'PARTICIPANT') {
+    const participant = await (prisma as any).user.findUnique({
+      where: { id: req.user.id },
+      select: { complimentaryQuizId: true, purchasedCategoryIds: true },
+    });
+
+    const isComplimentary = participant?.complimentaryQuizId === req.params.quizId;
+
+    if (!isComplimentary) {
+      // Look up which ExamCategory this quiz belongs to
+      // URLs in DB may be stored as full URL or path — match flexibly
+      const examQuiz = await (prisma as any).examQuiz.findFirst({
+        where: {
+          OR: [
+            { url: `/quiz/${req.params.quizId}` },
+            { url: { endsWith: `/quiz/${req.params.quizId}` } },
+            { url: { contains: req.params.quizId } },
+          ],
+        },
+        select: { subCategory: { select: { category: { select: { id: true, name: true } } } } },
+      });
+      const examCategoryId: string | null = examQuiz?.subCategory?.category?.id ?? null;
+      const examCategoryName: string | null = examQuiz?.subCategory?.category?.name ?? null;
+
+      const purchasedIds: string[] = JSON.parse(participant?.purchasedCategoryIds || '[]');
+      const hasPurchasedCategory = examCategoryId ? purchasedIds.includes(examCategoryId) : false;
+
+      if (!hasPurchasedCategory) {
+        res.json({ questions: parsed.slice(0, PARTICIPANT_FREE_LIMIT), totalQuestions: parsed.length, examCategoryId, examCategoryName });
+        return;
+      }
+
+      // Purchased category: enforce 10-attempt retake limit per quiz
+      const attemptCount = await prisma.quizAttempt.count({
+        where: { userId: req.user!.id, quizId: req.params.quizId },
+      });
+      if (attemptCount >= 10) {
+        res.status(403).json({
+          error: 'Sorry, your maximum retake attempt limit of 10 is reached',
+          code: 'ATTEMPT_LIMIT_REACHED',
+        });
+        return;
+      }
+    }
+  }
+
+  // Apply shuffling for paid/complimentary participant and anonymous users
+  if (!isAdmin && quiz?.randomizeQuestions) {
+    for (let i = parsed.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [parsed[i], parsed[j]] = [parsed[j], parsed[i]];
+    }
+  }
+
+  // Participant: return as object; admin/anonymous: plain array
+  if (req.user?.role === 'PARTICIPANT') {
+    res.json({ questions: parsed, totalQuestions: parsed.length });
+  } else {
+    res.json(parsed);
+  }
 }
 
 export async function createQuestion(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
   const { quizId } = req.params;
-  const { text, type, options, correctAnswer, explanation } = req.body;
+  const { text, type, options, correctAnswer, explanation, tags } = req.body;
 
   if (!text || !type || !VALID_TYPES.includes(type)) {
     res.status(400).json({ error: 'text and valid type are required' });
@@ -135,6 +203,7 @@ export async function createQuestion(req: AuthRequest, res: Response): Promise<v
       options: options ? JSON.stringify(options) : null,
       correctAnswer: JSON.stringify(correctAnswer),
       explanation: explanation || null,
+      tags: tags ? String(tags).slice(0, 120) : null,
       orderIndex: count,
     },
   });
@@ -149,7 +218,7 @@ export async function createQuestion(req: AuthRequest, res: Response): Promise<v
 export async function updateQuestion(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
   const { id, quizId } = req.params;
-  const { text, type, options, correctAnswer, explanation } = req.body;
+  const { text, type, options, correctAnswer, explanation, tags } = req.body;
 
   const quiz = await getQuizWithOwnership(quizId, adminId);
   if (!quiz) {
@@ -166,6 +235,7 @@ export async function updateQuestion(req: AuthRequest, res: Response): Promise<v
         options: options !== undefined ? JSON.stringify(options) : undefined,
         correctAnswer: correctAnswer !== undefined ? JSON.stringify(correctAnswer) : undefined,
         explanation: explanation !== undefined ? (explanation || null) : undefined,
+        tags: tags !== undefined ? (tags ? String(tags).slice(0, 120) : null) : undefined,
       },
     });
 
@@ -195,6 +265,26 @@ export async function deleteQuestion(req: AuthRequest, res: Response): Promise<v
   } catch {
     res.status(404).json({ error: 'Question not found' });
   }
+}
+
+export async function bulkDeleteQuestions(req: AuthRequest, res: Response): Promise<void> {
+  const adminId = req.user!.id;
+  const { quizId } = req.params;
+  const { ids } = req.body;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    res.status(400).json({ error: 'ids array is required' });
+    return;
+  }
+
+  const quiz = await getQuizWithOwnership(quizId, adminId);
+  if (!quiz) {
+    res.status(404).json({ error: 'Quiz not found' });
+    return;
+  }
+
+  await prisma.question.deleteMany({ where: { id: { in: ids }, quizId } });
+  res.status(204).send();
 }
 
 export async function importQuestions(req: AuthRequest, res: Response): Promise<void> {

@@ -33,8 +33,33 @@ export function gradeAnswer(
       return true;
     }
 
-    case 'FREE_TEXT':
-      return String(submitted).trim().toLowerCase() === String(correct).trim().toLowerCase();
+    case 'FREE_TEXT': {
+      const normalize = (s: string) =>
+        String(s)
+          .trim()
+          .toLowerCase()
+          .replace(/\s*=\s*/g, '=')
+          .replace(/\s+/g, ' ');
+      const normSub = normalize(String(submitted));
+      if (!normSub) return false;
+      const normCorr = normalize(String(correct));
+      // Support "X or Y or Z" as multiple acceptable answers
+      const alternatives = normCorr.split(/\s+or\s+/).map(s => s.trim()).filter(Boolean);
+      for (const alt of alternatives) {
+        if (normSub === alt) return true;
+        // Keyword prefix: "geothermal" matches "geothermal energy"
+        if (alt.startsWith(normSub + ' ')) return true;
+        // When AI stored a full explanation, the answer appears in the last sentence
+        if (alt.length > 60) {
+          const sentences = alt.split(/\.\s+/);
+          const lastSentence = sentences[sentences.length - 1].replace(/\.$/, '').trim();
+          const escaped = normSub.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`(?:^|[\\s=,;:(])${escaped}(?:[\\s.,;:!?)]|$)`);
+          if (regex.test(lastSentence)) return true;
+        }
+      }
+      return false;
+    }
 
     default:
       return false;

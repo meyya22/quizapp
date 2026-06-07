@@ -594,3 +594,36 @@ Return ONLY the JSON array — no duplicates, no overlap with the above.`;
 
   res.json({ quiz: updated, added: newQuestions.length });
 }
+
+export async function explainQuestion(req: Request, res: Response): Promise<void> {
+  const { quizTitle, questionText, language } = req.body;
+  if (!questionText || typeof questionText !== 'string' || questionText.trim().length === 0) {
+    res.status(400).json({ error: 'questionText is required.' }); return;
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) { res.status(500).json({ error: 'AI service not configured.' }); return; }
+
+  const context = quizTitle ? `This question is from the quiz: "${quizTitle.trim()}".` : '';
+  const langInstruction = language && language !== 'English' ? ` Respond in ${language}.` : '';
+
+  try {
+    const client = new Anthropic({ apiKey });
+    const message = await client.messages.create({
+      model: process.env.CLAUDE_MODEL ?? 'claude-haiku-4-5-20251001',
+      max_tokens: 300,
+      temperature: 0.3,
+      system: `You are a concise exam tutor. Given a question, explain in 2–3 sentences why the correct answer is correct. Be direct and factual — no step-by-step instructions, no "how to approach" advice, no filler. Just the core reason the answer is right.${langInstruction}`,
+      messages: [{ role: 'user', content: `${context}\n\nQuestion: ${questionText.trim().slice(0, 800)}\n\nWhy is the correct answer correct? Be brief and precise.` }],
+    });
+
+    const block = message.content[0];
+    if (!block || block.type !== 'text') {
+      res.status(502).json({ error: 'AI returned an unexpected response.' }); return;
+    }
+    res.json({ explanation: block.text.trim() });
+  } catch (err) {
+    console.error('explainQuestion failed:', err);
+    res.status(502).json({ error: 'AI explanation failed. Please try again.' });
+  }
+}

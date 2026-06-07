@@ -90,8 +90,8 @@ Each element must be an object with exactly these fields:
 - "text": question string
 - "type": one of MULTIPLE_CHOICE, MULTIPLE_RESPONSE, TRUE_FALSE, FREE_TEXT
 - "options": object {"A":"...","B":"...","C":"...","D":"..."} for MULTIPLE_CHOICE/MULTIPLE_RESPONSE, or null for TRUE_FALSE/FREE_TEXT
-- "correctAnswer": single letter "A"/"B"/"C"/"D" for MULTIPLE_CHOICE; array like ["A","C"] for MULTIPLE_RESPONSE; "true" or "false" for TRUE_FALSE; answer string for FREE_TEXT
-- "explanation": string explaining why the answer is correct`;
+- "correctAnswer": single letter "A"/"B"/"C"/"D" for MULTIPLE_CHOICE; array like ["A","C"] for MULTIPLE_RESPONSE; "true" or "false" for TRUE_FALSE; for FREE_TEXT use ONLY the short expected answer (e.g. "4", "-5", "photosynthesis") — never include working or explanation here
+- "explanation": string explaining why the answer is correct (for FREE_TEXT this is where you put the full working/reasoning)`;
 
   const userPrompt = `${prompt.trim().slice(0, 2000)}\n\nIf this is a question generation request, generate up to 10 questions and return ONLY the JSON array. Otherwise return {"refused": true}.`;
 

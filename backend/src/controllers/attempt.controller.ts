@@ -2,6 +2,85 @@ import { Response } from 'express';
 import { prisma } from '../config/prisma';
 import { calculateScore } from '../services/grading.service';
 import { AuthRequest, SubmittedAnswer } from '../types';
+import type { Request } from 'express';
+
+function parseDevice(ua: string): string {
+  if (/mobile/i.test(ua)) return 'Mobile';
+  if (/tablet|ipad/i.test(ua)) return 'Tablet';
+  return 'Desktop';
+}
+
+function getClientIp(req: Request): string {
+  const fwd = req.headers['x-forwarded-for'];
+  const ip = typeof fwd === 'string' ? fwd.split(',')[0].trim() : '';
+  return ip || (req.socket?.remoteAddress ?? '');
+}
+
+async function lookupGeo(ip: string): Promise<{ city: string | null; country: string | null }> {
+  if (!ip || /^(127\.|::1$|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(ip)) {
+    return { city: null, country: null };
+  }
+  try {
+    const res = await fetch(`http://ip-api.com/json/${ip}?fields=status,city,country`);
+    if (!res.ok) return { city: null, country: null };
+    const data = await res.json() as { status: string; city?: string; country?: string };
+    if (data.status !== 'success') return { city: null, country: null };
+    return { city: data.city ?? null, country: data.country ?? null };
+  } catch { return { city: null, country: null }; }
+}
+
+async function lookupQuizMeta(quizId: string) {
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: quizId },
+    select: { title: true, category: { select: { name: true } } },
+  });
+  const examQuiz = await (prisma as any).examQuiz.findFirst({
+    where: {
+      OR: [
+        { url: `/quiz/${quizId}` },
+        { url: { endsWith: `/quiz/${quizId}` } },
+        { url: { contains: quizId } },
+      ],
+    },
+    select: { subCategory: { select: { name: true, category: { select: { name: true } } } } },
+  });
+  return {
+    quizTitle: quiz?.title ?? null,
+    adminCategory: quiz?.category?.name ?? null,
+    examCategory: examQuiz?.subCategory?.category?.name ?? null,
+    examSubCategory: examQuiz?.subCategory?.name ?? null,
+  };
+}
+
+async function logAnonymousAttempt(req: Request, quizId: string, score: number, passed: boolean) {
+  try {
+    const meta = await lookupQuizMeta(quizId);
+    const device = parseDevice(req.headers['user-agent'] ?? '');
+    const { city, country } = await lookupGeo(getClientIp(req));
+    await (prisma as any).anonymousAttempt.create({
+      data: { eventType: 'submit', quizId, ...meta, score, passed, device, city, country },
+    });
+  } catch { /* non-critical */ }
+}
+
+export async function logAnonymousPreview(req: Request, res: Response): Promise<void> {
+  try {
+    const { quizId, quizTitle, examCategory } = req.body as Record<string, string | undefined>;
+    const device = parseDevice(req.headers['user-agent'] ?? '');
+    const { city, country } = await lookupGeo(getClientIp(req));
+    let meta = { quizTitle: quizTitle ?? null, adminCategory: null as string | null, examCategory: examCategory ?? null, examSubCategory: null as string | null };
+    if (quizId) {
+      try {
+        const looked = await lookupQuizMeta(quizId);
+        meta = { ...looked, examCategory: examCategory ?? looked.examCategory };
+      } catch { /* ok */ }
+    }
+    await (prisma as any).anonymousAttempt.create({
+      data: { eventType: 'click', quizId: quizId ?? null, ...meta, device, city, country },
+    });
+  } catch { /* non-critical */ }
+  res.status(201).json({ ok: true });
+}
 
 const FREE_RESPONSE_LIMIT = 50;
 const PAID_RESPONSE_LIMIT = 2000;
@@ -98,6 +177,11 @@ export async function submitAttempt(req: AuthRequest, res: Response): Promise<vo
     },
   });
 
+  // Log anonymous attempts for superadmin tracking
+  if (!req.user) {
+    logAnonymousAttempt(req, quizId, score, passed);
+  }
+
   res.status(201).json({ id: attempt.id, score, passed, timeTaken });
 }
 
@@ -174,12 +258,12 @@ export async function getAttemptsSummary(req: AuthRequest, res: Response): Promi
       score: true,
       passed: true,
       completedAt: true,
-      quiz: { select: { title: true } },
+      quiz: { select: { title: true, category: { select: { name: true } } } },
     },
     orderBy: { completedAt: 'desc' },
   });
 
-  const quizMap = new Map<string, { title: string; count: number; totalScore: number; passCount: number; lastAt: Date }>();
+  const quizMap = new Map<string, { title: string; categoryName: string; count: number; totalScore: number; passCount: number; lastAt: Date }>();
 
   for (const a of attempts) {
     const entry = quizMap.get(a.quizId);
@@ -190,6 +274,7 @@ export async function getAttemptsSummary(req: AuthRequest, res: Response): Promi
     } else {
       quizMap.set(a.quizId, {
         title: a.quiz.title,
+        categoryName: (a.quiz as any).category?.name ?? '',
         count: 1,
         totalScore: a.score,
         passCount: a.passed ? 1 : 0,
@@ -202,6 +287,7 @@ export async function getAttemptsSummary(req: AuthRequest, res: Response): Promi
     .map(([quizId, d]) => ({
       quizId,
       title: d.title,
+      categoryName: d.categoryName,
       attempts: d.count,
       avgScore: Math.round((d.totalScore / d.count) * 10) / 10,
       passRate: Math.round((d.passCount / d.count) * 100),
@@ -241,7 +327,7 @@ export async function getAllAttempts(req: AuthRequest, res: Response): Promise<v
 
   const include = {
     user: { select: { id: true, name: true, email: true } },
-    quiz: { select: { id: true, title: true } },
+    quiz: { select: { id: true, title: true, category: { select: { name: true } } } },
   };
 
   if (download === 'true') {

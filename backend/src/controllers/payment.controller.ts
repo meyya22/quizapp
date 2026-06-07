@@ -326,19 +326,37 @@ export async function getPaymentMetrics(_req: AuthRequest, res: Response): Promi
   const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const startOfMonthTs = Math.floor(startOfMonth.getTime() / 1000);
 
-  const [totalPaid, monthlyPlan, yearlyPlan, allInvoices, monthInvoices] = await Promise.all([
+  const [
+    totalPaid, monthlyPlan, yearlyPlan, allInvoices, monthInvoices,
+    rzTotalCount, rzMonthCount, rzAllPurchases, rzMonthPurchases,
+  ] = await Promise.all([
     prisma.user.count({ where: { tier: 'PAID' } }),
     prisma.user.count({ where: { tier: 'PAID', subscriptionPlan: 'MONTHLY' } }),
     prisma.user.count({ where: { tier: 'PAID', subscriptionPlan: 'YEARLY' } }),
     stripe.invoices.list({ status: 'paid', limit: 100 }),
     stripe.invoices.list({ status: 'paid', created: { gte: startOfMonthTs }, limit: 100 }),
+    (prisma as any).categoryPurchase.count(),
+    (prisma as any).categoryPurchase.count({ where: { purchasedAt: { gte: startOfMonth } } }),
+    (prisma as any).categoryPurchase.findMany({
+      orderBy: { purchasedAt: 'desc' },
+      take: 20,
+      select: {
+        id: true, categoryName: true, paymentId: true, orderId: true,
+        paymentMethod: true, amountPaise: true, purchasedAt: true,
+        user: { select: { email: true, name: true } },
+      },
+    }),
+    (prisma as any).categoryPurchase.findMany({
+      where: { purchasedAt: { gte: startOfMonth } },
+      select: { amountPaise: true },
+    }),
   ]);
 
-  const totalRevenue = allInvoices.data.reduce((sum, inv) => sum + inv.amount_paid, 0);
-  const monthRevenue = monthInvoices.data.reduce((sum, inv) => sum + inv.amount_paid, 0);
+  const totalRevenue = allInvoices.data.reduce((sum: number, inv: any) => sum + inv.amount_paid, 0);
+  const monthRevenue = monthInvoices.data.reduce((sum: number, inv: any) => sum + inv.amount_paid, 0);
   const mrr = monthlyPlan * 500 + Math.round((yearlyPlan * 5000) / 12);
 
-  const recentTransactions = allInvoices.data.slice(0, 15).map((inv) => ({
+  const recentTransactions = allInvoices.data.slice(0, 15).map((inv: any) => ({
     id: inv.id,
     amountPaid: inv.amount_paid,
     currency: inv.currency,
@@ -348,6 +366,9 @@ export async function getPaymentMetrics(_req: AuthRequest, res: Response): Promi
     invoiceUrl: inv.hosted_invoice_url,
   }));
 
+  const rzTotalRevenuePaise = rzAllPurchases.reduce((sum: number, p: any) => sum + (p.amountPaise ?? 29900), 0);
+  const rzMonthRevenuePaise = rzMonthPurchases.reduce((sum: number, p: any) => sum + (p.amountPaise ?? 29900), 0);
+
   res.json({
     totalPaid,
     monthlyPlan,
@@ -356,5 +377,22 @@ export async function getPaymentMetrics(_req: AuthRequest, res: Response): Promi
     monthRevenue,
     mrr,
     recentTransactions,
+    razorpay: {
+      totalPurchases: rzTotalCount,
+      monthPurchases: rzMonthCount,
+      totalRevenueINR: Math.round(rzTotalRevenuePaise / 100),
+      monthRevenueINR: Math.round(rzMonthRevenuePaise / 100),
+      recentTransactions: rzAllPurchases.map((p: any) => ({
+        id: p.id,
+        categoryName: p.categoryName,
+        customerEmail: p.user?.email ?? null,
+        customerName: p.user?.name ?? null,
+        paymentId: p.paymentId ?? null,
+        orderId: p.orderId ?? null,
+        paymentMethod: p.paymentMethod ?? null,
+        amountPaise: p.amountPaise ?? 29900,
+        purchasedAt: p.purchasedAt.toISOString(),
+      })),
+    },
   });
 }

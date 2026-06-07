@@ -9,13 +9,15 @@ import {
   generatePreviewQuiz,
   submitPreviewSession,
   expandAiQuiz,
+  explainQuestion,
 } from '../controllers/aiQuiz.controller';
 
 const router = Router();
 
-// Public preview — no auth, AI rate limited
+// Public — no auth, AI rate limited
 router.post('/preview/generate', aiLimiter, generatePreviewQuiz);
 router.post('/preview/submit', aiLimiter, submitPreviewSession);
+router.post('/explain', aiLimiter, explainQuestion);
 
 // Authenticated routes
 router.post('/generate', authenticate, generateAiQuiz);

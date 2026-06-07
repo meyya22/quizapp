@@ -3,7 +3,7 @@ import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
 
 const FREE_QUIZ_TOTAL = 5;
-const PAID_QUIZ_TOTAL = 50;
+const PAID_QUIZ_TOTAL = 200;
 
 export async function getQuizzes(req: AuthRequest, res: Response): Promise<void> {
   const isAdmin = req.user?.role === 'ADMIN';
@@ -79,7 +79,7 @@ export async function toggleVisibility(req: AuthRequest, res: Response): Promise
 
 export async function createQuiz(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
-  const { categoryId, title, description, passingScore, visibility, layout, defaultLanguage } = req.body;
+  const { categoryId, title, description, passingScore, visibility, layout, defaultLanguage, randomizeQuestions } = req.body;
   if (!categoryId || !title) {
     res.status(400).json({ error: 'categoryId and title are required' });
     return;
@@ -116,6 +116,7 @@ export async function createQuiz(req: AuthRequest, res: Response): Promise<void>
       visibility: visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC',
       layout: layout === 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL',
       ...(defaultLanguage && { defaultLanguage }),
+      randomizeQuestions: randomizeQuestions === true,
     },
     include: { category: { select: { id: true, name: true } } },
   });
@@ -125,7 +126,7 @@ export async function createQuiz(req: AuthRequest, res: Response): Promise<void>
 export async function updateQuiz(req: AuthRequest, res: Response): Promise<void> {
   const adminId = req.user!.id;
   const { id } = req.params;
-  const { categoryId, title, description, passingScore, visibility, layout, defaultLanguage } = req.body;
+  const { categoryId, title, description, passingScore, visibility, layout, defaultLanguage, randomizeQuestions } = req.body;
 
   const existing = await prisma.quiz.findUnique({
     where: { id },
@@ -143,6 +144,7 @@ export async function updateQuiz(req: AuthRequest, res: Response): Promise<void>
       ...(visibility !== undefined && { visibility: visibility === 'PRIVATE' ? 'PRIVATE' : 'PUBLIC' }),
       ...(layout !== undefined && { layout: layout === 'HORIZONTAL' ? 'HORIZONTAL' : 'VERTICAL' }),
       ...(defaultLanguage !== undefined && { defaultLanguage }),
+      ...(randomizeQuestions !== undefined && { randomizeQuestions: randomizeQuestions === true }),
     },
     include: { category: { select: { id: true, name: true } } },
   });

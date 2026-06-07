@@ -2,13 +2,18 @@ import { Response } from 'express';
 import nodemailer from 'nodemailer';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
+import { completePurchase } from './razorpay.controller';
+
+function escapeHtml(s: string): string {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+}
 
 function buildCampaignHtml(name: string, body: string, appUrl: string): string {
   const paragraphs = body
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.7;">${p.replace(/\n/g, '<br/>')}</p>`)
+    .map((p) => `<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.7;">${escapeHtml(p).replace(/\n/g, '<br/>')}</p>`)
     .join('');
 
   return `<!DOCTYPE html>
@@ -51,8 +56,13 @@ function buildCampaignHtml(name: string, body: string, appUrl: string): string {
 </html>`;
 }
 
+function getMonthStart(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
 export async function getUsers(_req: AuthRequest, res: Response): Promise<void> {
-  const users = await prisma.user.findMany({
+  const users = await (prisma as any).user.findMany({
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -63,19 +73,58 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
       country: true,
       city: true,
       createdAt: true,
-      _count: { select: { attempts: true, aiQuizzes: true } },
+      aiGenerationsUsed: true,
+      aiGenerationsResetAt: true,
+      _count: { select: { attempts: true, aiQuizzes: true, categoryPurchases: true } },
       categories: { select: { _count: { select: { quizzes: true } } } },
+      categoryPurchases: { select: { examCategoryId: true, categoryName: true } },
     },
   });
 
-  const result = users.map(({ categories, _count, ...u }) => ({
+  const monthStart = getMonthStart();
+  const result = users.map(({ categories, _count, aiGenerationsUsed, aiGenerationsResetAt, categoryPurchases, ...u }: any) => ({
     ...u,
     _count: { attempts: _count.attempts },
-    quizCount: categories.reduce((sum, c) => sum + c._count.quizzes, 0),
+    purchaseCount: _count.categoryPurchases,
+    quizCount: categories.reduce((sum: number, c: any) => sum + c._count.quizzes, 0),
     aiQuizCount: _count.aiQuizzes,
+    aiGenerationsUsed: aiGenerationsResetAt < monthStart ? 0 : aiGenerationsUsed,
+    grantedCategories: (categoryPurchases as { examCategoryId: string; categoryName: string }[]).map((p) => ({
+      id: p.examCategoryId,
+      name: p.categoryName,
+    })),
   }));
 
   res.json(result);
+}
+
+export async function resetAiUsage(req: AuthRequest, res: Response): Promise<void> {
+  const { id } = req.params;
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) { res.status(404).json({ error: 'User not found' }); return; }
+
+  await prisma.user.update({
+    where: { id },
+    data: { aiGenerationsUsed: 0, aiGenerationsResetAt: new Date() },
+  });
+  res.json({ success: true });
+}
+
+export async function setComplimentaryQuiz(req: AuthRequest, res: Response): Promise<void> {
+  const userId = req.user!.id;
+  const { quizId } = req.body;
+  if (!quizId) { res.status(400).json({ error: 'quizId is required' }); return; }
+
+  const quiz = await prisma.quiz.findUnique({ where: { id: quizId }, select: { id: true } });
+  if (!quiz) { res.status(404).json({ error: 'Quiz not found' }); return; }
+
+  const user = await (prisma as any).user.findUnique({ where: { id: userId }, select: { complimentaryQuizId: true } });
+
+  if (!user?.complimentaryQuizId) {
+    await (prisma as any).user.update({ where: { id: userId }, data: { complimentaryQuizId: quizId } });
+  }
+
+  res.json({ complimentaryQuizId: user?.complimentaryQuizId ?? quizId });
 }
 
 export async function updateUser(req: AuthRequest, res: Response): Promise<void> {
@@ -196,7 +245,7 @@ function buildParticipantCampaignHtml(name: string, body: string, appUrl: string
     .split(/\n\n+/)
     .map((p) => p.trim())
     .filter(Boolean)
-    .map((p) => `<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.7;">${p.replace(/\n/g, '<br/>')}</p>`)
+    .map((p) => `<p style="margin:0 0 16px;color:#334155;font-size:15px;line-height:1.7;">${escapeHtml(p).replace(/\n/g, '<br/>')}</p>`)
     .join('');
 
   return `<!DOCTYPE html>
@@ -208,8 +257,7 @@ function buildParticipantCampaignHtml(name: string, body: string, appUrl: string
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <tr>
           <td style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:28px 40px;text-align:center;">
-            <span style="color:#ffffff;font-size:20px;font-weight:bold;letter-spacing:1px;">&#10024; XamGeni by Xam Bridge</span>
-            <p style="margin:6px 0 0;color:#ddd6fe;font-size:13px;">AI-powered quiz prep for every learner</p>
+            <span style="color:#ffffff;font-size:20px;font-weight:bold;letter-spacing:1px;">&#128218; Practice smarter, score higher</span>
           </td>
         </tr>
         <tr>
@@ -218,7 +266,7 @@ function buildParticipantCampaignHtml(name: string, body: string, appUrl: string
             <table cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
               <tr>
                 <td style="background:#7c3aed;border-radius:10px;padding:12px 28px;">
-                  <a href="${appUrl}/login" style="color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">Open XamGeni &rarr;</a>
+                  <a href="${appUrl}" style="color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">Visit XamBridge &rarr;</a>
                 </td>
               </tr>
             </table>
@@ -353,4 +401,118 @@ export async function getAnonymousQuizSessions(_req: AuthRequest, res: Response)
     take: 500,
   });
   res.json({ sessions });
+}
+
+export async function getAnonymousAttempts(req: AuthRequest, res: Response): Promise<void> {
+  const { page: pageStr, pageSize: pageSizeStr } = req.query as { page?: string; pageSize?: string };
+  const validSizes = [10, 25, 50];
+  const pageSize = validSizes.includes(parseInt(pageSizeStr || '')) ? parseInt(pageSizeStr!) : 10;
+  const page = Math.max(1, parseInt(pageStr || '1'));
+
+  const [total, attempts] = await Promise.all([
+    (prisma as any).anonymousAttempt.count(),
+    (prisma as any).anonymousAttempt.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+  ]);
+
+  res.json({ attempts, total, page, pages: Math.ceil(total / pageSize) || 1, pageSize });
+}
+
+export async function getAnonymousAttemptsStats(_req: AuthRequest, res: Response): Promise<void> {
+  const groups = await (prisma as any).anonymousAttempt.groupBy({
+    by: ['examSubCategory'],
+    _count: { id: true },
+    orderBy: { _count: { id: 'desc' } },
+    take: 5,
+    where: { examSubCategory: { not: null } },
+  });
+
+  const stats = await Promise.all(
+    groups.map(async (g: any) => {
+      // Find the most common examCategory for this subject
+      const catGroups = await (prisma as any).anonymousAttempt.groupBy({
+        by: ['examCategory'],
+        _count: { id: true },
+        orderBy: { _count: { id: 'desc' } },
+        take: 1,
+        where: { examSubCategory: g.examSubCategory, examCategory: { not: null } },
+      });
+
+      let category: string = catGroups[0]?.examCategory;
+
+      if (!category) {
+        const adminCatGroups = await (prisma as any).anonymousAttempt.groupBy({
+          by: ['adminCategory'],
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 1,
+          where: { examSubCategory: g.examSubCategory, adminCategory: { not: null } },
+        });
+        category = adminCatGroups[0]?.adminCategory ?? 'Unknown';
+      }
+
+      return {
+        subject: g.examSubCategory as string,
+        category,
+        count: g._count.id as number,
+      };
+    })
+  );
+
+  res.json({ stats });
+}
+
+export async function deleteAnonymousAttempts(req: AuthRequest, res: Response): Promise<void> {
+  const { ids } = req.body as { ids?: string[] };
+  if (ids && ids.length > 0) {
+    await (prisma as any).anonymousAttempt.deleteMany({ where: { id: { in: ids } } });
+  } else {
+    await (prisma as any).anonymousAttempt.deleteMany();
+  }
+  res.json({ success: true });
+}
+
+export async function grantCategories(req: AuthRequest, res: Response): Promise<void> {
+  const { id: userId } = req.params;
+  const { categories } = req.body as { categories: { id: string; name: string }[] };
+
+  if (!Array.isArray(categories) || categories.length === 0) {
+    res.status(400).json({ error: 'categories array is required' });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) { res.status(404).json({ error: 'User not found' }); return; }
+
+  for (const cat of categories) {
+    await completePurchase(userId, cat.id, cat.name, 'manual', null, 'manual', null);
+  }
+
+  res.json({ success: true, granted: categories.length });
+}
+
+export async function revokeCategory(req: AuthRequest, res: Response): Promise<void> {
+  const { id: userId } = req.params;
+  const { categoryId } = req.body as { categoryId: string };
+
+  if (!categoryId) { res.status(400).json({ error: 'categoryId is required' }); return; }
+
+  await (prisma as any).categoryPurchase.deleteMany({ where: { userId, examCategoryId: categoryId } });
+
+  const user = await (prisma as any).user.findUnique({ where: { id: userId }, select: { purchasedCategoryIds: true } });
+  const existing: string[] = JSON.parse(user?.purchasedCategoryIds || '[]');
+  await (prisma as any).user.update({
+    where: { id: userId },
+    data: { purchasedCategoryIds: JSON.stringify(existing.filter((id: string) => id !== categoryId)) },
+  });
+
+  const remaining = await (prisma as any).categoryPurchase.count({ where: { userId } });
+  if (remaining === 0) {
+    await prisma.user.update({ where: { id: userId }, data: { tier: 'FREE' } });
+  }
+
+  res.json({ success: true });
 }
