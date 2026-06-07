@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, Crown, Users, UserCheck, ShieldCheck, MapPin, RefreshCw, KeyRound, X } from 'lucide-react';
+import { Pencil, Trash2, Crown, Users, UserCheck, ShieldCheck, MapPin, RefreshCw, KeyRound, X, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -71,6 +71,11 @@ export default function UserReport() {
   const { data: users = [], isLoading } = useQuery<UserRecord[]>({
     queryKey: ['all-users'],
     queryFn: () => api.get('/users').then((r) => r.data),
+  });
+
+  const { data: pageVisits } = useQuery<{ total: number; today: number }>({
+    queryKey: ['page-visits-count'],
+    queryFn: () => api.get('/page-visits/count').then((r) => r.data),
   });
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<EditForm>();
@@ -209,7 +214,7 @@ export default function UserReport() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
         {[
           { label: 'Total Users', value: total, color: 'text-slate-900' },
           { label: 'Admins', value: admins, color: 'text-blue-700' },
@@ -221,6 +226,16 @@ export default function UserReport() {
             <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
           </div>
         ))}
+        <div className="bg-white rounded-xl border border-slate-200 p-4">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Eye className="w-3.5 h-3.5 text-emerald-500" />
+            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider">Page Visits</p>
+          </div>
+          <p className="text-2xl font-bold text-emerald-700">{pageVisits?.total ?? '—'}</p>
+          {pageVisits && (
+            <p className="text-xs text-slate-400 mt-0.5">+{pageVisits.today} today</p>
+          )}
+        </div>
       </div>
 
       {/* Daily signup charts */}

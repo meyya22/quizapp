@@ -307,6 +307,13 @@ model UpcomingExam {
   @@map("upcoming_exams")
 }
 
+model PageVisit {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  @@map("page_visits")
+}
+
 model PreviewSession {
   id        String   @id @default(cuid())
   topic     String

@@ -94,6 +94,10 @@ export default function Landing() {
   const [topic, setTopic] = useState('');
   const [genError, setGenError] = useState<string | null>(null);
 
+  useEffect(() => {
+    api.post('/page-visits').catch(() => {});
+  }, []);
+
   const [questions, setQuestions] = useState<PreviewQuestion[]>([]);
   const [quizTopic, setQuizTopic] = useState('');
   const [userAnswers, setUserAnswers] = useState<Map<string, string | string[]>>(new Map());
