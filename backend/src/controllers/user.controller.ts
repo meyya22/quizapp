@@ -88,9 +88,9 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
   if (quizIds.length > 0) {
     const quizzes = await prisma.quiz.findMany({
       where: { id: { in: quizIds as string[] } },
-      select: { id: true, title: true },
+      select: { id: true, title: true, category: { select: { name: true } } },
     });
-    quizzes.forEach((q) => { quizTitleMap[q.id] = q.title; });
+    quizzes.forEach((q: any) => { quizTitleMap[q.id] = `${q.category?.name ?? ''} — ${q.title}`.trim(); });
   }
 
   const monthStart = getMonthStart();
