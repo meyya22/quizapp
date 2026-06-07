@@ -95,6 +95,8 @@ export interface UserRecord {
   country?: string;
   city?: string;
   createdAt: string;
+  googleId?: string | null;
+  complimentaryQuizId?: string | null;
   quizCount: number;
   aiQuizCount: number;
   aiGenerationsUsed: number;

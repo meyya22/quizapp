@@ -73,6 +73,8 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
       country: true,
       city: true,
       createdAt: true,
+      googleId: true,
+      complimentaryQuizId: true,
       aiGenerationsUsed: true,
       aiGenerationsResetAt: true,
       _count: { select: { attempts: true, aiQuizzes: true, categoryPurchases: true } },
