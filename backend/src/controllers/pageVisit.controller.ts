@@ -1,9 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma';
 
+async function ensureTable(): Promise<void> {
+  await prisma.$executeRaw`
+    CREATE TABLE IF NOT EXISTS page_visits (
+      id TEXT PRIMARY KEY,
+      "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+}
+
 export async function recordVisit(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await prisma.$executeRaw`INSERT INTO page_visits (id, "createdAt") VALUES (gen_random_uuid()::text, NOW())`;
+    await ensureTable();
+    await prisma.$executeRaw`
+      INSERT INTO page_visits (id, "createdAt")
+      VALUES (gen_random_uuid()::text, NOW())
+    `;
     res.status(204).end();
   } catch (err) {
     next(err);
@@ -12,6 +25,7 @@ export async function recordVisit(_req: Request, res: Response, next: NextFuncti
 
 export async function getVisitCount(_req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    await ensureTable();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const [totalRows, todayRows] = await Promise.all([
