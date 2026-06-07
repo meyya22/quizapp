@@ -783,10 +783,15 @@ export default function QuizPlayer() {
           <span className="text-violet-500">— You are viewing this quiz as a participant.</span>
         </div>
       )}
+      {/* Quiz title — above sticky header so it's always fully visible on mobile */}
+      {quiz?.title && (
+        <h1 className="font-bold text-slate-900 text-lg leading-snug mb-2 px-1">{quiz.title}</h1>
+      )}
+
       {/* Sticky header */}
       <div className={`sticky ${isStandalone ? 'top-0' : 'top-16'} z-20 bg-slate-50 py-2 mb-4`}>
         <div className="bg-white rounded-xl border border-slate-200 px-4 pt-3 pb-2.5">
-          {/* Title row */}
+          {/* Controls row — Home, Share, answered count */}
           <div className="flex items-center gap-2 mb-2">
             <button
               onClick={() => navigate('/')}
@@ -794,9 +799,8 @@ export default function QuizPlayer() {
             >
               Home
             </button>
-            <h1 className="font-bold text-slate-900 text-base truncate flex-1">{quiz?.title}</h1>
             {id && quiz?.title && <ShareMenu quizId={id} quizTitle={quiz.title} />}
-            <span className="text-xs text-slate-400 shrink-0">
+            <span className="text-xs text-slate-400 shrink-0 ml-auto">
               {answeredCount}/{freeQuestions.length}
               {hasLockedQuestions && <span className="text-violet-500"> · Free</span>}
               {isPreviewLimited && <span className="text-amber-500"> · Preview</span>}
