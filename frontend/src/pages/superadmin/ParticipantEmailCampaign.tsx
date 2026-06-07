@@ -126,7 +126,7 @@ Knowledge compounds. Start now.`,
 export default function ParticipantEmailCampaign() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
-  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'yesterday' | 'last7' | 'last30'>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'yesterday' | 'last7' | 'last30' | 'active'>('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [activeTemplate, setActiveTemplate] = useState(0);
   const [subject, setSubject] = useState(TEMPLATES[0].subject);
@@ -172,7 +172,9 @@ export default function ParticipantEmailCampaign() {
 
     let list = participants;
 
-    if (dateFilter !== 'all') {
+    if (dateFilter === 'active') {
+      list = list.filter((u) => (u._count?.attempts ?? 0) >= 1);
+    } else if (dateFilter !== 'all') {
       list = list.filter((u) => {
         const joined = new Date(u.createdAt);
         if (dateFilter === 'today')     return joined >= today;
@@ -328,6 +330,7 @@ export default function ParticipantEmailCampaign() {
           <div className="px-4 py-2.5 border-b border-slate-100 flex items-center gap-1.5 flex-wrap">
             {([
               { value: 'all',       label: 'All time' },
+              { value: 'active',    label: 'Active Users' },
               { value: 'today',     label: 'Today' },
               { value: 'yesterday', label: 'Yesterday' },
               { value: 'last7',     label: 'Last 7 days' },
