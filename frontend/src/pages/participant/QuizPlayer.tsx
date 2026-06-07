@@ -785,7 +785,12 @@ export default function QuizPlayer() {
       )}
       {/* Quiz title — above sticky header so it's always fully visible on mobile */}
       {quiz?.title && (
-        <h1 className="font-bold text-slate-900 text-lg leading-snug mb-2 px-1">{quiz.title}</h1>
+        <h1 className="font-bold text-slate-900 text-lg leading-snug mb-2 px-1">
+          {quiz.category?.name && (
+            <span className="text-slate-500 font-medium">{quiz.category.name}, </span>
+          )}
+          {quiz.title}
+        </h1>
       )}
 
       {/* Sticky header */}
