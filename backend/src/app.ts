@@ -21,6 +21,7 @@ import examContentRoutes from './routes/examContent.routes';
 import upcomingExamRoutes from './routes/upcomingExam.routes';
 import dbInfoRoutes from './routes/dbInfo.routes';
 import pageVisitRoutes from './routes/pageVisit.routes';
+import chatRoutes from './routes/chat.routes';
 import { errorHandler, notFound } from './middleware/error';
 
 const app = express();
@@ -65,6 +66,7 @@ app.use('/api/exam-content', examContentRoutes);
 app.use('/api/upcoming-exams', upcomingExamRoutes);
 app.use('/api/db-info', dbInfoRoutes);
 app.use('/api/page-visits', pageVisitRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 

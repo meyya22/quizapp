@@ -3,6 +3,7 @@ import { BookOpen, LogOut, UserCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from './store/authStore';
 import Footer from './components/Footer';
+import SupportChat from './components/SupportChat';
 import Login from './pages/auth/Login';
 import RegisterAdmin from './pages/auth/RegisterAdmin';
 import RegisterLearner from './pages/auth/RegisterLearner';
@@ -99,8 +100,16 @@ function RequireAuth({ children, role }: { children: React.ReactNode; role?: str
   return <>{children}</>;
 }
 
+function ChatOverlay() {
+  const { user } = useAuthStore();
+  if (!user) return null;
+  return <SupportChat />;
+}
+
 export default function App() {
   return (
+    <>
+    <ChatOverlay />
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
@@ -220,5 +229,6 @@ export default function App() {
       <Route path="/privacy" element={<PrivacyPolicy />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
