@@ -36,7 +36,11 @@ const SECTIONS: Section[] = [
         </div>
         <div>
           <h3 className="font-semibold text-slate-800 mb-1">Payment information</h3>
-          <p>Paid subscriptions are processed by Stripe. We do not store your full card number, CVV, or bank details. We receive and store only non-sensitive billing information provided by Stripe (e.g. plan type, subscription status, last four digits of your card).</p>
+          <p>Category unlock payments are processed by Razorpay (UPI, cards, net banking, wallets). Subscription payments are processed by Stripe. We do not store your card number, UPI ID, CVV, or bank credentials. We receive and store only non-sensitive transaction records (e.g. payment reference, category purchased, amount) from these providers.</p>
+        </div>
+        <div>
+          <h3 className="font-semibold text-slate-800 mb-1">Anonymous usage data</h3>
+          <p>When a visitor who has not signed in interacts with a mock test — for example by clicking "Unlock Full Paper" — we record an anonymised event that may include approximate city and country (derived from IP address), device type (mobile/tablet/desktop), and the quiz or exam category involved. No personal identity is collected or linked to these events.</p>
         </div>
         <div>
           <h3 className="font-semibold text-slate-800 mb-1">Support enquiries</h3>
@@ -74,7 +78,7 @@ const SECTIONS: Section[] = [
         <p>We do not sell your personal data. We share information only in the following limited circumstances:</p>
         <div>
           <h3 className="font-semibold text-slate-800 mb-1">Service providers</h3>
-          <p>We use trusted third-party services to operate the platform — including Google Cloud (hosting and infrastructure), Stripe (payments), Anthropic (AI quiz generation), and our SMTP provider (transactional email). These providers process data only as needed to deliver their services and are bound by appropriate data protection agreements.</p>
+          <p>We use trusted third-party services to operate the platform — including Google Cloud (hosting and infrastructure), Razorpay (category unlock payments), Stripe (subscription payments), Anthropic (AI quiz generation via XamGeni), ip-api.com (anonymous geo-lookup from IP address), and our SMTP provider (transactional email). These providers process data only as needed to deliver their services and are bound by appropriate data protection agreements.</p>
         </div>
         <div>
           <h3 className="font-semibold text-slate-800 mb-1">Quiz Admins and Learners</h3>

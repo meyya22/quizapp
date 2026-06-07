@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, Layers, Database, Code2, BarChart3, FlaskConical } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, ExternalLink } from 'lucide-react';
 
-const DOMAINS = [
-  { icon: Code2, label: 'Software Development', desc: 'Full-stack application design and delivery across enterprise and product environments' },
-  { icon: Database, label: 'Data Engineering', desc: 'Data pipelines, warehousing, ETL architecture, and large-scale data platform builds' },
-  { icon: BarChart3, label: 'Data Analytics', desc: 'Business intelligence, reporting systems, and insights-driven decision support' },
-  { icon: Layers, label: 'IT & Systems', desc: 'Enterprise IT strategy, infrastructure, and cross-domain technical leadership' },
-  { icon: FlaskConical, label: 'Chemical Engineering', desc: 'Foundation discipline — Annamalai University, India, Class of 1997' },
+const OFFICIAL_SITES = [
+  { exam: 'CBSE', url: 'https://www.cbse.gov.in' },
+  { exam: 'NEET', url: 'https://neet.nta.nic.in' },
+  { exam: 'CUET', url: 'https://cuet.nta.nic.in' },
+  { exam: 'JEE Main', url: 'https://jeemain.nta.nic.in' },
+  { exam: 'UPSC', url: 'https://www.upsc.gov.in' },
+  { exam: 'Bank Exams (IBPS)', url: 'https://www.ibps.in' },
+  { exam: 'RRB NTPC', url: 'https://www.indianrailways.gov.in', note: 'Regional RRB sites: rrbcdg.gov.in, rrbchennai.gov.in, etc.' },
 ];
 
 export default function AboutUs() {
@@ -23,79 +25,113 @@ export default function AboutUs() {
           Back to home
         </Link>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* About card */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
 
           {/* Header band */}
-          <div className="h-24 bg-gradient-to-r from-blue-600 to-indigo-600" />
+          <div className="h-20 bg-gradient-to-r from-blue-600 to-indigo-600" />
 
-          {/* Avatar + name */}
           <div className="px-8 pb-8">
-            <div className="-mt-12 mb-5 flex items-end gap-5">
+            {/* Avatar + name */}
+            <div className="-mt-10 mb-5 flex items-end gap-4">
               <img
                 src="/about_avatar.png"
                 alt="Developer avatar"
-                className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover bg-slate-100"
+                className="w-20 h-20 rounded-full border-4 border-white shadow-md object-cover bg-slate-100"
               />
               <div className="pb-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs font-medium text-blue-700 mb-1.5">
+                <div className="inline-flex items-center px-2.5 py-1 bg-blue-50 border border-blue-200 rounded-full text-xs font-medium text-blue-700 mb-1">
                   Founder & Developer
                 </div>
-                <h1 className="text-xl font-bold text-slate-900 leading-tight">Xam Bridge</h1>
+                <h1 className="text-lg font-bold text-slate-900">Xam Bridge</h1>
               </div>
             </div>
 
             {/* Bio */}
-            <div className="space-y-4 text-sm text-slate-600 leading-relaxed mb-8">
-              <p>
-                I'm a Chemical Engineer from <span className="font-medium text-slate-800">Annamalai University, India</span> (Class of 1997) who found a deeper calling in software. What started as curiosity about technology turned into a 25-year career spanning the full breadth of the IT industry.
-              </p>
-              <p>
-                Over those years I've worked across software development, data engineering, data analytics, and enterprise IT — building systems, leading teams, and shipping products in domains that range from manufacturing to finance to education technology.
-              </p>
-              <p>
-                Xam Bridge was born from a simple belief: that creating and taking quizzes should be effortless for anyone — teachers, trainers, students, or self-learners. I built it as a solo developer, applying everything I've learned across two and a half decades in the industry.
-              </p>
-            </div>
-
-            {/* Domain expertise */}
-            <div className="mb-8">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Background & Expertise</h2>
-              <div className="space-y-3">
-                {DOMAINS.map(({ icon: Icon, label, desc }) => (
-                  <div key={label} className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                      <Icon className="w-4 h-4 text-slate-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-slate-800">{label}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <p className="text-sm text-slate-600 leading-relaxed mb-3">
+              XamBridge is a solo-built quiz platform designed to make exam preparation simple and effective.
+              Built by a software and data professional with 25+ years of industry experience, the app covers
+              major Indian competitive exams — NEET, JEE, CUET, UPSC, CBSE, Bank Exams, and more.
+            </p>
+            <p className="text-sm text-slate-600 leading-relaxed mb-6">
+              We leverage AI agents to curate and moderate questions based on the board or governing body's
+              syllabus, eliminating irrelevant or low-quality content, while providing students with a
+              realistic, timed CBT experience.
+            </p>
 
             {/* Contact */}
-            <div className="border-t border-slate-100 pt-6">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Get in Touch</h2>
-              <p className="text-sm text-slate-600 mb-3">
-                Have a feature idea, partnership enquiry, or just want to say hello? I'd love to hear from you.
+            <div className="border-t border-slate-100 pt-5">
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Got questions or partnership ideas? Drop us an email —{' '}
+                <a
+                  href="mailto:contact@xambridge.com"
+                  className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                >
+                  contact@xambridge.com
+                </a>
               </p>
-              <a
-                href="mailto:appdeveloper@xambridge.com"
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                appdeveloper@xambridge.com
-              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Disclaimer card */}
+        <div className="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden">
+          <div className="px-8 py-6">
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 bg-amber-50 border border-amber-200 rounded-lg flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 text-amber-600" />
+              </div>
+              <h2 className="text-base font-semibold text-slate-800">Disclaimer</h2>
+            </div>
+
+            <div className="space-y-3 text-sm text-slate-600 leading-relaxed mb-6">
+              <p>
+                <span className="font-semibold text-slate-800">"XamBridge"</span> does not represent a government entity.
+                This app is not affiliated with, endorsed by, or authorized by any government agency or department.
+              </p>
+              <p>
+                All information provided is for informational purposes only. Users are encouraged to verify all data
+                with official government sources directly.
+              </p>
+            </div>
+
+            {/* Official websites table */}
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">Official Exam Websites</h3>
+            <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide w-2/5">Exam</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Official Website</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {OFFICIAL_SITES.map(({ exam, url, note }) => (
+                    <tr key={exam} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 font-medium text-slate-700 align-top">{exam}</td>
+                      <td className="px-4 py-3 align-top">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline break-all"
+                        >
+                          {url}
+                          <ExternalLink className="w-3 h-3 shrink-0" />
+                        </a>
+                        {note && <p className="text-xs text-slate-400 mt-1">{note}</p>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
         {/* Footer note */}
         <p className="text-center text-xs text-slate-400 mt-8">
-          &copy; {new Date().getFullYear()} Xam Bridge &middot; Built with passion by a developer who still remembers thermodynamics.
+          &copy; {new Date().getFullYear()} Xam Bridge &middot; Independent platform for exam preparation.
         </p>
       </div>
     </div>

@@ -47,13 +47,25 @@ export default function Login() {
     formState: { errors },
   } = useForm<FormData>({ resolver: zodResolver(schema) });
 
+  function extractQuizId(url: string | undefined): string | null {
+    const match = (url || '').match(/^\/quiz\/([^?/]+)/);
+    return match ? match[1] : null;
+  }
+
   async function onSubmit(data: FormData) {
     setLoading(true);
     setAuthError(null);
     try {
       const res = await api.post('/auth/login', data);
       setAuth(res.data.user, res.data.token);
-      navigate(from || (res.data.user.role === 'ADMIN' ? '/admin' : '/participant'));
+      const quizId = extractQuizId(from);
+      if (quizId && res.data.user.role === 'PARTICIPANT' && !res.data.user.complimentaryQuizId) {
+        try {
+          const patchRes = await api.patch('/users/me/complimentary-quiz', { quizId });
+          setAuth({ ...res.data.user, complimentaryQuizId: patchRes.data.complimentaryQuizId }, res.data.token);
+        } catch {}
+      }
+      navigate(from || (res.data.user.role === 'ADMIN' ? '/admin' : '/'));
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } }).response?.data?.error ??
@@ -71,7 +83,14 @@ export default function Login() {
     try {
       const res = await api.post('/auth/google', { idToken: credentialResponse.credential });
       setAuth(res.data.user, res.data.token);
-      navigate(from || (res.data.user.role === 'ADMIN' ? '/admin' : '/participant'));
+      const quizId = extractQuizId(from);
+      if (quizId && res.data.user.role === 'PARTICIPANT' && !res.data.user.complimentaryQuizId) {
+        try {
+          const patchRes = await api.patch('/users/me/complimentary-quiz', { quizId });
+          setAuth({ ...res.data.user, complimentaryQuizId: patchRes.data.complimentaryQuizId }, res.data.token);
+        } catch {}
+      }
+      navigate(from || (res.data.user.role === 'ADMIN' ? '/admin' : '/'));
     } catch {
       setAuthError({ type: 'google', message: 'Google sign-in failed. Please try again.' });
     } finally {
@@ -85,9 +104,9 @@ export default function Login() {
   return (
     <>
     <Helmet>
-      <title>Sign In  - Xam Bridge</title>
-      <meta name="description" content="Sign in to your Xam Bridge account to manage quizzes, view reports, and take tests." />
-      <meta name="keywords" content="quiz platform login, sign in quiz maker, Xam Bridge login, quiz admin sign in" />
+      <title>Sign In — Xam Bridge Exam Prep</title>
+      <meta name="description" content="Sign in to Xam Bridge to access your mock tests, track your exam prep progress, and practise for NEET, UPSC, CUET, SSC, Banking and more." />
+      <meta name="keywords" content="Xam Bridge login, exam prep sign in, mock test login India, NEET prep login, UPSC prep login" />
       <link rel="canonical" href="https://www.xambridge.com/login" />
     </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -105,7 +124,7 @@ export default function Login() {
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Sign in</h1>
           <p className="text-slate-500 text-sm mb-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-blue-600 font-medium hover:underline">
+            <Link to="/register/learner" className="text-blue-600 font-medium hover:underline">
               Register
             </Link>
           </p>

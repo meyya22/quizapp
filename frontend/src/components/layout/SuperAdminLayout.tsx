@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import Footer from '../Footer';
-import { Users, LogOut, ShieldCheck, CreditCard, Mail, Menu, X, Sparkles, BrainCircuit, EyeOff, BookUser, Settings } from 'lucide-react';
+import { Users, LogOut, ShieldCheck, CreditCard, Mail, Menu, X, Sparkles, BrainCircuit, EyeOff, BookUser, Settings, LayoutGrid, Activity, CalendarDays, Database } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 
@@ -27,8 +27,12 @@ export default function SuperAdminLayout() {
     { to: '/superadmin/participant-campaign', icon: Sparkles, label: 'Learner Campaigns' },
     { to: '/superadmin/ai-quiz-report', icon: BrainCircuit, label: 'AI Quiz Report' },
     { to: '/superadmin/anonymous-quizzes', icon: EyeOff, label: 'Track Anonymous Quiz' },
+    { to: '/superadmin/anonymous-attempts', icon: Activity, label: 'Anon Attempts' },
     { to: '/superadmin/contact-builder', icon: BookUser, label: 'Contact Builder' },
     { to: '/superadmin/email-config', icon: Settings, label: 'Email Config' },
+    { to: '/superadmin/exam-content', icon: LayoutGrid, label: 'Exam Content' },
+    { to: '/superadmin/upcoming-exams', icon: CalendarDays, label: 'Upcoming Exam Dates' },
+    { to: '/superadmin/db-info', icon: Database, label: 'DB Info' },
   ];
 
   return (

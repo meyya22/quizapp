@@ -6,7 +6,6 @@ import {
   Trophy, Users, CheckCircle, ChevronRight as ViewIcon,
   X, CheckCircle2, XCircle, ClipboardList,
 } from 'lucide-react';
-import { Badge } from '../../components/ui/Badge';
 import { Select } from '../../components/ui/Select';
 import api from '../../services/api';
 import { Quiz, QuizAttempt } from '../../types';
@@ -174,11 +173,55 @@ interface PagedAttempts {
 interface QuizSummary {
   quizId: string;
   title: string;
+  categoryName: string;
   attempts: number;
   avgScore: number;
   passRate: number;
   passCount: number;
   lastAt: string;
+}
+
+function TopQuizzesChart({ summary }: { summary: QuizSummary[] }) {
+  const top8 = [...summary].sort((a, b) => b.attempts - a.attempts).slice(0, 8);
+  if (top8.length === 0) return null;
+  const max = Math.max(...top8.map((q) => q.attempts), 1);
+  const colors = [
+    'bg-blue-500', 'bg-violet-500', 'bg-emerald-500', 'bg-amber-500',
+    'bg-rose-500', 'bg-cyan-500', 'bg-orange-500', 'bg-indigo-500',
+  ];
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-5">
+      <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
+        <BarChart3 className="w-4 h-4 text-blue-500" />
+        Top 8 Quizzes by Attempts
+      </h2>
+      <div className="space-y-3">
+        {top8.map((q, i) => {
+          const pct = Math.round((q.attempts / max) * 100);
+          const label = [q.categoryName, q.title].filter(Boolean).join(', ');
+          return (
+            <div key={q.quizId} className="flex items-center gap-3">
+              <span className="text-xs font-bold text-slate-400 w-4 shrink-0 text-right">{i + 1}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1 gap-2">
+                  <span className="text-xs text-slate-700 truncate">{label}</span>
+                  <span className="text-xs font-semibold text-slate-500 shrink-0">
+                    {q.attempts} attempt{q.attempts !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-2">
+                  <div
+                    className={`${colors[i]} h-2 rounded-full transition-all duration-500`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 type SortDir = 'asc' | 'desc' | null;
@@ -256,7 +299,6 @@ export default function Reports() {
   const { data: summary = [], isLoading: summaryLoading } = useQuery<QuizSummary[]>({
     queryKey: ['attempts-summary'],
     queryFn: () => api.get('/attempts/summary').then((r) => r.data),
-    enabled: viewMode === 'grouped',
   });
 
   const attempts = pagedData?.attempts ?? [];
@@ -303,8 +345,8 @@ export default function Reports() {
         'Participant': a.user?.name ?? a.participantName ?? '—',
         'Email': a.user?.email ?? a.participantEmail ?? '',
         'Quiz': a.quiz?.title ?? '',
+        'Category': a.quiz?.category?.name ?? '—',
         'Score': `${a.score.toFixed(1)}%`,
-        'Status': a.passed ? 'Passed' : 'Failed',
         'Time Taken': formatTime(a.timeTaken),
         'Date': formatDate(a.completedAt),
       }));
@@ -327,13 +369,13 @@ export default function Reports() {
       doc.text(`Generated ${new Date().toLocaleDateString()}  ·  ${all.length} records`, 14, 22);
       autoTable(doc, {
         startY: 28,
-        head: [['Participant', 'Email', 'Quiz', 'Score', 'Status', 'Time', 'Date']],
+        head: [['Participant', 'Email', 'Quiz', 'Category', 'Score', 'Time', 'Date']],
         body: all.map((a) => [
           a.user?.name ?? a.participantName ?? '—',
           a.user?.email ?? a.participantEmail ?? '',
           a.quiz?.title ?? '',
+          a.quiz?.category?.name ?? '—',
           `${a.score.toFixed(1)}%`,
-          a.passed ? 'Passed' : 'Failed',
           formatTime(a.timeTaken),
           formatDate(a.completedAt),
         ]),
@@ -389,6 +431,9 @@ export default function Reports() {
           {exporting && <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />}
         </div>
       </div>
+
+      {/* Top 8 bar chart — always visible */}
+      {summary.length > 0 && <TopQuizzesChart summary={summary} />}
 
       {/* View mode tabs */}
       <div className="flex border-b border-slate-200 mb-5">
@@ -446,7 +491,7 @@ export default function Reports() {
                           Score <SortIcon active={sortScore !== null} dir={sortScore} />
                         </button>
                       </th>
-                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Status</th>
+                      <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Category</th>
                       <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Time</th>
                       <th className="px-5 py-3">
                         <button onClick={toggleSortDate}
@@ -470,11 +515,7 @@ export default function Reports() {
                             {attempt.score.toFixed(1)}%
                           </span>
                         </td>
-                        <td className="px-5 py-4">
-                          <Badge variant={attempt.passed ? 'success' : 'danger'}>
-                            {attempt.passed ? 'Passed' : 'Failed'}
-                          </Badge>
-                        </td>
+                        <td className="px-5 py-4 text-sm text-slate-700">{attempt.quiz?.category?.name ?? '—'}</td>
                         <td className="px-5 py-4 text-sm text-slate-600">{formatTime(attempt.timeTaken)}</td>
                         <td className="px-5 py-4 text-sm text-slate-600">{formatDate(attempt.completedAt)}</td>
                         <td className="px-5 py-4">

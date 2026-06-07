@@ -22,6 +22,7 @@ interface FormData {
   passingScore: number;
   layout: Layout;
   defaultLanguage: string;
+  randomizeQuestions: boolean;
 }
 
 export default function QuizzesList() {
@@ -43,9 +44,10 @@ export default function QuizzesList() {
   });
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
-    defaultValues: { passingScore: 70, layout: 'VERTICAL', defaultLanguage: 'en' },
+    defaultValues: { passingScore: 70, layout: 'VERTICAL', defaultLanguage: 'en', randomizeQuestions: false },
   });
   const selectedLayout = watch('layout');
+  const randomizeQuestions = watch('randomizeQuestions');
 
   function openUpgrade(err: unknown) {
     const e = err as { response?: { status?: number; data?: { error?: string } } };
@@ -110,7 +112,7 @@ export default function QuizzesList() {
 
   function openCreate() {
     setEditing(null);
-    reset({ categoryId: '', title: '', description: '', passingScore: 70, layout: 'VERTICAL', defaultLanguage: 'en' });
+    reset({ categoryId: '', title: '', description: '', passingScore: 70, layout: 'VERTICAL', defaultLanguage: 'en', randomizeQuestions: false });
     setModalOpen(true);
   }
 
@@ -123,6 +125,7 @@ export default function QuizzesList() {
       passingScore: quiz.passingScore,
       layout: quiz.layout,
       defaultLanguage: quiz.defaultLanguage ?? 'en',
+      randomizeQuestions: quiz.randomizeQuestions ?? false,
     });
     setModalOpen(true);
   }
@@ -202,27 +205,27 @@ export default function QuizzesList() {
             <tbody className="divide-y divide-slate-100">
               {quizzes.map((quiz) => (
                 <tr key={quiz.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-5 py-4">
-                    <p className="font-medium text-slate-900">{quiz.title}</p>
+                  <td className="px-5 py-3">
+                    <p className="text-sm font-medium text-slate-900">{quiz.title}</p>
                     {quiz.description && (
-                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{quiz.description}</p>
+                      <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{quiz.description}</p>
                     )}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3">
                     <Badge variant="neutral">{quiz.category.name}</Badge>
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-600">
+                  <td className="px-5 py-3 text-xs text-slate-600">
                     {quiz._count?.questions ?? 0}
                   </td>
-                  <td className="px-5 py-4 text-sm text-slate-600">{quiz.passingScore}%</td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3 text-xs text-slate-600">{quiz.passingScore}%</td>
+                  <td className="px-5 py-3">
                     {quiz.published ? (
                       <Badge variant="success">Published</Badge>
                     ) : (
                       <Badge variant="neutral">Draft</Badge>
                     )}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3">
                     {quiz.published ? (
                       quiz.visibility === 'PUBLIC' ? (
                         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
@@ -237,7 +240,7 @@ export default function QuizzesList() {
                       <span className="text-xs text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3">
                     {quiz.published ? (
                       <button
                         onClick={() => copyShareLink(quiz)}
@@ -256,7 +259,7 @@ export default function QuizzesList() {
                       <span className="text-xs text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-3">
                     <div className="flex items-center justify-end gap-1">
                       {quiz.published && (
                         <button
@@ -284,8 +287,6 @@ export default function QuizzesList() {
                       </button>
                       <Link
                         to={`/quiz/${quiz.id}?preview=true`}
-                        target="_blank"
-                        rel="noopener noreferrer"
                         title="Preview as participant"
                         className="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
                       >
@@ -389,6 +390,16 @@ export default function QuizzesList() {
               ))}
             </div>
           </div>
+          <label className="flex items-center justify-between px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer">
+            <div>
+              <p className="text-sm font-medium text-slate-700">Randomize Questions</p>
+              <p className="text-xs text-slate-500 mt-0.5">Display questions in random order each attempt</p>
+            </div>
+            <div className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${randomizeQuestions ? 'bg-blue-600' : 'bg-slate-300'}`}>
+              <input type="checkbox" className="sr-only" {...register('randomizeQuestions')} />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${randomizeQuestions ? 'translate-x-6' : 'translate-x-1'}`} />
+            </div>
+          </label>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" type="button" onClick={closeModal}>
               Cancel

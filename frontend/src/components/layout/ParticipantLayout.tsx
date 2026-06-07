@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, LogOut, BookOpen, HelpCircle, Sparkles, CreditCard } from 'lucide-react';
 import Footer from '../Footer';
 import { useAuthStore } from '../../store/authStore';
@@ -7,6 +7,8 @@ import toast from 'react-hot-toast';
 export default function ParticipantLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isHelpPage = pathname === '/participant/help';
 
   function handleLogout() {
     logout();
@@ -23,7 +25,7 @@ export default function ParticipantLayout() {
     <div className="min-h-screen flex flex-col">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link to="/participant" className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" />
             </div>
@@ -31,18 +33,22 @@ export default function ParticipantLayout() {
           </Link>
 
           <nav className="flex items-center gap-0.5">
-            <NavLink to="/participant" end className={navLinkClass}>
-              <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">ExamPrep</span>
-            </NavLink>
-            <NavLink to="/participant/quizzes" className={navLinkClass}>
-              <LayoutDashboard className="w-4 h-4" />
-              <span className="hidden sm:inline">Quizzes</span>
-            </NavLink>
-            <NavLink to="/participant/plans" className={navLinkClass}>
-              <CreditCard className="w-4 h-4" />
-              <span className="hidden sm:inline">Payment Plans</span>
-            </NavLink>
+            {!isHelpPage && (
+              <>
+                <NavLink to="/participant" end className={navLinkClass}>
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden sm:inline">ExamPrep</span>
+                </NavLink>
+                <NavLink to="/participant/quizzes" className={navLinkClass}>
+                  <LayoutDashboard className="w-4 h-4" />
+                  <span className="hidden sm:inline">Quizzes</span>
+                </NavLink>
+                <NavLink to="/participant/plans" className={navLinkClass}>
+                  <CreditCard className="w-4 h-4" />
+                  <span className="hidden sm:inline">Payment Plans</span>
+                </NavLink>
+              </>
+            )}
             <NavLink to="/participant/help" className={navLinkClass}>
               <HelpCircle className="w-4 h-4" />
               <span className="hidden sm:inline">Help</span>

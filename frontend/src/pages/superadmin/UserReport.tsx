@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, Crown, Users, UserCheck, ShieldCheck, MapPin } from 'lucide-react';
+import { Pencil, Trash2, Crown, Users, UserCheck, ShieldCheck, MapPin, RefreshCw, KeyRound, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -10,6 +10,10 @@ import { Modal } from '../../components/ui/Modal';
 import { Badge } from '../../components/ui/Badge';
 import api from '../../services/api';
 import { UserRecord, Role, Tier } from '../../types';
+
+interface ExamCategory { id: string; name: string; }
+interface ExamContentTree { id: string; name: string; }
+interface GrantTarget { userId: string; userName: string; purchasedIds: string[]; }
 
 interface EditForm {
   name: string;
@@ -57,6 +61,8 @@ const TIER_FILTER_OPTIONS = [
 export default function UserReport() {
   const qc = useQueryClient();
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
+  const [grantTarget, setGrantTarget] = useState<GrantTarget | null>(null);
+  const [selectedCatIds, setSelectedCatIds] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [filterRole, setFilterRole] = useState('');
@@ -68,6 +74,33 @@ export default function UserReport() {
   });
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<EditForm>();
+
+  const { data: examCategories = [] } = useQuery<ExamCategory[]>({
+    queryKey: ['exam-categories-flat'],
+    queryFn: () => api.get('/exam-content').then((r) => (r.data as ExamContentTree[]).map((c: any) => ({ id: c.id, name: c.name }))),
+    staleTime: 300_000,
+  });
+
+  const grantMutation = useMutation({
+    mutationFn: ({ userId, categories }: { userId: string; categories: ExamCategory[] }) =>
+      api.post(`/users/${userId}/grant-categories`, { categories }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['all-users'] });
+      toast.success('Categories granted');
+      setGrantTarget(null);
+    },
+    onError: () => toast.error('Failed to grant categories'),
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: ({ userId, categoryId }: { userId: string; categoryId: string }) =>
+      api.post(`/users/${userId}/revoke-category`, { categoryId }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['all-users'] });
+      toast.success('Category revoked');
+    },
+    onError: () => toast.error('Failed to revoke category'),
+  });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: EditForm }) => api.put(`/users/${id}`, data),
@@ -88,6 +121,15 @@ export default function UserReport() {
     onError: () => toast.error('Failed to delete user'),
   });
 
+  const resetAiMutation = useMutation({
+    mutationFn: (id: string) => api.post(`/users/${id}/reset-ai-usage`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['all-users'] });
+      toast.success('AI usage reset');
+    },
+    onError: () => toast.error('Failed to reset AI usage'),
+  });
+
   function openEdit(user: UserRecord) {
     setEditingUser(user);
     reset({ name: user.name, role: user.role, tier: user.tier });
@@ -97,6 +139,12 @@ export default function UserReport() {
     if (confirm(`Delete user "${user.name}" (${user.email})? This cannot be undone.`)) {
       deleteMutation.mutate(user.id);
     }
+  }
+
+  function openGrant(user: UserRecord) {
+    const purchasedIds = (user.grantedCategories ?? []).map((c) => c.id);
+    setGrantTarget({ userId: user.id, userName: user.name, purchasedIds });
+    setSelectedCatIds(new Set());
   }
 
   const total = users.length;
@@ -296,43 +344,43 @@ export default function UserReport() {
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-          <table className="w-full min-w-[820px]">
+          <table className="w-full">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">User</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Role</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Tier</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Quizzes</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Attempts</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Location</th>
-                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-4 py-3">Joined</th>
-                <th className="px-4 py-3" />
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">User</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">Role</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">Tier</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">Attempts</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">Purchases</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">Location</th>
+                <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-3 py-2">Joined</th>
+                <th className="px-3 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {pagedUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className="px-3 py-2">
                     <p className="text-sm font-medium text-slate-900">{user.name}</p>
                     <p className="text-xs text-slate-400">{user.email}</p>
                   </td>
-                  <td className="px-4 py-3">{roleBadge(user.role)}</td>
-                  <td className="px-4 py-3">{tierBadge(user.tier)}</td>
-                  <td className="px-4 py-3 text-xs text-slate-600">
+                  <td className="px-3 py-2">{roleBadge(user.role)}</td>
+                  <td className="px-3 py-2">{tierBadge(user.tier)}</td>
+                  <td className="px-3 py-2 text-xs text-slate-600">{user._count.attempts}</td>
+                  <td className="px-3 py-2 text-xs text-slate-600">
                     {user.role === 'PARTICIPANT' ? (
-                      <span className="flex items-center gap-1.5">
-                        {user.aiQuizCount}
-                        {user.aiQuizCount > 0 && (
-                          <span className="text-[10px] font-medium text-violet-600 bg-violet-50 border border-violet-200 px-1.5 py-0.5 rounded-full leading-none">XamGeni</span>
-                        )}
-                      </span>
+                      user.purchaseCount > 0 ? (
+                        <span className="inline-flex items-center gap-1 font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                          {user.purchaseCount}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300">—</span>
+                      )
                     ) : (
-                      user.quizCount
+                      <span className="text-slate-300">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-600">{user._count.attempts}</td>
-                  <td className="px-4 py-3 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-slate-500">
                     {user.city || user.country ? (
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
@@ -342,11 +390,33 @@ export default function UserReport() {
                       <span className="text-slate-300">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">
-                    {new Date(user.createdAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  <td className="px-3 py-2 text-xs text-slate-500 whitespace-nowrap">
+                    {new Date(user.createdAt).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false })}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap w-px">
+                  <td className="px-3 py-2 whitespace-nowrap w-px">
                     <div className="flex items-center justify-end gap-1">
+                      {user.role === 'ADMIN' && user.aiGenerationsUsed > 0 && (
+                        <button
+                          onClick={() => {
+                            if (confirm(`Reset AI generation usage for ${user.name} to 0?`))
+                              resetAiMutation.mutate(user.id);
+                          }}
+                          disabled={resetAiMutation.isPending}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 hover:bg-violet-50 transition-colors disabled:opacity-50"
+                          title="Reset AI generation usage"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {user.role === 'PARTICIPANT' && (
+                        <button
+                          onClick={() => openGrant(user)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                          title="Grant/Revoke category access"
+                        >
+                          <KeyRound className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                       <button
                         onClick={() => openEdit(user)}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
@@ -369,7 +439,6 @@ export default function UserReport() {
               ))}
             </tbody>
           </table>
-          </div>
 
           {/* Pagination footer */}
           <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-slate-50">
@@ -414,6 +483,88 @@ export default function UserReport() {
           </div>
         </div>
       )}
+
+      {/* Grant / Revoke Category Access Modal */}
+      <Modal
+        open={!!grantTarget}
+        onClose={() => setGrantTarget(null)}
+        title={`Category Access — ${grantTarget?.userName}`}
+      >
+        <div className="space-y-4">
+          {/* Already granted */}
+          {(grantTarget?.purchasedIds?.length ?? 0) > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Currently Unlocked</p>
+              <div className="flex flex-wrap gap-2">
+                {examCategories
+                  .filter((c) => grantTarget!.purchasedIds.includes(c.id))
+                  .map((c) => (
+                    <span key={c.id} className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-700">
+                      {c.name}
+                      <button
+                        onClick={() => {
+                          if (confirm(`Revoke "${c.name}" access for ${grantTarget!.userName}?`)) {
+                            revokeMutation.mutate({ userId: grantTarget!.userId, categoryId: c.id });
+                            setGrantTarget((prev) => prev ? { ...prev, purchasedIds: prev.purchasedIds.filter((id) => id !== c.id) } : null);
+                          }
+                        }}
+                        className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-emerald-200 transition-colors"
+                        title={`Revoke ${c.name}`}
+                      >
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Grant new categories */}
+          <div>
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Grant New Categories</p>
+            <div className="max-h-60 overflow-y-auto space-y-1 border border-slate-100 rounded-lg p-2">
+              {examCategories
+                .filter((c) => !(grantTarget?.purchasedIds ?? []).includes(c.id))
+                .map((c) => (
+                  <label key={c.id} className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 accent-emerald-600"
+                      checked={selectedCatIds.has(c.id)}
+                      onChange={(e) => {
+                        setSelectedCatIds((prev) => {
+                          const next = new Set(prev);
+                          e.target.checked ? next.add(c.id) : next.delete(c.id);
+                          return next;
+                        });
+                      }}
+                    />
+                    <span className="text-sm text-slate-700">{c.name}</span>
+                  </label>
+                ))}
+              {examCategories.filter((c) => !(grantTarget?.purchasedIds ?? []).includes(c.id)).length === 0 && (
+                <p className="text-sm text-slate-400 text-center py-3">All categories already unlocked</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="secondary" type="button" onClick={() => setGrantTarget(null)}>Cancel</Button>
+            <Button
+              type="button"
+              loading={grantMutation.isPending}
+              disabled={selectedCatIds.size === 0}
+              onClick={() => {
+                const cats = examCategories.filter((c) => selectedCatIds.has(c.id));
+                grantMutation.mutate({ userId: grantTarget!.userId, categories: cats });
+              }}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              Grant {selectedCatIds.size > 0 ? `${selectedCatIds.size} ` : ''}Categor{selectedCatIds.size === 1 ? 'y' : 'ies'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         open={!!editingUser}

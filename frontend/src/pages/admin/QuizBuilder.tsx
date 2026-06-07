@@ -36,6 +36,7 @@ interface QuestionFormData {
   correctTF: string;
   correctFreeText: string;
   explanation: string;
+  tags: string;
 }
 
 interface AiUsage { used: number; limit: number; tier: string }
@@ -50,6 +51,8 @@ export default function QuizBuilder() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [aiModalOpen, setAiModalOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
@@ -155,6 +158,17 @@ export default function QuizBuilder() {
     onError: () => toast.error('Failed to delete question'),
   });
 
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: string[]) => api.delete(`/quizzes/${id}/questions`, { data: { ids } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['questions', id] });
+      qc.invalidateQueries({ queryKey: ['quizzes'] });
+      setSelectedIds(new Set());
+      toast.success('Questions deleted');
+    },
+    onError: () => toast.error('Failed to delete questions'),
+  });
+
   const importMutation = useMutation({
     mutationFn: (file: File) => {
       const formData = new FormData();
@@ -188,12 +202,12 @@ export default function QuizBuilder() {
       correctAnswer = data.correctFreeText;
     }
 
-    return { text: data.text, type, options, correctAnswer, explanation: data.explanation || null };
+    return { text: data.text, type, options, correctAnswer, explanation: data.explanation || null, tags: data.tags ? data.tags.slice(0, 120) : null };
   }
 
   function openCreate() {
     setEditing(null);
-    reset({ type: 'MULTIPLE_CHOICE', correctTF: 'true', correctMultiple: [], explanation: '' });
+    reset({ type: 'MULTIPLE_CHOICE', correctTF: 'true', correctMultiple: [], explanation: '', tags: '' });
     setModalOpen(true);
   }
 
@@ -211,6 +225,7 @@ export default function QuizBuilder() {
       correctTF: q.type === 'TRUE_FALSE' ? (q.correctAnswer as string) : 'true',
       correctFreeText: q.type === 'FREE_TEXT' ? (q.correctAnswer as string) : '',
       explanation: q.explanation || '',
+      tags: q.tags || '',
     });
     setModalOpen(true);
   }
@@ -288,8 +303,6 @@ export default function QuizBuilder() {
           <div className="flex gap-2">
             <Link
               to={`/quiz/${id}?preview=true`}
-              target="_blank"
-              rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 transition-colors"
             >
               <Eye className="w-4 h-4" />
@@ -349,14 +362,54 @@ export default function QuizBuilder() {
         </div>
       ) : (
         <div className="space-y-3">
+          <div className="flex items-center justify-between px-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-600">
+              <input
+                type="checkbox"
+                className="rounded border-slate-300 text-blue-600"
+                checked={selectedIds.size === questions.length && questions.length > 0}
+                onChange={(e) =>
+                  setSelectedIds(e.target.checked ? new Set(questions.map((q) => q.id)) : new Set())
+                }
+              />
+              {selectedIds.size > 0 ? `${selectedIds.size} selected` : 'Select all'}
+            </label>
+            {selectedIds.size > 0 && (
+              <button
+                onClick={() => {
+                  if (confirm(`Delete ${selectedIds.size} question${selectedIds.size !== 1 ? 's' : ''}?`))
+                    bulkDeleteMutation.mutate(Array.from(selectedIds));
+                }}
+                disabled={bulkDeleteMutation.isPending}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-50"
+              >
+                {bulkDeleteMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+                Delete {selectedIds.size}
+              </button>
+            )}
+          </div>
           {questions.map((q, idx) => (
             <div
               key={q.id}
-              className="bg-white rounded-xl border border-slate-200 p-5 flex items-start gap-4"
+              className={`bg-white rounded-xl border p-5 flex items-start gap-4 transition-colors ${selectedIds.has(q.id) ? 'border-blue-300 bg-blue-50/30' : 'border-slate-200'}`}
             >
-              <div className="flex items-center gap-2 text-slate-300 mt-0.5">
-                <GripVertical className="w-4 h-4" />
-                <span className="text-sm font-medium">{idx + 1}</span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <input
+                  type="checkbox"
+                  className="rounded border-slate-300 text-blue-600"
+                  checked={selectedIds.has(q.id)}
+                  onChange={(e) => {
+                    const next = new Set(selectedIds);
+                    if (e.target.checked) next.add(q.id); else next.delete(q.id);
+                    setSelectedIds(next);
+                  }}
+                />
+                <GripVertical className="w-4 h-4 text-slate-300" />
+                <span className="text-sm font-medium text-slate-300">{idx + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-slate-900 font-medium">{q.text}</p>
@@ -604,13 +657,20 @@ export default function QuizBuilder() {
             />
           )}
 
-          <div className="border-t border-slate-100 pt-4">
+          <div className="border-t border-slate-100 pt-4 space-y-3">
             <TextArea
               label="Answer Explanation (optional)"
               placeholder="Explain why this is the correct answer. Shown to participants after they submit."
               rows={2}
               {...register('explanation')}
             />
+            <Input
+              label="Chapter / Topic Tag (optional)"
+              placeholder="e.g. Chapter: Life Science  |  Unit 4: Thermodynamics  |  Topic: Profit & Loss"
+              maxLength={120}
+              {...register('tags')}
+            />
+            <p className="text-xs text-slate-400 -mt-1">Max 120 characters. Displayed as a tag below the question in the quiz player.</p>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

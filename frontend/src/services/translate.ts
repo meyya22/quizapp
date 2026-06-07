@@ -13,9 +13,6 @@ export const LANGUAGES: Language[] = [
   { code: 'mr', label: 'मराठी (Marathi)' },
   { code: 'ta', label: 'தமிழ் (Tamil)' },
   { code: 'gu', label: 'ગુજરાતી (Gujarati)' },
-  { code: 'pt', label: 'Português (Portuguese)' },
-  { code: 'es', label: 'Español (Spanish)' },
-  { code: 'id', label: 'Bahasa Indonesia (Indonesian)' },
 ];
 
 export interface TranslatedResultContent {

@@ -94,9 +94,9 @@ export default function RegisterAdmin() {
   return (
     <>
     <Helmet>
-      <title>Create Free Quiz Admin Account  - Xam Bridge</title>
-      <meta name="description" content="Sign up free as an educator or trainer. Create up to 5 quizzes, use AI to generate questions, and share with your audience. No credit card required." />
-      <meta name="keywords" content="create quiz account, free quiz maker signup, quiz admin, teacher quiz tool, trainer assessment platform, free quiz creator, quiz builder registration" />
+      <title>Create Free Educator Account — Xam Bridge Quiz Platform</title>
+      <meta name="description" content="Sign up free as an educator or trainer on Xam Bridge. Create quizzes for your students, use AI question generation, share via link, and track results. No credit card required." />
+      <meta name="keywords" content="create quiz for students India, free quiz maker educator, teacher quiz tool India, online quiz creator free, quiz builder India, assessment platform for teachers, coaching institute quiz tool" />
       <link rel="canonical" href="https://www.xambridge.com/register/admin" />
     </Helmet>
     <div className="min-h-screen bg-slate-50 flex flex-col">

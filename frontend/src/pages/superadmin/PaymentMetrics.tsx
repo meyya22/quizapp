@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   Crown, TrendingUp, DollarSign, Users, RefreshCw,
-  ExternalLink, FileText, Calendar, ArrowUpRight,
+  ExternalLink, FileText, Calendar, ArrowUpRight, IndianRupee,
 } from 'lucide-react';
 import api from '../../services/api';
 import { PaymentMetrics } from '../../types';
@@ -10,8 +10,12 @@ function formatUSD(cents: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
 }
 
+function formatINR(rupees: number) {
+  return `₹${new Intl.NumberFormat('en-IN').format(rupees)}`;
+}
+
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 interface StatCardProps {
@@ -165,7 +169,103 @@ export default function PaymentMetricsPage() {
         </div>
       )}
 
-      {/* Recent transactions */}
+      {/* ── Razorpay section ── */}
+      {data.razorpay && (
+        <>
+          <div className="flex items-center gap-2 pt-2">
+            <IndianRupee className="w-4 h-4 text-blue-600" />
+            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">Razorpay — Category Purchases</h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard
+              label="Total Purchases"
+              value={String(data.razorpay.totalPurchases)}
+              sub="All time"
+              icon={<Crown className="w-5 h-5 text-blue-600" />}
+              accent="text-blue-700"
+              bg="bg-blue-50"
+            />
+            <StatCard
+              label="This Month"
+              value={String(data.razorpay.monthPurchases)}
+              sub="Purchases"
+              icon={<Calendar className="w-5 h-5 text-violet-600" />}
+              accent="text-violet-700"
+              bg="bg-violet-50"
+            />
+            <StatCard
+              label="Total Revenue"
+              value={formatINR(data.razorpay.totalRevenueINR)}
+              sub="All time"
+              icon={<IndianRupee className="w-5 h-5 text-emerald-600" />}
+              accent="text-emerald-700"
+              bg="bg-emerald-50"
+            />
+            <StatCard
+              label="Month Revenue"
+              value={formatINR(data.razorpay.monthRevenueINR)}
+              sub="This month"
+              icon={<TrendingUp className="w-5 h-5 text-amber-600" />}
+              accent="text-amber-700"
+              bg="bg-amber-50"
+            />
+          </div>
+
+          <div className="bg-white rounded-xl border border-slate-200">
+            <div className="px-5 py-4 border-b border-slate-100">
+              <p className="font-semibold text-slate-900">Razorpay Transactions</p>
+              <p className="text-xs text-slate-400 mt-0.5">Last {data.razorpay.recentTransactions.length} category purchases</p>
+            </div>
+            {data.razorpay.recentTransactions.length === 0 ? (
+              <p className="text-center text-slate-400 text-sm py-10">No Razorpay transactions yet.</p>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50">
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Customer</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Category</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Method</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Payment / Order ID</th>
+                    <th className="text-left text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Date</th>
+                    <th className="text-right text-xs font-medium text-slate-500 uppercase tracking-wider px-5 py-3">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {data.razorpay.recentTransactions.map((tx) => (
+                    <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <p className="text-sm text-slate-800 font-medium truncate max-w-[140px]">{tx.customerName ?? '—'}</p>
+                        <p className="text-xs text-slate-400 truncate max-w-[140px]">{tx.customerEmail ?? ''}</p>
+                      </td>
+                      <td className="px-5 py-3.5 text-sm text-slate-700 max-w-[160px] truncate">{tx.categoryName}</td>
+                      <td className="px-5 py-3.5">
+                        {tx.paymentMethod ? (
+                          <span className="capitalize text-xs font-medium bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+                            {tx.paymentMethod}
+                          </span>
+                        ) : <span className="text-slate-300">—</span>}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <p className="text-xs font-mono text-slate-500">{tx.paymentId ?? '—'}</p>
+                        {tx.orderId && <p className="text-xs font-mono text-slate-400">{tx.orderId}</p>}
+                      </td>
+                      <td className="px-5 py-3.5 text-sm text-slate-500">{formatDate(tx.purchasedAt)}</td>
+                      <td className="px-5 py-3.5 text-right">
+                        <span className="text-sm font-semibold text-emerald-700">
+                          {formatINR(Math.round(tx.amountPaise / 100))}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Recent Stripe transactions */}
       <div className="bg-white rounded-xl border border-slate-200">
         <div className="px-5 py-4 border-b border-slate-100">
           <p className="font-semibold text-slate-900">Recent Transactions</p>

@@ -6,10 +6,7 @@ import api from '../services/api';
 
 interface EnquiryForm {
   name: string;
-  type: string;
-  location: string;
   email: string;
-  phone: string;
   message: string;
 }
 
@@ -39,12 +36,27 @@ export default function HelpSupport() {
   }
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <HelpCircle className="w-6 h-6 text-blue-600" /> Help & Support
+          <HelpCircle className="w-6 h-6 text-blue-600" /> Help &amp; Support
         </h1>
-        <p className="text-slate-500 mt-1 text-sm">Get help with your account, billing, or any other questions.</p>
+        <p className="text-slate-500 mt-1 text-sm">We're here to help. Check our FAQ or send us a message below.</p>
+      </div>
+
+      {/* Contact info */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 flex items-start gap-4">
+        <Mail className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-blue-900">Email Support</p>
+          <p className="text-xs text-blue-700 mt-0.5 mb-2">For account issues, payment queries, or anything else:</p>
+          <a
+            href="mailto:cs.admin@xambridge.com"
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900 underline underline-offset-2 transition-colors"
+          >
+            cs.admin@xambridge.com
+          </a>
+        </div>
       </div>
 
       {/* FAQ callout */}
@@ -55,7 +67,7 @@ export default function HelpSupport() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-900">Looking for quick answers?</p>
-            <p className="text-xs text-slate-500 mt-0.5">Check our FAQ — it covers plans, AI generation, languages, and more.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Our FAQ covers mock tests, payments, accounts, and more.</p>
           </div>
         </div>
         <Link
@@ -66,42 +78,17 @@ export default function HelpSupport() {
         </Link>
       </div>
 
-      {/* Contact info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 space-y-3">
-        <h2 className="font-semibold text-blue-900">Contact Us</h2>
-        <p className="text-sm text-blue-800 leading-relaxed">
-          For any technical issues, billing, payment, cancellation, or other enquiries, please reach out to our support team:
-        </p>
-        <a
-          href="mailto:cs.admin@xambridge.com"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:text-blue-900 transition-colors"
-        >
-          <Mail className="w-4 h-4" />
-          cs.admin@xambridge.com
-        </a>
-        <div className="pt-2 border-t border-blue-200">
-          <p className="text-xs text-blue-700 font-medium mb-1">We can help with:</p>
-          <ul className="text-xs text-blue-700 space-y-0.5 list-disc list-inside">
-            <li>Technical issues & troubleshooting</li>
-            <li>Billing & payment queries</li>
-            <li>Subscription cancellation</li>
-            <li>Account management</li>
-            <li>General product questions</li>
-          </ul>
-        </div>
-      </div>
-
       {/* Contact form */}
       <div className="bg-white border border-slate-200 rounded-xl p-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-1">General Enquiry</h2>
-        <p className="text-sm text-slate-500 mb-6">Fill in the form below and we'll get back to you as soon as possible.</p>
+        <h2 className="text-base font-semibold text-slate-900 mb-1">Send a Message</h2>
+        <p className="text-sm text-slate-500 mb-5">We'll get back to you as soon as possible.</p>
 
         {submitStatus === 'success' && (
           <div className="mb-5 flex items-center gap-3 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-lg">
             <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-emerald-800">Enquiry sent successfully!</p>
-              <p className="text-xs text-emerald-700 mt-0.5">We'll get back to you at the email you provided.</p>
+              <p className="text-sm font-semibold text-emerald-800">Message sent!</p>
+              <p className="text-xs text-emerald-700 mt-0.5">We'll reply to the email you provided.</p>
             </div>
           </div>
         )}
@@ -115,45 +102,18 @@ export default function HelpSupport() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Name */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                placeholder="Your full name"
+                placeholder="Your name"
                 {...register('name', { required: 'Name is required' })}
                 className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
             </div>
-
-            {/* Business or Individual */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Business or Individual</label>
-              <select
-                {...register('type')}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                <option value="">— Select —</option>
-                <option value="Individual">Individual</option>
-                <option value="Business">Business</option>
-              </select>
-            </div>
-
-            {/* Location */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Location</label>
-              <input
-                type="text"
-                placeholder="City, Country"
-                {...register('location')}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Email <span className="text-red-500">*</span>
@@ -169,20 +129,8 @@ export default function HelpSupport() {
               />
               {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>}
             </div>
-
-            {/* Phone */}
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
-              <input
-                type="tel"
-                placeholder="+1 234 567 8900"
-                {...register('phone')}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
           </div>
 
-          {/* Message */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-sm font-medium text-slate-700">
@@ -193,8 +141,8 @@ export default function HelpSupport() {
               </span>
             </div>
             <textarea
-              rows={6}
-              placeholder="Please describe your enquiry in detail..."
+              rows={5}
+              placeholder="How can we help you?"
               {...register('message', {
                 required: 'Message is required',
                 maxLength: { value: 1000, message: 'Message must be 1000 characters or less' },
@@ -208,10 +156,10 @@ export default function HelpSupport() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Send className="w-4 h-4" />
-            {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+            {isSubmitting ? 'Sending…' : 'Send Message'}
           </button>
         </form>
       </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle, XCircle, Clock, Trophy, ArrowLeft, RotateCcw, Globe, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Trophy, ArrowLeft, RotateCcw, Globe, Loader2, ChevronRight } from 'lucide-react';
 import { Badge } from '../../components/ui/Badge';
 import api from '../../services/api';
 import { AttemptResult, QuestionType } from '../../types';
@@ -24,6 +24,10 @@ function renderAnswer(
   return String(value);
 }
 
+interface ExamQuiz { id: string; title: string; url: string | null; order: number; }
+interface ExamSubCategory { id: string; name: string; order: number; quizzes: ExamQuiz[]; }
+interface ExamCategory { id: string; name: string; order: number; subCategories: ExamSubCategory[]; }
+
 const TYPE_LABELS: Record<QuestionType, string> = {
   MULTIPLE_CHOICE: 'Multiple Choice',
   MULTIPLE_RESPONSE: 'Multiple Response',
@@ -45,6 +49,13 @@ export default function Results() {
   const { data: result, isLoading } = useQuery<AttemptResult>({
     queryKey: ['attempt', attemptId],
     queryFn: () => api.get(`/attempts/${attemptId}`).then((r) => r.data),
+  });
+
+  const { data: examContent = [] } = useQuery<ExamCategory[]>({
+    queryKey: ['exam-content-public'],
+    queryFn: () => api.get('/exam-content/public').then((r) => r.data),
+    staleTime: 60_000,
+    enabled: !!result,
   });
 
   useEffect(() => {
@@ -90,18 +101,32 @@ export default function Results() {
 
   const isStandalone = location.pathname.startsWith('/results/');
 
+  const currentUrl = `/quiz/${result.quizId}`;
+  let nextQuizInfo: { url: string; label: string } | null = null;
+  outer: for (const cat of examContent) {
+    for (const sub of cat.subCategories) {
+      const sorted = [...sub.quizzes].sort((a, b) => a.order - b.order);
+      const idx = sorted.findIndex((q) => q.url === currentUrl);
+      if (idx !== -1 && idx < sorted.length - 1) {
+        const next = sorted[idx + 1];
+        if (next.url) {
+          nextQuizInfo = { url: next.url, label: `${sub.name} — ${next.title}` };
+        }
+        break outer;
+      }
+    }
+  }
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
-        {!isStandalone ? (
-          <Link
-            to="/participant"
-            className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Quizzes
-          </Link>
-        ) : <div />}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Home
+        </Link>
 
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-slate-400 shrink-0" />
@@ -155,7 +180,7 @@ export default function Results() {
         </div>
       </div>
 
-      <div className="flex justify-end mb-4">
+      <div className="flex items-center justify-end gap-4 mb-4">
         <Link
           to={isStandalone ? `/quiz/${result.quizId}` : `/participant/quiz/${result.quizId}`}
           state={{ lang: selectedLang }}
@@ -164,6 +189,16 @@ export default function Results() {
           <RotateCcw className="w-4 h-4" />
           Retake Quiz
         </Link>
+        {nextQuizInfo && (
+          <Link
+            to={nextQuizInfo.url}
+            state={{ lang: selectedLang }}
+            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-800"
+          >
+            <ChevronRight className="w-4 h-4" />
+            Next: {nextQuizInfo.label}
+          </Link>
+        )}
       </div>
 
       <h2 className="text-lg font-semibold text-slate-900 mb-4">Question Review</h2>
@@ -194,14 +229,17 @@ export default function Results() {
                 {item.options && (
                   <div className="grid grid-cols-2 gap-1.5 mb-3">
                     {Object.entries(item.options).map(([key, value]) => {
+                      const isNumericKey = /^\d+$/.test(key);
+                      const answerValue = isNumericKey ? (value as string) : key;
+                      const displayKey = isNumericKey ? String.fromCharCode(65 + parseInt(key)) : key;
                       const correctArr = Array.isArray(item.correctAnswer)
                         ? item.correctAnswer
                         : [item.correctAnswer];
                       const userArr = Array.isArray(item.userAnswer)
                         ? item.userAnswer
                         : [item.userAnswer];
-                      const isCorrectOption = correctArr.includes(key);
-                      const isUserChoice = userArr.includes(key);
+                      const isCorrectOption = correctArr.includes(answerValue);
+                      const isUserChoice = userArr.includes(answerValue);
 
                       return (
                         <div
@@ -214,7 +252,7 @@ export default function Results() {
                               : 'bg-slate-50 text-slate-600 border border-slate-100'
                           }`}
                         >
-                          <span className="font-medium">{key}.</span> {value}
+                          <span className="font-medium">{displayKey}.</span> {value as string}
                           {isCorrectOption && <CheckCircle className="w-3.5 h-3.5 ml-auto" />}
                         </div>
                       );
@@ -254,16 +292,14 @@ export default function Results() {
         ))}
       </div>
 
-      {!isStandalone && (
-        <div className="mt-8 flex justify-center">
-          <Link
-            to="/participant"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            Back to All Quizzes
-          </Link>
-        </div>
-      )}
+      <div className="mt-8 flex justify-center">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors"
+        >
+          Back to Home
+        </Link>
+      </div>
     </div>
   );
 }

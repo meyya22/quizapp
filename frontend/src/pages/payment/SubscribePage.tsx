@@ -100,9 +100,9 @@ export default function SubscribePage() {
   return (
     <>
     <Helmet>
-      <title>Pricing — Xam Bridge</title>
-      <meta name="description" content="Upgrade to Xam Bridge Pro for $5/month. Get 50 quizzes, AI question generation, quiz translation in 9 languages, advanced analytics, and 2,000 responses per month." />
-      <meta name="keywords" content="quiz maker pricing, quiz platform subscription, online quiz pro plan, quiz builder paid plan, assessment tool pricing, quiz maker upgrade" />
+      <title>Plans &amp; Pricing — Xam Bridge Exam Prep Platform</title>
+      <meta name="description" content="Unlock full mock test papers for ₹299 per exam category — one-time, no subscription. Also explore XamGeni AI quiz plans for advanced practice. Xam Bridge India." />
+      <meta name="keywords" content="Xam Bridge pricing India, mock test unlock price, exam prep subscription India, ₹299 mock test, competitive exam practice plans India" />
       <link rel="canonical" href="https://www.xambridge.com/subscribe" />
     </Helmet>
     <div className="min-h-screen bg-slate-50">

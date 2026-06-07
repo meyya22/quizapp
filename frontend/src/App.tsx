@@ -1,6 +1,8 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, Link } from 'react-router-dom';
+import { BookOpen, LogOut, UserCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuthStore } from './store/authStore';
-import Landing from './pages/Landing';
+import Footer from './components/Footer';
 import Login from './pages/auth/Login';
 import RegisterAdmin from './pages/auth/RegisterAdmin';
 import RegisterLearner from './pages/auth/RegisterLearner';
@@ -30,18 +32,63 @@ import EmailCampaign from './pages/superadmin/EmailCampaign';
 import ParticipantEmailCampaign from './pages/superadmin/ParticipantEmailCampaign';
 import ParticipantAiQuizReport from './pages/superadmin/ParticipantAiQuizReport';
 import AnonymousQuizTracker from './pages/superadmin/AnonymousQuizTracker';
+import AnonymousAttempts from './pages/superadmin/AnonymousAttempts';
 import ContactBuilder from './pages/superadmin/ContactBuilder';
 import EmailConfigPage from './pages/superadmin/EmailConfigPage';
+import ExamContentManager from './pages/superadmin/ExamContentManager';
+import UpcomingExams from './pages/superadmin/UpcomingExams';
+import DbInfo from './pages/superadmin/DbInfo';
+import AltLandingPage from './pages/AltLandingPage';
+import PaymentPending from './pages/PaymentPending';
+import RazorpaySuccess from './pages/RazorpaySuccess';
+import UnlockExams from './pages/UnlockExams';
 import HelpSupport from './pages/HelpSupport';
 import FAQ from './pages/FAQ';
 import AboutUs from './pages/AboutUs';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function RootRedirect() {
-  const { isAuthenticated, user } = useAuthStore();
-  if (!isAuthenticated) return <Landing />;
+  const { user } = useAuthStore();
   if (user?.role === 'SUPER_ADMIN') return <Navigate to="/superadmin/users" replace />;
-  return <Navigate to={user?.role === 'ADMIN' ? '/admin' : '/participant'} replace />;
+  if (user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
+  return <AltLandingPage />;
+}
+
+function AccountShell({ children }: { children: React.ReactNode }) {
+  const { user, logout } = useAuthStore();
+  function handleLogout() { logout(); toast.success('Logged out'); }
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center">
+              <BookOpen className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-slate-900 text-base">Xam Bridge</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <UserCircle className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-sm font-medium text-slate-700 hidden sm:block">{user?.name}</span>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:block">Logout</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8">
+        {children}
+      </main>
+    </div>
+  );
 }
 
 function RequireAuth({ children, role }: { children: React.ReactNode; role?: string }) {
@@ -96,9 +143,19 @@ export default function App() {
         <Route path="quiz/:id" element={<QuizPlayer />} />
         <Route path="results/:attemptId" element={<Results />} />
         <Route path="plans" element={<PlansPage />} />
-        <Route path="account" element={<ParticipantAccount />} />
         <Route path="help" element={<HelpSupport />} />
       </Route>
+
+      <Route
+        path="/participant/account"
+        element={
+          <RequireAuth role="PARTICIPANT">
+            <AccountShell>
+              <ParticipantAccount />
+            </AccountShell>
+          </RequireAuth>
+        }
+      />
 
       <Route
         path="/superadmin"
@@ -115,18 +172,25 @@ export default function App() {
         <Route path="participant-campaign" element={<ParticipantEmailCampaign />} />
         <Route path="ai-quiz-report" element={<ParticipantAiQuizReport />} />
         <Route path="anonymous-quizzes" element={<AnonymousQuizTracker />} />
+        <Route path="anonymous-attempts" element={<AnonymousAttempts />} />
         <Route path="contact-builder" element={<ContactBuilder />} />
         <Route path="email-config" element={<EmailConfigPage />} />
+        <Route path="exam-content" element={<ExamContentManager />} />
+        <Route path="upcoming-exams" element={<UpcomingExams />} />
+        <Route path="db-info" element={<DbInfo />} />
       </Route>
+
+      <Route path="/explore" element={<AltLandingPage />} />
 
       {/* Standalone share routes — no navigation chrome, no login required */}
       <Route
         path="/quiz/:id"
         element={
-          <div className="min-h-screen bg-slate-50">
-            <div className="max-w-3xl mx-auto px-6 py-8">
+          <div className="min-h-screen bg-slate-50 flex flex-col">
+            <div className="flex-1 max-w-3xl mx-auto w-full px-6 py-8">
               <QuizPlayer />
             </div>
+            <Footer />
           </div>
         }
       />
@@ -141,6 +205,16 @@ export default function App() {
         }
       />
 
+      <Route path="/checkout" element={<PaymentPending />} />
+      <Route path="/payment/razorpay/success" element={<RazorpaySuccess />} />
+      <Route
+        path="/unlock-exams"
+        element={
+          <RequireAuth role="PARTICIPANT">
+            <UnlockExams />
+          </RequireAuth>
+        }
+      />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />

@@ -3,13 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Crown, CreditCard, Calendar, RefreshCw, AlertTriangle,
-  CheckCircle2, Clock, ExternalLink, FileText, XCircle,
-  BrainCircuit, Zap,
+  CheckCircle2, Clock, ExternalLink, FileText, XCircle, Zap,
+  BookOpen, RotateCcw, IndianRupee, ChevronDown, ChevronRight,
 } from 'lucide-react';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 import toast from 'react-hot-toast';
 import type { ParticipantPlanKey } from './ParticipantPlanCards';
+import type { Quiz, QuizAttempt } from '../../types';
 
 const PLAN_LABEL: Record<ParticipantPlanKey, string> = {
   STARTER: 'Starter',
@@ -29,12 +30,15 @@ const PLAN_BADGE: Record<ParticipantPlanKey, string> = {
   EXAMELITE: 'bg-amber-100 text-amber-700',
 };
 
-interface PlanInfo {
-  plan: ParticipantPlanKey;
-  planName: string;
-  used: number;
-  limit: number;
-  monthlyReset: boolean;
+interface CategoryPurchaseRecord {
+  id: string;
+  examCategoryId: string;
+  categoryName: string;
+  paymentId: string | null;
+  orderId: string | null;
+  paymentMethod: string | null;
+  amountPaise: number | null;
+  purchasedAt: string;
 }
 
 interface SubscriptionInfo {
@@ -92,23 +96,56 @@ export default function ParticipantAccount() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [expandedQuizId, setExpandedQuizId] = useState<string | null>(null);
 
-  const { data: planData } = useQuery<PlanInfo>({
-    queryKey: ['ai-quizzes'],
-    queryFn: () => api.get('/ai-quiz').then((r) => r.data),
+  const { data: compQuiz } = useQuery<Quiz>({
+    queryKey: ['quiz', user?.complimentaryQuizId],
+    queryFn: () => api.get(`/quizzes/${user!.complimentaryQuizId}`).then((r) => r.data),
+    enabled: !!user?.complimentaryQuizId,
+    staleTime: 300_000,
+  });
+
+  const { data: myAttempts = [] } = useQuery<QuizAttempt[]>({
+    queryKey: ['attempts-my'],
+    queryFn: () => api.get('/attempts/my').then((r) => r.data),
     staleTime: 30_000,
+  });
+
+  // Group all attempts by quizId, sorted by most recent attempt per group
+  const attemptGroups = (() => {
+    const map = new Map<string, { title: string; categoryName: string; attempts: typeof myAttempts }>();
+    for (const a of myAttempts) {
+      const title = a.quiz?.title ?? (a.quizId === user?.complimentaryQuizId && compQuiz ? compQuiz.title : 'Quiz');
+      const categoryName = a.quiz?.category?.name ?? compQuiz?.category?.name ?? '';
+      if (!map.has(a.quizId)) map.set(a.quizId, { title, categoryName, attempts: [] });
+      map.get(a.quizId)!.attempts.push(a);
+    }
+    // Sort each group newest first, then sort groups by most recent attempt
+    return [...map.entries()]
+      .map(([quizId, g]) => ({
+        quizId,
+        ...g,
+        attempts: [...g.attempts].sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()),
+      }))
+      .sort((a, b) => new Date(b.attempts[0].completedAt).getTime() - new Date(a.attempts[0].completedAt).getTime());
+  })();
+
+  const { data: purchases = [] } = useQuery<CategoryPurchaseRecord[]>({
+    queryKey: ['category-purchases'],
+    queryFn: () => api.get('/payment/razorpay/purchases').then((r) => r.data),
+    staleTime: 60_000,
   });
 
   const { data: subscription, isLoading: subLoading } = useQuery<SubscriptionInfo | null>({
     queryKey: ['subscription'],
     queryFn: () => api.get('/payment/subscription').then((r) => r.data),
-    enabled: user?.tier === 'PAID',
+    enabled: user?.tier === 'PAID' && purchases.length === 0,
   });
 
   const { data: invoices = [], isLoading: invLoading } = useQuery<Invoice[]>({
     queryKey: ['invoices'],
     queryFn: () => api.get('/payment/invoices').then((r) => r.data),
-    enabled: user?.tier === 'PAID',
+    enabled: user?.tier === 'PAID' && purchases.length === 0,
   });
 
   const cancelMutation = useMutation({
@@ -130,14 +167,14 @@ export default function ParticipantAccount() {
     onError: () => toast.error('Failed to reactivate. Please try again.'),
   });
 
-  const currentPlan = planData?.plan ?? 'STARTER';
   const isPaid = user?.tier === 'PAID';
+  const hasAnyPurchase = purchases.length > 0;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">My Account</h1>
-        <p className="text-slate-500 mt-1">Your profile and XamGeni plan details</p>
+        <p className="text-slate-500 mt-1">Your profile and subscription details</p>
       </div>
 
       {/* Profile */}
@@ -148,78 +185,173 @@ export default function ParticipantAccount() {
             {user?.name?.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-slate-900">{user?.name}</p>
-            <p className="text-sm text-slate-500">{user?.email}</p>
+            <p className="font-semibold text-slate-900 truncate">{user?.name}</p>
+            <p className="text-sm text-slate-500 truncate">{user?.email}</p>
           </div>
-          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${PLAN_BADGE[currentPlan]}`}>
-            <Crown className="w-3 h-3" />
-            {PLAN_LABEL[currentPlan]}
+          <span className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+            hasAnyPurchase ? 'bg-emerald-100 text-emerald-700' : isPaid ? PLAN_BADGE['EXAMELITE'] : PLAN_BADGE['STARTER']
+          }`}>
+            {hasAnyPurchase ? (
+              <><CheckCircle2 className="w-3 h-3" /> {purchases.length} {purchases.length === 1 ? 'Category' : 'Categories'} Unlocked</>
+            ) : isPaid ? (
+              <><Crown className="w-3 h-3" /> Premium</>
+            ) : (
+              <><Crown className="w-3 h-3" /> Free</>
+            )}
           </span>
         </div>
       </div>
 
-      {/* XamGeni plan usage */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <BrainCircuit className="w-4 h-4 text-violet-500" />
-          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">XamGeni Plan Usage</h2>
+      {/* Past Attempt History */}
+      {myAttempts.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Past Attempt History</h2>
+          <div className="divide-y divide-slate-100">
+            {attemptGroups.map((group) => {
+              const isOpen = expandedQuizId === group.quizId;
+              const latest = group.attempts[0];
+              return (
+                <div key={group.quizId}>
+                  <button
+                    onClick={() => setExpandedQuizId(isOpen ? null : group.quizId)}
+                    className="w-full flex items-center gap-3 py-3 text-left hover:bg-slate-50 transition-colors -mx-1 px-1 rounded-lg"
+                  >
+                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
+                      <BookOpen className="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 truncate">{group.title}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {group.categoryName && <span>{group.categoryName} · </span>}
+                        {group.attempts.length} attempt{group.attempts.length !== 1 ? 's' : ''} · Last: {latest.score.toFixed(1)}%
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${latest.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+                        {latest.passed ? 'Passed' : 'Failed'}
+                      </span>
+                      {isOpen
+                        ? <ChevronDown className="w-4 h-4 text-slate-400" />
+                        : <ChevronRight className="w-4 h-4 text-slate-400" />}
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="pb-3 pl-11">
+                      <div className="border border-slate-100 rounded-lg overflow-hidden">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 border-b border-slate-100">
+                              <th className="text-left px-3 py-2 font-semibold text-slate-500">#</th>
+                              <th className="text-left px-3 py-2 font-semibold text-slate-500">Score</th>
+                              <th className="text-left px-3 py-2 font-semibold text-slate-500">Result</th>
+                              <th className="text-left px-3 py-2 font-semibold text-slate-500">Date &amp; Time</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-50">
+                            {group.attempts.map((attempt, idx) => (
+                              <tr key={attempt.id} className="hover:bg-slate-50 transition-colors">
+                                <td className="px-3 py-2 text-slate-400">{group.attempts.length - idx}</td>
+                                <td className="px-3 py-2 font-semibold text-slate-900">{attempt.score.toFixed(1)}%</td>
+                                <td className="px-3 py-2">
+                                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${attempt.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'}`}>
+                                    {attempt.passed ? '✓ Passed' : '✗ Failed'}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-2 text-slate-500">
+                                  {new Date(attempt.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+      )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Plan</p>
-            <p className="font-semibold text-slate-900">{PLAN_LABEL[currentPlan]}</p>
-            <p className="text-xs text-slate-400">{PLAN_PRICE[currentPlan]}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Quizzes Used</p>
-            <p className="font-semibold text-slate-900">
-              {planData?.used ?? 0} / {planData?.limit ?? 5}
-            </p>
-            <p className="text-xs text-slate-400">
-              {planData?.monthlyReset ? 'this month' : 'lifetime'}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-slate-400 uppercase tracking-wider">Resets</p>
-            <p className="font-semibold text-slate-900">
-              {planData?.monthlyReset ? 'Monthly' : 'Never'}
-            </p>
+      {myAttempts.length === 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Past Attempt History</h2>
+          <p className="text-sm text-slate-400 flex items-center gap-1.5">
+            <RotateCcw className="w-3 h-3" /> No attempts yet — start a mock test to see your history here.
+          </p>
+        </div>
+      )}
+
+      {/* Category purchases */}
+      {purchases.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">My Purchases</h2>
+          <div className="space-y-0 divide-y divide-slate-100">
+            {purchases.map((p) => (
+              <div key={p.id} className="py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                    <IndianRupee className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{p.categoryName} — All Mock Tests</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {new Date(p.purchasedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {p.paymentMethod && (
+                        <span className="ml-2 capitalize bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded text-xs font-medium">
+                          {p.paymentMethod}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-slate-900">
+                      ₹{p.amountPaise ? (p.amountPaise / 100).toFixed(0) : '299'}
+                    </p>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
+                      <CheckCircle2 className="w-3 h-3" /> Unlocked
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      )}
 
-        {/* Usage bar */}
-        {planData && (
-          <div className="mt-4">
-            <div className="flex justify-between text-xs text-slate-400 mb-1">
-              <span>{planData.used} used</span>
-              <span>{planData.limit - planData.used} remaining</span>
-            </div>
-            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  planData.used >= planData.limit ? 'bg-red-500' : 'bg-violet-500'
-                }`}
-                style={{ width: `${Math.min(100, (planData.used / planData.limit) * 100)}%` }}
-              />
-            </div>
+      {/* Unlock more exams CTA */}
+      {(hasAnyPurchase || !!user?.complimentaryQuizId) && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-slate-900">Want to unlock other exams?</p>
+            <p className="text-xs text-slate-400 mt-0.5">Each category ₹299 · one-time payment</p>
           </div>
-        )}
+          <button
+            onClick={() => navigate('/unlock-exams')}
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+          >
+            <Zap className="w-4 h-4" /> Click here
+          </button>
+        </div>
+      )}
 
-        {!isPaid && (
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <button
-              onClick={() => navigate('/participant/plans')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg transition-colors"
-            >
-              <Zap className="w-4 h-4" /> Upgrade Plan
-            </button>
-          </div>
-        )}
-      </div>
+      {/* Upgrade CTA for free users without a complimentary quiz */}
+      {!isPaid && !user?.complimentaryQuizId && (
+        <div className="bg-white rounded-xl border border-slate-200 p-5">
+          <p className="text-sm text-slate-700 mb-3">Are you interested in unlocking all the mock test in any exam?</p>
+          <button
+            onClick={() => navigate('/unlock-exams')}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold rounded-lg transition-colors"
+          >
+            <Zap className="w-4 h-4" /> View Plan
+          </button>
+        </div>
+      )}
 
-      {/* Subscription details (paid users with Stripe) */}
-      {isPaid && (
+      {/* Subscription details (Stripe subscribers only, not Razorpay category buyers) */}
+      {isPaid && !hasAnyPurchase && (
         <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Subscription</h2>
 
@@ -315,8 +447,8 @@ export default function ParticipantAccount() {
         </div>
       )}
 
-      {/* Payment history */}
-      {isPaid && (
+      {/* Payment history (Stripe subscribers only) */}
+      {isPaid && !hasAnyPurchase && (
         <div className="bg-white rounded-xl border border-slate-200 p-5">
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Payment History</h2>
           {invLoading ? (

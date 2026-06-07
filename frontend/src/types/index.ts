@@ -8,6 +8,7 @@ export interface User {
   email: string;
   role: Role;
   tier: Tier;
+  complimentaryQuizId: string | null;
 }
 
 export interface Category {
@@ -32,6 +33,7 @@ export interface Quiz {
   visibility: Visibility;
   layout: Layout;
   defaultLanguage: string;
+  randomizeQuestions: boolean;
   createdAt: string;
   category: { id: string; name: string; admin?: { name: string } };
   _count?: { questions: number; attempts?: number };
@@ -45,6 +47,7 @@ export interface Question {
   options: Record<string, string> | null;
   correctAnswer: string | string[];
   explanation?: string | null;
+  tags?: string | null;
   orderIndex: number;
 }
 
@@ -94,6 +97,9 @@ export interface UserRecord {
   createdAt: string;
   quizCount: number;
   aiQuizCount: number;
+  aiGenerationsUsed: number;
+  purchaseCount: number;
+  grantedCategories: { id: string; name: string }[];
   _count: { attempts: number };
 }
 
@@ -131,6 +137,23 @@ export interface PaymentMetrics {
     description: string | null;
     invoiceUrl: string | null;
   }[];
+  razorpay: {
+    totalPurchases: number;
+    monthPurchases: number;
+    totalRevenueINR: number;
+    monthRevenueINR: number;
+    recentTransactions: {
+      id: string;
+      categoryName: string;
+      customerEmail: string | null;
+      customerName: string | null;
+      paymentId: string | null;
+      orderId: string | null;
+      paymentMethod: string | null;
+      amountPaise: number;
+      purchasedAt: string;
+    }[];
+  } | null;
 }
 
 export interface Contact {
