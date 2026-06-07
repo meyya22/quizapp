@@ -1,6 +1,5 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import Anthropic from '@anthropic-ai/sdk';
-import { AuthRequest } from '../types';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -30,14 +29,14 @@ Common questions:
 - Login issues: Users can sign in with email/password or Google SSO
 - Results: Quiz results and scores are saved and accessible from the dashboard
 
-Keep answers concise (2–4 sentences unless the question genuinely needs more). Be warm and helpful. If you don't know something specific about Xam Bridge that isn't covered above, say so honestly and suggest contacting support at support@xambridge.com.`;
+Keep answers concise (2–4 sentences unless the question genuinely needs more). Be warm and helpful. Write in plain conversational text — no markdown, no asterisks, no bullet symbols, no headers. If you don't know something specific about Xam Bridge that isn't covered above, say so honestly and suggest contacting support at support@xambridge.com.`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-export async function chat(req: AuthRequest, res: Response): Promise<void> {
+export async function chat(req: Request, res: Response): Promise<void> {
   const { message, history = [] } = req.body as { message: string; history: ChatMessage[] };
 
   if (!message || typeof message !== 'string' || !message.trim()) {

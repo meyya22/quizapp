@@ -101,8 +101,14 @@ function RequireAuth({ children, role }: { children: React.ReactNode; role?: str
 }
 
 function ChatOverlay() {
-  const { user } = useAuthStore();
-  if (!user) return null;
+  const location = useLocation();
+  const path = location.pathname;
+  const show =
+    path === '/' ||
+    path === '/explore' ||
+    path === '/participant/account' ||
+    path.endsWith('/help');
+  if (!show) return null;
   return <SupportChat />;
 }
 
