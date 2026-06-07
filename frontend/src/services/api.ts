@@ -18,7 +18,8 @@ api.interceptors.response.use(
   (error) => {
     const isStandalonePath =
       window.location.pathname.startsWith('/quiz/') ||
-      window.location.pathname.startsWith('/results/');
+      window.location.pathname.startsWith('/results/') ||
+      window.location.pathname === '/login';
     if (error.response?.status === 401 && !isStandalonePath) {
       useAuthStore.getState().logout();
       window.location.href = '/';
