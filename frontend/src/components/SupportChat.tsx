@@ -27,9 +27,12 @@ export default function SupportChat() {
     }
   }, [open, messages]);
 
+  const wordCount = input.trim() ? input.trim().split(/\s+/).length : 0;
+  const overLimit = wordCount > 50;
+
   async function send() {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || overLimit) return;
 
     const userMsg: Message = { role: 'user', content: text };
     const history = messages.filter((m) => m !== GREETING);
@@ -103,24 +106,31 @@ export default function SupportChat() {
           </div>
 
           {/* Input */}
-          <div className="px-3 py-3 border-t border-slate-200 bg-white flex items-center gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-              placeholder="Type a message..."
-              disabled={loading}
-              className="flex-1 text-sm px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:opacity-50"
-            />
-            <button
-              onClick={send}
-              disabled={!input.trim() || loading}
-              className="w-9 h-9 flex items-center justify-center bg-violet-600 hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors shrink-0"
-            >
-              <Send className="w-4 h-4" />
-            </button>
+          <div className="px-3 py-3 border-t border-slate-200 bg-white">
+            <div className="flex items-center gap-2">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
+                placeholder="Type a message..."
+                disabled={loading}
+                className={`flex-1 text-sm px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 disabled:opacity-50 ${overLimit ? 'border-red-400 focus:ring-red-400' : 'border-slate-200 focus:ring-violet-500'}`}
+              />
+              <button
+                onClick={send}
+                disabled={!input.trim() || loading || overLimit}
+                className="w-9 h-9 flex items-center justify-center bg-violet-600 hover:bg-violet-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition-colors shrink-0"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
+            {wordCount > 0 && (
+              <p className={`text-xs mt-1 text-right ${overLimit ? 'text-red-500' : 'text-slate-400'}`}>
+                {wordCount}/50 words
+              </p>
+            )}
           </div>
         </div>
       )}
