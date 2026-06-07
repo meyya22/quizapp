@@ -5,6 +5,7 @@ import { authenticate, requireSuperAdmin } from '../middleware/auth';
 const router = Router();
 
 router.post('/', recordVisit);
+router.get('/hit', recordVisit);
 router.get('/count', authenticate, requireSuperAdmin, getVisitCount);
 
 export default router;

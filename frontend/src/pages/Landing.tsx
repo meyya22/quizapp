@@ -96,7 +96,7 @@ export default function Landing() {
 
   useEffect(() => {
     const base = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
-    fetch(`${base}/page-visits`, { method: 'POST', mode: 'no-cors', body: '' }).catch(() => {});
+    fetch(`${base}/page-visits/hit`, { mode: 'no-cors' }).catch(() => {});
   }, []);
 
   const [questions, setQuestions] = useState<PreviewQuestion[]>([]);
