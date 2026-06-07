@@ -97,6 +97,7 @@ export interface UserRecord {
   createdAt: string;
   googleId?: string | null;
   complimentaryQuizId?: string | null;
+  complimentaryQuizTitle?: string | null;
   quizCount: number;
   aiQuizCount: number;
   aiGenerationsUsed: number;

@@ -83,9 +83,20 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
     },
   });
 
+  const quizIds = [...new Set((users as any[]).map((u: any) => u.complimentaryQuizId).filter(Boolean))];
+  const quizTitleMap: Record<string, string> = {};
+  if (quizIds.length > 0) {
+    const quizzes = await prisma.quiz.findMany({
+      where: { id: { in: quizIds as string[] } },
+      select: { id: true, title: true },
+    });
+    quizzes.forEach((q) => { quizTitleMap[q.id] = q.title; });
+  }
+
   const monthStart = getMonthStart();
   const result = users.map(({ categories, _count, aiGenerationsUsed, aiGenerationsResetAt, categoryPurchases, ...u }: any) => ({
     ...u,
+    complimentaryQuizTitle: u.complimentaryQuizId ? (quizTitleMap[u.complimentaryQuizId] ?? null) : null,
     _count: { attempts: _count.attempts },
     purchaseCount: _count.categoryPurchases,
     quizCount: categories.reduce((sum: number, c: any) => sum + c._count.quizzes, 0),

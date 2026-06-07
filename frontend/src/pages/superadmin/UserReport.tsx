@@ -598,8 +598,8 @@ export default function UserReport() {
             <div className="flex items-center justify-between px-3 py-2.5">
               <span className="text-xs font-medium text-slate-500">Complimentary quiz</span>
               {editingUser?.complimentaryQuizId ? (
-                <span className="font-mono text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-md max-w-[180px] truncate" title={editingUser.complimentaryQuizId}>
-                  {editingUser.complimentaryQuizId}
+                <span className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-md max-w-[200px] truncate" title={editingUser.complimentaryQuizTitle ?? editingUser.complimentaryQuizId}>
+                  {editingUser.complimentaryQuizTitle ?? editingUser.complimentaryQuizId}
                 </span>
               ) : (
                 <span className="text-xs text-slate-400">None</span>
