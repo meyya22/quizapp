@@ -95,8 +95,13 @@ export default function Landing() {
   const [genError, setGenError] = useState<string | null>(null);
 
   useEffect(() => {
-    const base = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
-    fetch(`${base}/page-visits/hit`, { mode: 'no-cors' }).catch(() => {});
+    const today = new Date().toISOString().slice(0, 10);
+    const key = 'xb_visit_date';
+    if (localStorage.getItem(key) !== today) {
+      const base = (import.meta.env.VITE_API_URL as string | undefined) || '/api';
+      fetch(`${base}/page-visits/hit`, { mode: 'no-cors' }).catch(() => {});
+      localStorage.setItem(key, today);
+    }
   }, []);
 
   const [questions, setQuestions] = useState<PreviewQuestion[]>([]);
