@@ -613,7 +613,7 @@ export async function explainQuestion(req: Request, res: Response): Promise<void
       model: process.env.CLAUDE_MODEL ?? 'claude-haiku-4-5-20251001',
       max_tokens: 300,
       temperature: 0.3,
-      system: `You are a concise exam tutor. Given a question, explain in 2–3 sentences why the correct answer is correct. Be direct and factual — no step-by-step instructions, no "how to approach" advice, no filler. Just the core reason the answer is right.${langInstruction}`,
+      system: `You are a concise exam tutor. Given a question, explain in 2–3 sentences why the correct answer is correct. Be direct and factual — no step-by-step instructions, no "how to approach" advice, no filler. Just the core reason the answer is right. Write in plain text only — no markdown, no asterisks, no bold, no bullet points.${langInstruction}`,
       messages: [{ role: 'user', content: `${context}\n\nQuestion: ${questionText.trim().slice(0, 800)}\n\nWhy is the correct answer correct? Be brief and precise.` }],
     });
 
