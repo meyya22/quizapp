@@ -43,7 +43,7 @@ export default function ForgotPassword() {
               <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-7 h-7 text-green-600" />
               </div>
-              <h1 className="text-xl font-bold text-slate-900 mb-2">Check your inbox</h1>
+              <h1 className="text-xl font-bold text-slate-900 mb-2">Check your inbox or Spam folder</h1>
               <p className="text-slate-500 text-sm mb-6">
                 If <span className="font-medium text-slate-700">{email}</span> is registered, we've sent a password reset link. It expires in 1 hour.
               </p>
