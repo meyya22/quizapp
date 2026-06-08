@@ -1,13 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/prisma';
 
+let tableReady = false;
 async function ensureTable(): Promise<void> {
+  if (tableReady) return;
   await prisma.$executeRaw`
     CREATE TABLE IF NOT EXISTS page_visits (
       id TEXT PRIMARY KEY,
       "createdAt" TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+  tableReady = true;
 }
 
 export async function recordVisit(_req: Request, res: Response, next: NextFunction): Promise<void> {
