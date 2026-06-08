@@ -5,6 +5,8 @@ import { useAuthStore } from './store/authStore';
 import Footer from './components/Footer';
 import SupportChat from './components/SupportChat';
 import Login from './pages/auth/Login';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import RegisterAdmin from './pages/auth/RegisterAdmin';
 import RegisterLearner from './pages/auth/RegisterLearner';
 import PaymentPage from './pages/payment/PaymentPage';
@@ -119,6 +121,8 @@ export default function App() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/register" element={<Navigate to="/register/admin" replace />} />
       <Route path="/register/admin" element={<RegisterAdmin />} />
       <Route path="/register/learner" element={<RegisterLearner />} />

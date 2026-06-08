@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { prisma } from '../config/prisma';
 import { AuthRequest } from '../types';
-import { sendWelcomeEmail, sendNewUserNotification } from '../services/email.service';
+import { sendWelcomeEmail, sendNewUserNotification, sendPasswordResetEmail } from '../services/email.service';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -138,6 +139,59 @@ export async function googleAuth(req: Request, res: Response): Promise<void> {
   } catch {
     res.status(401).json({ error: 'Google token verification failed' });
   }
+}
+
+export async function forgotPassword(req: Request, res: Response): Promise<void> {
+  const { email } = req.body;
+  if (!email) { res.status(400).json({ error: 'Email is required' }); return; }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  // Always respond 200 to avoid revealing whether the email exists
+  if (!user || !user.passwordHash) {
+    res.json({ message: 'If that email is registered, a reset link has been sent.' });
+    return;
+  }
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordResetToken: token, passwordResetExpiry: expiry },
+  });
+
+  const resetUrl = `${process.env.FRONTEND_URL || 'https://quizapp-frontend-552535177061.us-central1.run.app'}/reset-password?token=${token}`;
+  sendPasswordResetEmail(user.email, user.name, resetUrl);
+
+  res.json({ message: 'If that email is registered, a reset link has been sent.' });
+}
+
+export async function resetPassword(req: Request, res: Response): Promise<void> {
+  const { token, password } = req.body;
+  if (!token || !password || password.length < 8) {
+    res.status(400).json({ error: 'Valid token and a password of at least 8 characters are required.' });
+    return;
+  }
+
+  const user = await prisma.user.findFirst({
+    where: {
+      passwordResetToken: token,
+      passwordResetExpiry: { gt: new Date() },
+    },
+  });
+
+  if (!user) {
+    res.status(400).json({ error: 'This reset link is invalid or has expired. Please request a new one.' });
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash, passwordResetToken: null, passwordResetExpiry: null },
+  });
+
+  res.json({ message: 'Password updated successfully. You can now sign in.' });
 }
 
 export async function getMe(req: Request & { user?: { id: string } }, res: Response): Promise<void> {

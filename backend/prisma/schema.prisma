@@ -26,6 +26,8 @@ model User {
   purchasedCategoryIds         String    @default("[]")
   country      String?
   city         String?
+  passwordResetToken           String?
+  passwordResetExpiry          DateTime?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 

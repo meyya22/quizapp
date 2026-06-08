@@ -177,6 +177,70 @@ export async function sendWelcomeEmail(to: string, name: string, role: string): 
   }
 }
 
+export async function sendPasswordResetEmail(to: string, name: string, resetUrl: string): Promise<void> {
+  const transporter = await createTransporter();
+  if (!transporter) return;
+
+  const from = await getFromAddress();
+
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:32px 40px;text-align:center;">
+            <span style="color:#ffffff;font-size:20px;font-weight:bold;">&#128218; Xam Bridge</span>
+            <h1 style="margin:12px 0 4px;color:#ffffff;font-size:20px;font-weight:700;">Reset your password</h1>
+            <p style="margin:0;color:#bfdbfe;font-size:13px;">This link expires in 1 hour.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 40px;">
+            <p style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.6;">
+              Hi <strong>${name}</strong>,<br><br>
+              We received a request to reset the password for your Xam Bridge account.
+              Click the button below to choose a new password.
+            </p>
+            <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+              <tr>
+                <td style="background:#2563eb;border-radius:10px;padding:13px 32px;">
+                  <a href="${resetUrl}" style="color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;">Reset Password &rarr;</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 12px;color:#64748b;font-size:13px;line-height:1.6;">
+              If the button doesn't work, copy and paste this link into your browser:
+            </p>
+            <p style="margin:0 0 24px;word-break:break-all;">
+              <a href="${resetUrl}" style="color:#2563eb;font-size:12px;">${resetUrl}</a>
+            </p>
+            <p style="margin:0;color:#94a3b8;font-size:12px;">
+              If you didn't request this, you can safely ignore this email — your password won't change.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:18px 40px;text-align:center;">
+            <p style="margin:0;color:#94a3b8;font-size:12px;">
+              &copy; ${new Date().getFullYear()} Xam Bridge &nbsp;&middot;&nbsp; Empowering learners everywhere.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({ from, to, subject: 'Reset your Xam Bridge password', html });
+  } catch { /* Non-fatal */ }
+}
+
 const SUPER_ADMIN_EMAIL = 'cs.admin@xambridge.com';
 
 export async function sendSubscriptionConfirmationEmail(
