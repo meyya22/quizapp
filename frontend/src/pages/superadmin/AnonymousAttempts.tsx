@@ -1,8 +1,60 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Activity, Trash2, CheckCircle, XCircle, MapPin, Monitor, ChevronLeft, ChevronRight, BarChart2 } from 'lucide-react';
+import { Activity, Trash2, CheckCircle, XCircle, MapPin, Monitor, ChevronLeft, ChevronRight, BarChart2, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+
+interface TrendPoint { date: string; count: number; }
+
+function DailyTrendChart({ data }: { data: TrendPoint[] }) {
+  const W = 600, H = 170;
+  const PAD = { top: 28, right: 20, bottom: 44, left: 44 };
+  const cW = W - PAD.left - PAD.right;
+  const cH = H - PAD.top - PAD.bottom;
+  const maxVal = Math.max(...data.map((d) => d.count), 1);
+
+  const px = (i: number) => PAD.left + (data.length < 2 ? cW / 2 : (i / (data.length - 1)) * cW);
+  const py = (v: number) => PAD.top + cH - (v / maxVal) * cH;
+
+  const linePath = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${px(i)},${py(d.count)}`).join(' ');
+  const areaPath = `${linePath} L ${px(data.length - 1)},${PAD.top + cH} L ${px(0)},${PAD.top + cH} Z`;
+
+  const fmtDate = (iso: string) => {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const gridLines = [0, Math.round(maxVal / 2), maxVal];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: '170px' }}>
+      <defs>
+        <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {gridLines.map((v) => (
+        <g key={v}>
+          <line x1={PAD.left} y1={py(v)} x2={W - PAD.right} y2={py(v)} stroke="#e2e8f0" strokeWidth="1" />
+          <text x={PAD.left - 6} y={py(v) + 4} textAnchor="end" fontSize="10" fill="#94a3b8">{v}</text>
+        </g>
+      ))}
+      <path d={areaPath} fill="url(#trendGrad)" />
+      <path d={linePath} fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      {data.map((d, i) => (
+        <g key={d.date}>
+          <circle cx={px(i)} cy={py(d.count)} r="5" fill="#7c3aed" />
+          <circle cx={px(i)} cy={py(d.count)} r="2.5" fill="white" />
+          {d.count > 0 && (
+            <text x={px(i)} y={py(d.count) - 9} textAnchor="middle" fontSize="10" fontWeight="600" fill="#6d28d9">{d.count}</text>
+          )}
+          <text x={px(i)} y={H - 6} textAnchor="middle" fontSize="10" fill="#94a3b8">{fmtDate(d.date)}</text>
+        </g>
+      ))}
+    </svg>
+  );
+}
 
 interface SubjectStat {
   subject: string;
@@ -37,6 +89,12 @@ export default function AnonymousAttempts() {
   const { data: statsData } = useQuery<{ stats: SubjectStat[] }>({
     queryKey: ['anonymous-attempts-stats'],
     queryFn: () => api.get('/users/anonymous-attempts/stats').then((r) => r.data),
+    staleTime: 60_000,
+  });
+
+  const { data: trendData } = useQuery<{ trend: TrendPoint[] }>({
+    queryKey: ['anonymous-attempts-trend'],
+    queryFn: () => api.get('/users/anonymous-attempts/trend').then((r) => r.data),
     staleTime: 60_000,
   });
 
@@ -349,6 +407,20 @@ export default function AnonymousAttempts() {
           </div>
         </div>
       </div>
+
+      {/* Daily Trend Chart */}
+      {trendData && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 mt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-violet-600" />
+            <h2 className="text-sm font-semibold text-slate-700">Daily Attempts — Last 7 Days</h2>
+            <span className="ml-auto text-xs text-slate-400">
+              Total: {trendData.trend.reduce((s, d) => s + d.count, 0)}
+            </span>
+          </div>
+          <DailyTrendChart data={trendData.trend} />
+        </div>
+      )}
     </div>
   );
 }

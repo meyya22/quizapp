@@ -478,6 +478,28 @@ export async function getAnonymousAttemptsStats(_req: AuthRequest, res: Response
   res.json({ stats });
 }
 
+export async function getAnonymousAttemptsTrend(_req: AuthRequest, res: Response): Promise<void> {
+  const rows = await prisma.$queryRaw<{ day: Date; count: bigint }[]>`
+    SELECT DATE_TRUNC('day', "createdAt") AS day, COUNT(*) AS count
+    FROM anonymous_attempts
+    WHERE "createdAt" >= NOW() - INTERVAL '7 days'
+    GROUP BY day
+    ORDER BY day ASC
+  `;
+
+  const result: { date: string; count: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const found = rows.find((r) => new Date(r.day).toISOString().slice(0, 10) === key);
+    result.push({ date: key, count: found ? Number(found.count) : 0 });
+  }
+
+  res.json({ trend: result });
+}
+
 export async function deleteAnonymousAttempts(req: AuthRequest, res: Response): Promise<void> {
   const { ids } = req.body as { ids?: string[] };
   if (ids && ids.length > 0) {

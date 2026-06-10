@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getUsers, updateUser, deleteUser, resetAiUsage, setComplimentaryQuiz, sendEmailCampaign, sendParticipantEmailCampaign, getCampaignHistory, getCampaignRecipients, getParticipantAiQuizReport, getAnonymousQuizSessions, getAnonymousAttempts, getAnonymousAttemptsStats, deleteAnonymousAttempts, grantCategories, revokeCategory } from '../controllers/user.controller';
+import { getUsers, updateUser, deleteUser, resetAiUsage, setComplimentaryQuiz, sendEmailCampaign, sendParticipantEmailCampaign, getCampaignHistory, getCampaignRecipients, getParticipantAiQuizReport, getAnonymousQuizSessions, getAnonymousAttempts, getAnonymousAttemptsStats, getAnonymousAttemptsTrend, deleteAnonymousAttempts, grantCategories, revokeCategory } from '../controllers/user.controller';
 import { authenticate, requireSuperAdmin } from '../middleware/auth';
 
 const router = Router();
@@ -12,6 +12,7 @@ router.get('/campaign-history/:id/recipients', authenticate, requireSuperAdmin, 
 router.get('/ai-quiz-report', authenticate, requireSuperAdmin, getParticipantAiQuizReport);
 router.get('/preview-sessions', authenticate, requireSuperAdmin, getAnonymousQuizSessions);
 router.get('/anonymous-attempts/stats', authenticate, requireSuperAdmin, getAnonymousAttemptsStats);
+router.get('/anonymous-attempts/trend', authenticate, requireSuperAdmin, getAnonymousAttemptsTrend);
 router.get('/anonymous-attempts', authenticate, requireSuperAdmin, getAnonymousAttempts);
 router.delete('/anonymous-attempts', authenticate, requireSuperAdmin, deleteAnonymousAttempts);
 router.delete('/:id', authenticate, requireSuperAdmin, deleteUser);
