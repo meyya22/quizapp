@@ -7,9 +7,13 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefi
 function buildDatasourceUrl(): string | undefined {
   const url = process.env.DATABASE_URL;
   if (!url) return undefined;
-  if (url.includes('connect_timeout')) return url;
+  const params: string[] = [];
+  if (!url.includes('connect_timeout')) params.push('connect_timeout=30');
+  if (!url.includes('connection_limit')) params.push('connection_limit=1');
+  if (!url.includes('pool_timeout')) params.push('pool_timeout=20');
+  if (params.length === 0) return url;
   const sep = url.includes('?') ? '&' : '?';
-  return `${url}${sep}connect_timeout=30`;
+  return `${url}${sep}${params.join('&')}`;
 }
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
