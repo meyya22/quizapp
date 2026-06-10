@@ -9,7 +9,7 @@ function buildDatasourceUrl(): string | undefined {
   if (!url) return undefined;
   const params: string[] = [];
   if (!url.includes('connect_timeout')) params.push('connect_timeout=30');
-  if (!url.includes('connection_limit')) params.push('connection_limit=1');
+  if (!url.includes('connection_limit')) params.push('connection_limit=10');
   if (!url.includes('pool_timeout')) params.push('pool_timeout=20');
   if (params.length === 0) return url;
   const sep = url.includes('?') ? '&' : '?';
