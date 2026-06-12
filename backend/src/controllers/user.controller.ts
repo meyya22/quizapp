@@ -75,6 +75,7 @@ export async function getUsers(_req: AuthRequest, res: Response): Promise<void> 
       createdAt: true,
       googleId: true,
       complimentaryQuizId: true,
+      hearAboutUs: true,
       aiGenerationsUsed: true,
       aiGenerationsResetAt: true,
       _count: { select: { attempts: true, aiQuizzes: true, categoryPurchases: true } },

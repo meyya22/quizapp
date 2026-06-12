@@ -11,6 +11,7 @@ app.listen(PORT, async () => {
   try {
     await prisma.$executeRaw`ALTER TABLE users ADD COLUMN IF NOT EXISTS "passwordResetToken" TEXT`;
     await prisma.$executeRaw`ALTER TABLE users ADD COLUMN IF NOT EXISTS "passwordResetExpiry" TIMESTAMPTZ`;
+    await prisma.$executeRaw`ALTER TABLE users ADD COLUMN IF NOT EXISTS "hearAboutUs" TEXT`;
   } catch (err) {
     console.error('Column migration error:', err);
   }

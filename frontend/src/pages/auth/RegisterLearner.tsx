@@ -26,6 +26,8 @@ const schema = z
 
 type FormData = z.infer<typeof schema>;
 
+const HEAR_ABOUT_OPTIONS = ['Google Search', 'Instagram', 'X', 'Reddit', 'Others'] as const;
+
 export default function RegisterLearner() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +36,7 @@ export default function RegisterLearner() {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [hearAboutUs, setHearAboutUs] = useState<string>('');
 
   const { register, handleSubmit, setError, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -51,6 +54,7 @@ export default function RegisterLearner() {
     try {
       const res = await api.post('/auth/register', {
         name: data.name, email: data.email, password: data.password, role: 'PARTICIPANT',
+        hearAboutUs: hearAboutUs || undefined,
       });
       setAuth(res.data.user, res.data.token);
       const quizId = extractQuizId(from);
@@ -153,6 +157,35 @@ export default function RegisterLearner() {
 
               <Input label="Password" type="password" placeholder="Min 8 characters" error={errors.password?.message} {...register('password')} />
               <Input label="Confirm Password" type="password" placeholder="••••••••" error={errors.confirmPassword?.message} {...register('confirmPassword')} />
+
+              {/* How did you hear about us? (optional) */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-slate-700">
+                  How did you hear about us? <span className="text-slate-400 font-normal">(optional)</span>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {HEAR_ABOUT_OPTIONS.map((opt) => (
+                    <label
+                      key={opt}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm cursor-pointer transition-colors select-none ${
+                        hearAboutUs === opt
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="hearAboutUs"
+                        value={opt}
+                        checked={hearAboutUs === opt}
+                        onChange={() => setHearAboutUs(opt)}
+                        className="sr-only"
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              </div>
 
               {generalError && (
                 <div className="flex items-start gap-2.5 p-3 rounded-lg bg-red-50 border border-red-200">

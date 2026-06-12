@@ -28,6 +28,7 @@ model User {
   city         String?
   passwordResetToken           String?
   passwordResetExpiry          DateTime?
+  hearAboutUs                  String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 

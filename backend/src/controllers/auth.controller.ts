@@ -28,7 +28,7 @@ function signToken(user: { id: string; email: string; role: string; tier: string
 }
 
 export async function register(req: Request, res: Response): Promise<void> {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, hearAboutUs } = req.body;
 
   if (!name || !email || !password) {
     res.status(400).json({ error: 'name, email, and password are required' });
@@ -46,7 +46,7 @@ export async function register(req: Request, res: Response): Promise<void> {
   const passwordHash = await bcrypt.hash(password, 12);
   const location = await getLocationFromIp(req.ip || '');
   const user = await prisma.user.create({
-    data: { name, email, passwordHash, role: assignedRole, country: location?.country, city: location?.city },
+    data: { name, email, passwordHash, role: assignedRole, country: location?.country, city: location?.city, hearAboutUs: hearAboutUs || null },
   });
 
   sendWelcomeEmail(user.email, user.name, user.role);

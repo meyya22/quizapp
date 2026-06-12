@@ -620,6 +620,16 @@ export default function UserReport() {
                 <span className="text-xs text-slate-400">None</span>
               )}
             </div>
+            <div className="flex items-center justify-between px-3 py-2.5">
+              <span className="text-xs font-medium text-slate-500">Lead channel</span>
+              {editingUser?.hearAboutUs ? (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-violet-50 border border-violet-200 text-violet-700">
+                  {editingUser.hearAboutUs}
+                </span>
+              ) : (
+                <span className="text-xs text-slate-400">Not specified</span>
+              )}
+            </div>
           </div>
 
           <Input
