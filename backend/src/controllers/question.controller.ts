@@ -127,7 +127,24 @@ export async function getQuestions(req: AuthRequest, res: Response): Promise<voi
       const hasPurchasedCategory = examCategoryId ? purchasedIds.includes(examCategoryId) : false;
 
       if (!hasPurchasedCategory) {
-        res.json({ questions: parsed.slice(0, PARTICIPANT_FREE_LIMIT), totalQuestions: parsed.length, examCategoryId, examCategoryName });
+        // Count all questions across every quiz in this exam category
+        let categoryTotalQuestions: number | null = null;
+        if (examCategoryId) {
+          const examQuizzes = await (prisma as any).examQuiz.findMany({
+            where: { subCategory: { categoryId: examCategoryId } },
+            select: { url: true },
+          });
+          const quizIds: string[] = examQuizzes
+            .map((eq: { url: string | null }) => {
+              const m = (eq.url ?? '').match(/([a-z0-9]+)$/i);
+              return m ? m[1] : null;
+            })
+            .filter(Boolean);
+          if (quizIds.length > 0) {
+            categoryTotalQuestions = await prisma.question.count({ where: { quizId: { in: quizIds } } });
+          }
+        }
+        res.json({ questions: parsed.slice(0, PARTICIPANT_FREE_LIMIT), totalQuestions: parsed.length, examCategoryId, examCategoryName, categoryTotalQuestions });
         return;
       }
 

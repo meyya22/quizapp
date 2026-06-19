@@ -589,7 +589,7 @@ export default function QuizPlayer() {
     (quizError as { response?: { data?: { code?: string } } } | null)
       ?.response?.data?.code === 'QUIZ_PRIVATE';
 
-  const { data: questionData, isLoading, error: questionsError } = useQuery<{ questions: Question[]; totalQuestions: number; examCategoryId?: string | null; examCategoryName?: string | null }>({
+  const { data: questionData, isLoading, error: questionsError } = useQuery<{ questions: Question[]; totalQuestions: number; examCategoryId?: string | null; examCategoryName?: string | null; categoryTotalQuestions?: number | null }>({
     queryKey: ['questions', id, studyMode],
     queryFn: async () => {
       const r = await api.get(`/quizzes/${id}/questions${studyMode ? '?study=true' : ''}`);
@@ -602,6 +602,7 @@ export default function QuizPlayer() {
   const totalQuestions = questionData?.totalQuestions ?? 0;
   const examCategoryId = questionData?.examCategoryId ?? null;
   const examCategoryName = questionData?.examCategoryName ?? null;
+  const categoryTotalQuestions = questionData?.categoryTotalQuestions ?? null;
 
   useEffect(() => {
     const data = (questionsError as { response?: { data?: { code?: string; tier?: string } } } | null)?.response?.data;
@@ -911,7 +912,7 @@ export default function QuizPlayer() {
                     onClick={() => setShowUpgradeWall(true)}
                     className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
                   >
-                    <Lock className="w-4 h-4" /> Want to practice all {totalQuestions} questions?
+                    <Lock className="w-4 h-4" /> View all {categoryTotalQuestions ?? totalQuestions} questions?
                   </button>
                 ) : currentPage < anonDisplayQuestions.length - 1 ? (
                   <Button onClick={() => setCurrentPage((p) => p + 1)}>
