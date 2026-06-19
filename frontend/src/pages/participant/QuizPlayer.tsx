@@ -515,21 +515,13 @@ function UpgradeWall({ locked, categoryName, examCategoryId }: { locked: number;
 }
 
 function SignupWall({ total, free, returnTo }: { total: number; free: number; returnTo: string }) {
-  const locked = total - free;
   return (
     <div className="bg-gradient-to-br from-violet-50 to-white rounded-2xl border-2 border-violet-200 p-8 text-center">
       <div className="inline-flex items-center justify-center w-14 h-14 bg-violet-100 rounded-2xl mb-4">
         <Lock className="w-7 h-7 text-violet-600" />
       </div>
-      <h2 className="text-xl font-bold text-slate-900 mb-2">
-        You've seen {free} free question{free !== 1 ? 's' : ''}
-      </h2>
-      <p className="text-slate-500 text-sm mb-1 max-w-sm mx-auto">
-        Create a <strong className="text-slate-700">free account</strong> to unlock all{' '}
-        <strong className="text-slate-700">{total}</strong> questions in this paper — and every subject in Sample Paper 1.
-      </p>
-      <p className="text-violet-500 text-xs font-medium mb-6">
-        {locked} more question{locked !== 1 ? 's' : ''} waiting for you
+      <p className="text-slate-700 text-base font-medium mb-6 max-w-sm mx-auto">
+        Create a free account to view the remaining questions
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Link
