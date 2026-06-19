@@ -514,7 +514,7 @@ function UpgradeWall({ locked, categoryName, examCategoryId }: { locked: number;
   );
 }
 
-function SignupWall({ total, free, returnTo }: { total: number; free: number; returnTo: string }) {
+function SignupWall({ returnTo }: { returnTo: string }) {
   return (
     <div className="bg-gradient-to-br from-violet-50 to-white rounded-2xl border-2 border-violet-200 p-8 text-center">
       <div className="inline-flex items-center justify-center w-14 h-14 bg-violet-100 rounded-2xl mb-4">
@@ -859,7 +859,7 @@ export default function QuizPlayer() {
         /* ── Horizontal: one question per page ── */
         <>
           {showPaywall ? (
-            <SignupWall total={totalQuestions} free={FREE_PREVIEW_LIMIT} returnTo={returnTo} />
+            <SignupWall returnTo={returnTo} />
           ) : showUpgradeWall ? (
             <UpgradeWall locked={totalQuestions - questions.length} categoryName={examCategoryName ?? quiz?.category?.name} examCategoryId={examCategoryId} />
 
@@ -954,7 +954,7 @@ export default function QuizPlayer() {
           {isAnonymous ? (
             <div className="mt-6">
               {hasLockedQuestions ? (
-                <SignupWall total={totalQuestions} free={FREE_PREVIEW_LIMIT} returnTo={returnTo} />
+                <SignupWall returnTo={returnTo} />
               ) : (
                 <div className="bg-gradient-to-br from-violet-50 to-white rounded-2xl border-2 border-violet-200 p-6 text-center">
                   <Sparkles className="w-8 h-8 text-violet-500 mx-auto mb-3" />
