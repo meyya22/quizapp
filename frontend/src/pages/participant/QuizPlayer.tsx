@@ -919,7 +919,7 @@ export default function QuizPlayer() {
                     onClick={() => setShowUpgradeWall(true)}
                     className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm"
                   >
-                    <Lock className="w-4 h-4" /> Unlock {examCategoryName ?? 'Full Paper'} →
+                    <Lock className="w-4 h-4" /> Want to practice all {totalQuestions} questions?
                   </button>
                 ) : currentPage < anonDisplayQuestions.length - 1 ? (
                   <Button onClick={() => setCurrentPage((p) => p + 1)}>
