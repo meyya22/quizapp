@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
-import { BookOpen, IndianRupee, ArrowLeft, CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import { BookOpen, ArrowLeft, CheckCircle, AlertCircle, Zap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
@@ -87,9 +87,11 @@ export default function CheckoutPage() {
 
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-blue-100 rounded-2xl mb-4">
-                <IndianRupee className="w-7 h-7 text-blue-600" />
-              </div>
+              <img
+                src="/payment_image.png"
+                alt="Payment"
+                className="w-full rounded-xl mb-4 object-cover"
+              />
               <h1 className="text-xl font-bold text-slate-900">
                 Unlock {displayName} Mock Tests
               </h1>
