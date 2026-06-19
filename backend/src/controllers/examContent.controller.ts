@@ -139,7 +139,7 @@ export async function getExamCategoryQuizList(req: Request, res: Response): Prom
       })
     );
 
-    res.json(result);
+    res.json(result.filter((q) => q.questionCount > 0));
   } catch {
     res.status(500).json({ error: 'Failed to load quiz list.' });
   }
