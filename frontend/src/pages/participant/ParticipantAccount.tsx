@@ -308,7 +308,7 @@ export default function ParticipantAccount() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold text-slate-900">
-                      ₹{p.amountPaise ? (p.amountPaise / 100).toFixed(0) : '299'}
+                      ₹{p.amountPaise ? (p.amountPaise / 100).toFixed(0) : '99'}
                     </p>
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600">
                       <CheckCircle2 className="w-3 h-3" /> Unlocked
@@ -326,7 +326,7 @@ export default function ParticipantAccount() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-slate-900">Want to unlock other exams?</p>
-            <p className="text-xs text-slate-400 mt-0.5">Each category ₹299 · one-time payment</p>
+            <p className="text-xs text-slate-400 mt-0.5">Each category ₹99 · one-time payment</p>
           </div>
           <button
             onClick={() => navigate('/unlock-exams')}

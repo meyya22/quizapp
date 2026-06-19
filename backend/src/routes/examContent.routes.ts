@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate, requireSuperAdmin } from '../middleware/auth';
 import {
   getPublicExamContent,
+  getExamCategoryQuizList,
   getAllCategories,
   createCategory, updateCategory, deleteCategory,
   createSubCategory, updateSubCategory, deleteSubCategory,
@@ -12,6 +13,7 @@ const router = Router();
 
 // Public
 router.get('/public', getPublicExamContent);
+router.get('/public/categories/:id/quiz-list', getExamCategoryQuizList);
 
 // Superadmin
 router.get('/', authenticate, requireSuperAdmin, getAllCategories);

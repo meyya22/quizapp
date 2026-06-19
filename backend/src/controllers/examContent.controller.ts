@@ -109,6 +109,42 @@ export async function deleteSubCategory(req: Request, res: Response): Promise<vo
   } catch { res.status(500).json({ error: 'Failed to delete sub-category.' }); }
 }
 
+// ── Public quiz list for a category (with question counts) ───────────────────
+
+export async function getExamCategoryQuizList(req: Request, res: Response): Promise<void> {
+  const { id } = req.params;
+  try {
+    const subCategories = await prisma.examSubCategory.findMany({
+      where: { categoryId: id, isActive: true },
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
+      include: {
+        quizzes: {
+          where: { isActive: true },
+          orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+          select: { title: true, url: true },
+        },
+      },
+    });
+
+    const examQuizzes = subCategories.flatMap((sc: { quizzes: { title: string; url: string | null }[] }) => sc.quizzes);
+
+    const result = await Promise.all(
+      examQuizzes.map(async (eq: { title: string; url: string | null }) => {
+        const m = (eq.url ?? '').match(/([a-z0-9]+)$/i);
+        const quizId = m ? m[1] : null;
+        const questionCount = quizId
+          ? await prisma.question.count({ where: { quizId } })
+          : 0;
+        return { title: eq.title, questionCount };
+      })
+    );
+
+    res.json(result);
+  } catch {
+    res.status(500).json({ error: 'Failed to load quiz list.' });
+  }
+}
+
 // ── Quizzes ───────────────────────────────────────────────────────────────────
 
 export async function createExamQuiz(req: Request, res: Response): Promise<void> {

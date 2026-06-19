@@ -115,7 +115,7 @@ export default function CheckoutPage() {
 
             {/* Price */}
             <div className="flex items-baseline justify-center gap-1 mb-6">
-              <span className="text-4xl font-bold text-slate-900">₹299</span>
+              <span className="text-4xl font-bold text-slate-900">₹99</span>
               <span className="text-slate-400 text-sm">one-time</span>
             </div>
 
@@ -128,7 +128,7 @@ export default function CheckoutPage() {
               {loading ? (
                 <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Redirecting…</>
               ) : (
-                <><Zap className="w-4 h-4" /> Pay ₹299</>
+                <><Zap className="w-4 h-4" /> Pay ₹99</>
               )}
             </button>
 

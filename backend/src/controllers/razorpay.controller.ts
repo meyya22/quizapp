@@ -143,7 +143,7 @@ export async function initiatePayment(req: AuthRequest, res: Response): Promise<
     const frontendUrl = process.env.FRONTEND_URL || 'https://www.xambridge.com';
 
     const payload = JSON.stringify({
-      amount: 29900,
+      amount: 9900,
       currency: 'INR',
       accept_partial: false,
       description: categoryName ? `Unlock ${categoryName} Mock Tests` : 'Xam Bridge — Unlock Mock Tests',
@@ -359,7 +359,7 @@ export async function verifyPayment(req: AuthRequest, res: Response): Promise<vo
   const details = cachedDetails ?? await fetchRazorpayPayment(razorpay_payment_id);
   const orderId = details.order_id ?? null;
   const paymentMethod = details.method ?? null;
-  const amountPaise = details.amount ?? 29900;
+  const amountPaise = details.amount ?? 9900;
 
   await completePurchase(userId, pending.examCategoryId, pending.categoryName, razorpay_payment_id, orderId, paymentMethod, amountPaise);
 

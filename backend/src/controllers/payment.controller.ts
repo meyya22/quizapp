@@ -366,8 +366,8 @@ export async function getPaymentMetrics(_req: AuthRequest, res: Response): Promi
     invoiceUrl: inv.hosted_invoice_url,
   }));
 
-  const rzTotalRevenuePaise = rzAllPurchases.reduce((sum: number, p: any) => sum + (p.amountPaise ?? 29900), 0);
-  const rzMonthRevenuePaise = rzMonthPurchases.reduce((sum: number, p: any) => sum + (p.amountPaise ?? 29900), 0);
+  const rzTotalRevenuePaise = rzAllPurchases.reduce((sum: number, p: any) => sum + (p.amountPaise ?? 9900), 0);
+  const rzMonthRevenuePaise = rzMonthPurchases.reduce((sum: number, p: any) => sum + (p.amountPaise ?? 9900), 0);
 
   res.json({
     totalPaid,
@@ -390,7 +390,7 @@ export async function getPaymentMetrics(_req: AuthRequest, res: Response): Promi
         paymentId: p.paymentId ?? null,
         orderId: p.orderId ?? null,
         paymentMethod: p.paymentMethod ?? null,
-        amountPaise: p.amountPaise ?? 29900,
+        amountPaise: p.amountPaise ?? 9900,
         purchasedAt: p.purchasedAt.toISOString(),
       })),
     },

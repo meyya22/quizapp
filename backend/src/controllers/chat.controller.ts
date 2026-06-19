@@ -14,7 +14,7 @@ About Xam Bridge:
 
 Pricing & Plans:
 - Basic access (free): Participate in public quizzes, use XamGeni for free
-- Category unlock: ₹299 one-time payment unlocks all mock tests in a specific exam category (e.g., NEET, UPSC)
+- Category unlock: ₹99 one-time payment unlocks all mock tests in a specific exam category (e.g., NEET, UPSC)
 - Payments are processed securely via Razorpay
 
 Refund & Cancellation Policy:

@@ -487,28 +487,55 @@ function ShareMenu({ quizId, quizTitle }: { quizId: string; quizTitle: string })
   );
 }
 
-function UpgradeWall({ locked, categoryName, examCategoryId }: { locked: number; categoryName?: string; examCategoryId?: string | null }) {
+function UpgradeWall({ categoryName, examCategoryId }: { locked: number; categoryName?: string; examCategoryId?: string | null }) {
   const checkoutUrl = examCategoryId
     ? `/checkout?categoryId=${encodeURIComponent(examCategoryId)}&categoryName=${encodeURIComponent(categoryName ?? '')}`
     : '/checkout';
+
+  const { data: quizList } = useQuery<{ title: string; questionCount: number }[]>({
+    queryKey: ['exam-category-quiz-list', examCategoryId],
+    queryFn: () => api.get(`/exam-content/public/categories/${examCategoryId}/quiz-list`).then((r) => r.data),
+    enabled: !!examCategoryId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const totalQuestions = quizList?.reduce((s, q) => s + q.questionCount, 0) ?? 0;
+
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-white rounded-2xl border-2 border-amber-200 p-8 text-center">
-      <div className="inline-flex items-center justify-center w-14 h-14 bg-amber-100 rounded-2xl mb-4">
-        <Lock className="w-7 h-7 text-amber-600" />
+    <div className="bg-gradient-to-br from-amber-50 to-white rounded-2xl border-2 border-amber-200 p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="inline-flex items-center justify-center w-10 h-10 bg-amber-100 rounded-xl flex-shrink-0">
+          <Lock className="w-5 h-5 text-amber-600" />
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-slate-900">
+            {categoryName ?? 'This category'} — Full Access
+          </h2>
+          <p className="text-xs text-slate-500">Unlock all papers with one payment</p>
+        </div>
       </div>
-      <h2 className="text-xl font-bold text-slate-900 mb-2">
-        {locked} more question{locked !== 1 ? 's' : ''} locked
-      </h2>
-      <p className="text-slate-500 text-sm mb-6 max-w-sm mx-auto">
-        Unlock all mock test questions across every subject
-        {categoryName ? <> in <strong className="text-slate-700">{categoryName}</strong></> : ''}.
-      </p>
+
+      {quizList && quizList.length > 0 && (
+        <div className="mb-4 rounded-xl border border-amber-200 overflow-hidden">
+          {quizList.map((q, i) => (
+            <div key={i} className={`flex items-center justify-between px-4 py-2.5 text-sm ${i % 2 === 0 ? 'bg-white' : 'bg-amber-50/50'}`}>
+              <span className="text-slate-700">{q.title}</span>
+              <span className="text-slate-500 font-medium ml-4 flex-shrink-0">{q.questionCount} Qs</span>
+            </div>
+          ))}
+          <div className="flex items-center justify-between px-4 py-2.5 bg-amber-100 font-semibold text-sm">
+            <span className="text-slate-800">Total</span>
+            <span className="text-amber-700">{totalQuestions} questions</span>
+          </div>
+        </div>
+      )}
+
       <Link
         to={checkoutUrl}
-        className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm"
+        className="inline-flex w-full items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-sm"
       >
         <Sparkles className="w-4 h-4" />
-        Pay ₹299 — Unlock {categoryName ? `all ${categoryName} mock tests` : 'all mock tests'}
+        Pay ₹99 — Unlock all {categoryName ?? ''} mock tests
       </Link>
     </div>
   );

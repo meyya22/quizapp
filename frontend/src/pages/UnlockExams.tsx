@@ -56,7 +56,7 @@ export default function UnlockExams() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900">Unlock More Exams</h1>
           <p className="text-slate-500 mt-1 text-sm">
-            Each category is ₹299 — one-time payment, unlimited access to all mock tests.
+            Each category is ₹99 — one-time payment, unlimited access to all mock tests.
           </p>
         </div>
 
@@ -98,7 +98,7 @@ export default function UnlockExams() {
                             }
                             className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
                           >
-                            <Zap className="w-3.5 h-3.5" /> Pay ₹299
+                            <Zap className="w-3.5 h-3.5" /> Pay ₹99
                           </button>
                         </div>
                       </div>

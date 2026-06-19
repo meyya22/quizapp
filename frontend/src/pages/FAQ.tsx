@@ -25,7 +25,7 @@ const SECTIONS: { heading: string; items: FAQItem[] }[] = [
       {
         question: 'Is Xam Bridge free to use?',
         answer:
-          'Yes. You can access a set of free mock tests without signing up. Creating a free learner account gives you access to AI-generated practice quizzes (XamGeni) and lets you save your progress. Full access to all mock test papers for a specific exam category can be unlocked for a one-time payment of ₹299 per category.',
+          'Yes. You can access a set of free mock tests without signing up. Creating a free learner account gives you access to AI-generated practice quizzes (XamGeni) and lets you save your progress. Full access to all mock test papers for a specific exam category can be unlocked for a one-time payment of ₹99 per category.',
       },
       {
         question: 'Do I need to install anything?',
@@ -45,12 +45,12 @@ const SECTIONS: { heading: string; items: FAQItem[] }[] = [
       {
         question: 'How many free mock tests can I access without paying?',
         answer:
-          'You can access the first few questions of any mock test without signing up. When you sign in with a free account, you get access to 3 questions per paper. To unlock full papers (all questions) for a category, a one-time payment of ₹299 applies.',
+          'You can access the first few questions of any mock test without signing up. When you sign in with a free account, you get access to 3 questions per paper. To unlock full papers (all questions) for a category, a one-time payment of ₹99 applies.',
       },
       {
         question: 'How do I unlock full mock test papers?',
         answer:
-          'Sign in (or register free), then go to the Unlock Exams page. Choose the exam category you want, and pay ₹299 one-time via Razorpay. Once the payment is confirmed, all mock test papers in that category are immediately unlocked for your account — no expiry.',
+          'Sign in (or register free), then go to the Unlock Exams page. Choose the exam category you want, and pay ₹99 one-time via Razorpay. Once the payment is confirmed, all mock test papers in that category are immediately unlocked for your account — no expiry.',
       },
       {
         question: 'How long does my access last after paying?',
@@ -100,7 +100,7 @@ const SECTIONS: { heading: string; items: FAQItem[] }[] = [
       {
         question: 'What is the pricing for full mock test access?',
         answer:
-          'Each exam category is ₹299 — a one-time payment. There are no monthly fees or renewals. Pay once and access all papers in that category forever.',
+          'Each exam category is ₹99 — a one-time payment. There are no monthly fees or renewals. Pay once and access all papers in that category forever.',
       },
       {
         question: 'Which payment methods are accepted?',
