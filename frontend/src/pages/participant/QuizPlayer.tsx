@@ -507,12 +507,18 @@ function UpgradeWall({ categoryName, examCategoryId }: { locked: number; categor
         <div className="inline-flex items-center justify-center w-10 h-10 bg-amber-100 rounded-xl flex-shrink-0">
           <Lock className="w-5 h-5 text-amber-600" />
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <h2 className="text-base font-bold text-slate-900">
             {categoryName ?? 'This category'} — Full Access
           </h2>
           <p className="text-xs text-slate-500">Unlock all papers with one payment</p>
         </div>
+        <Link
+          to={checkoutUrl}
+          className="inline-flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-xl transition-colors text-sm flex-shrink-0"
+        >
+          <Sparkles className="w-3.5 h-3.5" /> Pay ₹99
+        </Link>
       </div>
 
       {quizList && quizList.length > 0 && (
